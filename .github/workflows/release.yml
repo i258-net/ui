@@ -1,0 +1,52 @@
+name: release
+
+# Publishes @i258/ui on version tags.
+# OIDC trusted publishing: configure on npmjs package settings for this repo +
+# this workflow filename after the first bootstrap publish.
+# First publish: one-time granular token from the npm org owner (2FA).
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ui
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.12.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+          package-manager-cache: false
+
+      - name: Install
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: .
+        run: pnpm --filter @i258/ui build
+
+      - name: Ensure recent npm (OIDC trusted publishing)
+        run: npm install -g npm@latest
+
+      - name: Publish
+        run: pnpm publish --access public --no-git-checks
+        # No NODE_AUTH_TOKEN — OIDC after trusted publisher is configured.
+        # For the bootstrap publish only, temporarily set NODE_AUTH_TOKEN from a
+        # short-lived granular token secret, then remove it.
