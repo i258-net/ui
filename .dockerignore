@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+**/dist
+**/storybook-static
+.git
+.github
+.worktrees
+*.md
+.env*
+.DS_Store
+**/*.log
+coverage
+playwright-report
+test-results
+.turbo
+.scratch
+**/*.tsbuildinfo
