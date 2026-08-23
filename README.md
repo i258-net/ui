@@ -44,9 +44,11 @@ Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Wi
 
 ## Releases
 
-- CI/release workflow YAML lives in `docs/github-workflows/` until someone pastes them into `.github/workflows/` (preferred: Daniel, one-time — `rivet-i258` cannot push workflow files without App `workflows` write, which we are not requesting).
-- **First publish (when Rivet says ready):** on Daniel's Mac — `npm login` (2FA), then `npm publish --access public` in the built `packages/ui` dir. **No token minted, nothing stored in repo secrets.**
-- Then configure Trusted Publisher on npmjs (`@i258/ui` → Settings → GitHub Actions: org `i258-net`, repo `ui`, workflow `release.yml`). Later tags publish via OIDC only.
+- CI: `.github/workflows/ci.yml` (default `GITHUB_TOKEN` only — no `ci-i258` / `CI_APP_*`).
+- Publish: `.github/workflows/release.yml` on `v*` tags, job `environment: npm`, OIDC trusted publishing (no npm token secret).
+- **First publish (when Rivet says ready):** on Daniel's Mac — `npm login` (2FA), then `npm publish --access public` in the built `packages/ui` dir. **No token minted.**
+- Then configure Trusted Publisher on npmjs (`@i258/ui` → Settings → GitHub Actions: org `i258-net`, repo `ui`, workflow `release.yml`, environment `npm`). Later tags publish via OIDC; the `npm` environment also requires Daniel's approval.
+- Workflow edits under `.github/workflows/` require CODEOWNERS review (`@euporphium`).
 
 ## Contribution rules (short)
 
