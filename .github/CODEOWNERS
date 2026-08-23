@@ -1,0 +1,3 @@
+# Workflow changes require Daniel's review (enable "Require review from Code
+# Owners" on the main-requires-approved-pr ruleset once this file is on main).
+.github/workflows/ @euporphium
