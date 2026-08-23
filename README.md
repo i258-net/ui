@@ -23,13 +23,20 @@ Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailw
 **Cascade layers:** component rules ship in `@layer i258-components`, not Tailwind's shared `components` name. Layer order is first-declaration-wins, so a Tailwind consumer's preflight (`base`) can beat or lose to us depending on import order if we share `components`. Declare order **before** any `@import`:
 
 ```css
+/* layers.css — order statement alone; import this file first */
 @layer theme, base, components, i258-components, utilities;
+```
 
+```css
+/* globals.css (or app entry) */
+@import "./layers.css";
 @import "tailwindcss";
 @import "@i258/ui/styles.css";
 ```
 
 That puts our primitives above preflight/`components` and below utilities (so utility overrides still work).
+
+**Import order caveat:** the order statement must reach the browser **before** the package CSS. Under webpack/css-loader (Next.js), `@import`s are emitted ahead of the importing file's own rules — so putting the `@layer …` line in the *same* file as `@import "@i258/ui/styles.css"` lands it *after* `i258-components` and is a no-op. Use an earlier import (e.g. `./layers.css`) as above. Honeycomb's consumer PR is the reference.
 
 ## Workspace
 
