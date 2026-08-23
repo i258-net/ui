@@ -13,11 +13,22 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer components` → compiled CSS) · Radix/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Radix/CVA · Storybook 10 |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
-Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
+
+**Cascade layers:** component rules ship in `@layer i258-components`, not Tailwind's shared `components` name. Layer order is first-declaration-wins, so a Tailwind consumer's preflight (`base`) can beat or lose to us depending on import order if we share `components`. Declare order **before** any `@import`:
+
+```css
+@layer theme, base, components, i258-components, utilities;
+
+@import "tailwindcss";
+@import "@i258/ui/styles.css";
+```
+
+That puts our primitives above preflight/`components` and below utilities (so utility overrides still work).
 
 ## Workspace
 
@@ -37,8 +48,9 @@ pnpm workshop   # http://localhost:6006
 
 ```ts
 import { Button } from "@i258/ui";
-import "@i258/ui/styles.css";
 ```
+
+Import CSS from your app stylesheet (with the `@layer` order line above), not only from JS — JS-side CSS imports often land after Tailwind and freeze the wrong layer order.
 
 Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Without an explicit theme, dark follows `prefers-color-scheme`.
 
