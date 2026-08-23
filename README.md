@@ -15,8 +15,11 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 | Stack | pnpm · TypeScript 7 · Radix/CVA · compiled CSS · Storybook 10 |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
+| Tailwind v4 | **deferred** (see below) |
 
-Consumers import compiled CSS; they do **not** scan this package's source with Tailwind. Tailwind v4 enters as the authoring/`@theme` toolchain as the surface grows — the public contract stays compiled JS + CSS.
+### Tailwind v4 — deferred (needs a nod)
+
+The decided stack includes Tailwind v4 as the *authoring* toolchain (`@theme` → compiled `styles.css`). This scaffold instead ships **hand-authored semantic CSS + component classes** so the consumer contract is real immediately: import `@i258/ui/styles.css`, do **not** Tailwind-scan package source. No `tailwindcss` / `@tailwindcss/cli` yet; `tailwind-merge` is present for later. Say if you want `@tailwindcss/cli` wired as the CSS build step now; otherwise it lands when board-chrome / Honeycomb migration needs shared `@theme` wiring.
 
 ## Workspace
 
@@ -43,10 +46,9 @@ Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Wi
 
 ## Releases
 
-- Intended: semver tags (`v*`) trigger a release workflow (see `docs/github-workflows/`).
-- **Those YAML files are parked under `docs/`** until `rivet-i258` has GitHub App `workflows` write (push to `.github/workflows/` was refused). After permission lands, move them to `.github/workflows/`.
-- **OIDC trusted publishing** after the package exists on npm and a trusted publisher is configured for this repo + workflow.
-- **First publish** needs a one-time granular npm token from the org owner (trusted-publisher settings live on the package). Subsequent publishes are tokenless.
+- CI/release workflow YAML lives in `docs/github-workflows/` until someone pastes them into `.github/workflows/` (preferred: Daniel, one-time — `rivet-i258` cannot push workflow files without App `workflows` write, which we are not requesting).
+- **First publish (when Rivet says ready):** on Daniel's Mac — `npm login` (2FA), then `npm publish --access public` in the built `packages/ui` dir. **No token minted, nothing stored in repo secrets.**
+- Then configure Trusted Publisher on npmjs (`@i258/ui` → Settings → GitHub Actions: org `i258-net`, repo `ui`, workflow `release.yml`). Later tags publish via OIDC only.
 
 ## Contribution rules (short)
 
