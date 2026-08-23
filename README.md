@@ -6,7 +6,7 @@ Vision and decisions live in `i258-net/dotbuzz` → `PLANS/I258_DESIGN_SYSTEM_VI
 
 ## Status
 
-Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb board chrome.
+Scaffold + inside-out baseline in Storybook. Not a finished brand. First consumer migration: Honeycomb board chrome (after npm publish).
 
 | | |
 |---|---|
@@ -14,6 +14,7 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 | Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Radix/CVA · Storybook 10 |
+| Baseline | Tokens + light/dark themes · Button, Input, Label, Link, Checkbox, Badge, Surface |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 

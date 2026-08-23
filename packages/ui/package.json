@@ -32,6 +32,30 @@
       "types": "./dist/components/button.d.ts",
       "import": "./dist/components/button.js"
     },
+    "./input": {
+      "types": "./dist/components/input.d.ts",
+      "import": "./dist/components/input.js"
+    },
+    "./label": {
+      "types": "./dist/components/label.d.ts",
+      "import": "./dist/components/label.js"
+    },
+    "./link": {
+      "types": "./dist/components/link.d.ts",
+      "import": "./dist/components/link.js"
+    },
+    "./checkbox": {
+      "types": "./dist/components/checkbox.d.ts",
+      "import": "./dist/components/checkbox.js"
+    },
+    "./badge": {
+      "types": "./dist/components/badge.d.ts",
+      "import": "./dist/components/badge.js"
+    },
+    "./surface": {
+      "types": "./dist/components/surface.d.ts",
+      "import": "./dist/components/surface.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css"
   },
@@ -47,20 +71,21 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@radix-ui/react-checkbox": "^1.3.11",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.12",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.12",
     "tsdown": "^0.14.1",
     "typescript": "7.0.2",
-    "vitest": "^3.2.4",
-    "@tailwindcss/cli": "^4.1.12",
-    "tailwindcss": "^4.1.12"
+    "vitest": "^3.2.4"
   }
 }
