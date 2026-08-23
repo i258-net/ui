@@ -1,6 +1,6 @@
 /* Component styles — class names are package-owned (i258-*), not Tailwind utilities. */
 
-@layer components {
+@layer i258-components {
   .i258-btn {
     display: inline-flex;
     align-items: center;

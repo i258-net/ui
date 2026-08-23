@@ -3,10 +3,12 @@
   No `tailwindcss/theme` import and no `@theme` block: those emit unprefixed
   `--font-sans` / `--radius-md` / `--spacing-*` into `:root` and collide with
   consumer Tailwind (e.g. accounting-meta). Tokens are plain `--i258-*` vars;
-  components stay package-owned `i258-*` classes in `@layer components`.
+  component classes live in package-owned `@layer i258-components` (not
+  Tailwind's `components` — sharing that name lets consumer preflight win or
+  lose depending on who declares the layer first).
 */
 
-@layer components;
+@layer i258-components;
 
 @import "./tokens.css";
 @import "./themes.css";
