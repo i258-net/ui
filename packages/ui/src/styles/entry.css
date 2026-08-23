@@ -1,12 +1,12 @@
 /*
   Library CSS entry — compiled by @tailwindcss/cli.
-  Theme only (no preflight, no utilities) so consumers like accounting-meta
-  do not inherit colliding utility class names from this package.
+  No `tailwindcss/theme` import and no `@theme` block: those emit unprefixed
+  `--font-sans` / `--radius-md` / `--spacing-*` into `:root` and collide with
+  consumer Tailwind (e.g. accounting-meta). Tokens are plain `--i258-*` vars;
+  components stay package-owned `i258-*` classes in `@layer components`.
 */
 
-@layer theme, components;
-
-@import "tailwindcss/theme.css" layer(theme);
+@layer components;
 
 @import "./tokens.css";
 @import "./themes.css";

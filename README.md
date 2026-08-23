@@ -13,11 +13,11 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`@theme` → compiled CSS) · Radix/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer components` → compiled CSS) · Radix/CVA · Storybook 10 |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
-Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **theme + `@layer components` only** (no preflight, no utilities) so consumer Tailwind utilities cannot collide with ours. Component classes are package-owned (`i258-*`).
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
 
 ## Workspace
 
