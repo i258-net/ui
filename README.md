@@ -12,14 +12,12 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 |---|---|
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
-| Stack | pnpm · TypeScript 7 · Radix/CVA · compiled CSS · Storybook 10 |
+| License | MIT — Copyright (c) 2026 Daniel Newton |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`@theme` → compiled CSS) · Radix/CVA · Storybook 10 |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
-| Tailwind v4 | **deferred** (see below) |
 
-### Tailwind v4 — deferred (needs a nod)
-
-The decided stack includes Tailwind v4 as the *authoring* toolchain (`@theme` → compiled `styles.css`). This scaffold instead ships **hand-authored semantic CSS + component classes** so the consumer contract is real immediately: import `@i258/ui/styles.css`, do **not** Tailwind-scan package source. No `tailwindcss` / `@tailwindcss/cli` yet; `tailwind-merge` is present for later. Say if you want `@tailwindcss/cli` wired as the CSS build step now; otherwise it lands when board-chrome / Honeycomb migration needs shared `@theme` wiring.
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **theme + `@layer components` only** (no preflight, no utilities) so consumer Tailwind utilities cannot collide with ours. Component classes are package-owned (`i258-*`).
 
 ## Workspace
 

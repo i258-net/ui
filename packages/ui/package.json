@@ -59,6 +59,8 @@
     "react-dom": "^19.1.0",
     "tsdown": "^0.14.1",
     "typescript": "7.0.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@tailwindcss/cli": "^4.1.12",
+    "tailwindcss": "^4.1.12"
   }
 }

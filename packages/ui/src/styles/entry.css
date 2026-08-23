@@ -1,0 +1,13 @@
+/*
+  Library CSS entry — compiled by @tailwindcss/cli.
+  Theme only (no preflight, no utilities) so consumers like accounting-meta
+  do not inherit colliding utility class names from this package.
+*/
+
+@layer theme, components;
+
+@import "tailwindcss/theme.css" layer(theme);
+
+@import "./tokens.css";
+@import "./themes.css";
+@import "./components.css";

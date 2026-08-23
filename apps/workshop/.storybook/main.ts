@@ -18,7 +18,7 @@ const config: StorybookConfig = {
         alias: {
           "@i258/ui/styles.css": join(
             monorepoRoot,
-            "packages/ui/src/styles/styles.entry.css",
+            "packages/ui/src/styles/entry.css",
           ),
           "@i258/ui": join(monorepoRoot, "packages/ui/src/index.ts"),
         },

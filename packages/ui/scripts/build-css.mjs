@@ -1,22 +1,32 @@
-import { mkdir, copyFile, readFile, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const src = join(root, "src", "styles");
+const styles = join(root, "src", "styles");
 const dist = join(root, "dist");
 
 await mkdir(dist, { recursive: true });
 
-const tokens = await readFile(join(src, "tokens.css"), "utf8");
-const themes = await readFile(join(src, "themes.css"), "utf8");
-const components = await readFile(join(src, "components.css"), "utf8");
+function runCli(input, output) {
+  const result = spawnSync(
+    "pnpm",
+    ["exec", "tailwindcss", "-i", input, "-o", output, "--minify"],
+    {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  if (result.status !== 0) {
+    process.stderr.write(result.stdout ?? "");
+    process.stderr.write(result.stderr ?? "");
+    process.exit(result.status ?? 1);
+  }
+  process.stdout.write(result.stderr ?? result.stdout ?? "");
+}
 
-await copyFile(join(src, "tokens.css"), join(dist, "tokens.css"));
-await writeFile(
-  join(dist, "styles.css"),
-  [tokens, themes, components].join("\n"),
-  "utf8",
-);
-
-console.log("wrote dist/tokens.css and dist/styles.css");
+runCli(join(styles, "entry.css"), join(dist, "styles.css"));
+runCli(join(styles, "tokens.entry.css"), join(dist, "tokens.css"));
+console.log("wrote dist/styles.css and dist/tokens.css via tailwindcss CLI");
