@@ -13,7 +13,7 @@ Scaffold / baseline theme v1. Not a finished brand. First consumer: Honeycomb bo
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`@theme` → compiled CSS) · Radix/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer components` → compiled CSS) · Radix/CVA · Storybook 10 |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
