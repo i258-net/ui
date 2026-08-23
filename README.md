@@ -6,15 +6,15 @@ Vision and decisions live in `i258-net/dotbuzz` → `PLANS/I258_DESIGN_SYSTEM_VI
 
 ## Status
 
-Scaffold + inside-out baseline in Storybook. Not a finished brand. First consumer migration: Honeycomb board chrome (after npm publish).
+Scaffold + inside-out baseline in Storybook. Not a finished brand. First consumer migration: Honeycomb board chrome (`@i258/ui@0.1.0` live).
 
 | | |
 |---|---|
 | Repo | public |
-| Package | `@i258/ui` on npmjs.org (org `i258`) — not published yet |
+| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.1.0` published; this branch targets `0.2.0` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Radix/CVA · Storybook 10 |
-| Baseline | Tokens + light/dark themes · Button, Input, Label, Link, Checkbox, Badge, Surface |
+| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
@@ -52,7 +52,7 @@ pnpm typecheck
 pnpm workshop   # http://localhost:6006
 ```
 
-## Using `@i258/ui` (once published)
+## Using `@i258/ui`
 
 ```ts
 import { Button } from "@i258/ui";
@@ -65,9 +65,7 @@ Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Wi
 ## Releases
 
 - CI: `.github/workflows/ci.yml` (default `GITHUB_TOKEN` only — no `ci-i258` / `CI_APP_*`).
-- Publish: `.github/workflows/release.yml` on `v*` tags, job `environment: npm`, OIDC trusted publishing (no npm token secret).
-- **First publish (when Rivet says ready):** on Daniel's Mac — `npm login` (2FA), then `npm publish --access public` in the built `packages/ui` dir. **No token minted.**
-- Then configure Trusted Publisher on npmjs (`@i258/ui` → Settings → GitHub Actions: org `i258-net`, repo `ui`, workflow `release.yml`, environment `npm`). Later tags publish via OIDC; the `npm` environment also requires Daniel's approval.
+- Publish: `.github/workflows/release.yml` on `v*` tags, job `environment: npm`, OIDC trusted publishing (no npm token secret). Trusted Publisher is configured; Daniel approves the `npm` environment on each tag publish.
 - Workflow edits under `.github/workflows/` require CODEOWNERS review (`@euporphium`).
 
 ## Contribution rules (short)
