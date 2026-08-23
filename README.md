@@ -43,7 +43,8 @@ Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Wi
 
 ## Releases
 
-- Semver tags (`v*`) trigger `.github/workflows/release.yml`.
+- Intended: semver tags (`v*`) trigger a release workflow (see `docs/github-workflows/`).
+- **Those YAML files are parked under `docs/`** until `rivet-i258` has GitHub App `workflows` write (push to `.github/workflows/` was refused). After permission lands, move them to `.github/workflows/`.
 - **OIDC trusted publishing** after the package exists on npm and a trusted publisher is configured for this repo + workflow.
 - **First publish** needs a one-time granular npm token from the org owner (trusted-publisher settings live on the package). Subsequent publishes are tokenless.
 
