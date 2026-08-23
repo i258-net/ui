@@ -1,0 +1,51 @@
+name: release
+
+# Publishes @i258/ui on version tags via npm OIDC trusted publishing.
+# First publish is NOT this workflow: the org owner runs `npm login` then
+# `npm publish --access public` from their Mac (no token minted). After that,
+# configure Trusted Publisher on npmjs for this repo + this workflow filename.
+# This workflow is OIDC-only — no NODE_AUTH_TOKEN / npm secret.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ui
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.12.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+          package-manager-cache: false
+
+      - name: Install
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: .
+        run: pnpm --filter @i258/ui build
+
+      - name: Ensure recent npm (OIDC trusted publishing needs >= 11.5.1)
+        run: npm install -g npm@latest
+
+      - name: Publish
+        run: pnpm publish --access public --no-git-checks
+        # OIDC only — do not set NODE_AUTH_TOKEN.

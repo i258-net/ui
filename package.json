@@ -1,0 +1,20 @@
+{
+  "name": "i258-ui-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.12.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter @i258/ui build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "workshop": "pnpm --filter @i258/workshop storybook",
+    "workshop:build": "pnpm --filter @i258/workshop build-storybook"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

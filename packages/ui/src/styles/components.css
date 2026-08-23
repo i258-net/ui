@@ -1,0 +1,94 @@
+/* Component styles — class names are package-owned (i258-*), not Tailwind utilities. */
+
+@layer components {
+  .i258-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--i258-space-2);
+    border: 1px solid transparent;
+    border-radius: var(--i258-radius-md);
+    font-family: var(--i258-font-sans);
+    font-weight: 500;
+    line-height: var(--i258-leading-tight);
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color var(--i258-duration-fast) var(--i258-ease-standard),
+      color var(--i258-duration-fast) var(--i258-ease-standard),
+      border-color var(--i258-duration-fast) var(--i258-ease-standard),
+      box-shadow var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .i258-btn:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-btn--sm {
+    height: 2rem;
+    padding: 0 var(--i258-space-3);
+    font-size: var(--i258-text-sm);
+  }
+
+  .i258-btn--md {
+    height: 2.25rem;
+    padding: 0 var(--i258-space-4);
+    font-size: var(--i258-text-sm);
+  }
+
+  .i258-btn--lg {
+    height: 2.75rem;
+    padding: 0 var(--i258-space-6);
+    font-size: var(--i258-text-md);
+  }
+
+  .i258-btn--primary {
+    background: var(--i258-accent);
+    color: var(--i258-accent-foreground);
+  }
+
+  .i258-btn--primary:hover:not(:disabled) {
+    filter: brightness(1.05);
+  }
+
+  .i258-btn--secondary {
+    background: var(--i258-surface);
+    color: var(--i258-foreground);
+    border-color: var(--i258-border);
+  }
+
+  .i258-btn--secondary:hover:not(:disabled) {
+    background: var(--i258-background);
+  }
+
+  .i258-btn--ghost {
+    background: transparent;
+    color: var(--i258-foreground);
+  }
+
+  .i258-btn--ghost:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--i258-foreground) 8%, transparent);
+  }
+
+  .i258-btn--danger {
+    background: var(--i258-danger);
+    color: var(--i258-danger-foreground);
+  }
+
+  .i258-btn--danger:hover:not(:disabled) {
+    filter: brightness(1.05);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .i258-btn {
+      transition: none;
+    }
+  }
+}

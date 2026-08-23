@@ -1,0 +1,8 @@
+/* Tokens-only entry for @i258/ui/tokens.css — same theme, no components. */
+
+@layer theme;
+
+@import "tailwindcss/theme.css" layer(theme);
+
+@import "./tokens.css";
+@import "./themes.css";
