@@ -3,6 +3,9 @@
 # Cluster nodes are linux/amd64; this repo is edited from an arm64 Mac, so the
 # image is built in GitHub Actions (same reason as i258-net/honeycomb).
 # Published as ghcr.io/i258-net/ui-workshop (not the repo name).
+#
+# Runtime is nginxinc/nginx-unprivileged so the image matches the cluster's
+# hardened securityContext (runAsNonRoot, drop ALL, no privileged ports).
 
 FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS builder
 RUN apk add --no-cache libc6-compat
@@ -18,8 +21,8 @@ ENV STORYBOOK_DISABLE_TELEMETRY=1
 # required so any non-aliased import path stays valid and matches CI.
 RUN pnpm build && pnpm workshop:build
 
-FROM nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+FROM nginxinc/nginx-unprivileged:1.27-alpine@sha256:65e3e85dbaed8ba248841d9d58a899b6197106c23cb0ff1a132b7bfe0547e4c0
 COPY docker/workshop-nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/workshop/storybook-static /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
