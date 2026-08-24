@@ -4,9 +4,8 @@ name: workshop-image
 # Cluster nodes are linux/amd64; build here rather than on an arm64 Mac.
 #
 # Image: ghcr.io/i258-net/ui-workshop (distinct from the npm package / repo name).
-# GITHUB_TOKEN covers the GHCR push. No ci-i258 / CI_APP_* bump against k8s —
-# those org secrets are deliberately not wired into this repo (see release.yml);
-# Forge pins the digest in i258-net/k8s once the package exists.
+# GITHUB_TOKEN covers the GHCR push. On main, ci-i258 opens a digest-only PR on
+# i258-net/k8s (same pattern as honeycomb build.yml; I25-155).
 
 on:
   push:
@@ -16,6 +15,7 @@ on:
       - .dockerignore
       - docker/workshop-nginx.conf
       - .github/workflows/workshop-image.yml
+      - .github/scripts/pin-storybook-digest.py
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
@@ -27,6 +27,7 @@ on:
       - .dockerignore
       - docker/workshop-nginx.conf
       - .github/workflows/workshop-image.yml
+      - .github/scripts/pin-storybook-digest.py
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
@@ -83,5 +84,67 @@ jobs:
             echo '```'
             echo
             echo "Tags: \`${IMAGE}:main\` and \`${IMAGE}:sha-${{ github.sha }}\`."
-            echo "Pin this digest in i258-net/k8s (Forge) — this workflow does not open the bump PR."
+            echo "A follow-up job opens a PR on i258-net/k8s to pin this digest."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  bump-k8s:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Require ci-i258 App credentials
+        env:
+          APP_ID: ${{ secrets.CI_APP_ID }}
+          APP_KEY: ${{ secrets.CI_APP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::Org secrets CI_APP_ID / CI_APP_PRIVATE_KEY are not visible to this repo. Image was still pushed to GHCR; pin the digest by hand until they are."
+            exit 1
+          fi
+
+      - id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: i258-net
+          repositories: k8s
+
+      - uses: actions/checkout@v4
+        with:
+          path: ui
+
+      - uses: actions/checkout@v4
+        with:
+          repository: i258-net/k8s
+          token: ${{ steps.app-token.outputs.token }}
+          path: k8s
+
+      - name: Pin digest in k8s manifests
+        env:
+          DIGEST: ${{ needs.build.outputs.digest }}
+          K8S_ROOT: k8s
+        run: python3 ui/.github/scripts/pin-storybook-digest.py
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          path: k8s
+          branch: storybook/image-digest
+          delete-branch: true
+          title: "chore(storybook): pin image ${{ needs.build.outputs.digest }}"
+          commit-message: "chore(storybook): pin image ${{ needs.build.outputs.digest }}"
+          body: |
+            Auto-opened by `i258-net/ui` after GHCR publish.
+
+            Pins `ghcr.io/i258-net/ui-workshop@${{ needs.build.outputs.digest }}` in
+            `clusters/home/apps/storybook/manifests/10-deployment.yaml` and
+            `clusters/home/apps/storybook/versions.env`.
+
+            Source commit: https://github.com/i258-net/ui/commit/${{ github.sha }}
+            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Digest-only bump — Forge merges under the standing Tier-2 ci-i258
+            exception after diff + registry check (I25-155).

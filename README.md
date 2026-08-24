@@ -64,7 +64,7 @@ Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Wi
 
 ## Releases
 
-- CI: `.github/workflows/ci.yml` (default `GITHUB_TOKEN` only — no `ci-i258` / `CI_APP_*`).
+- CI: `.github/workflows/ci.yml` (default `GITHUB_TOKEN`; `workshop-image` uses org `CI_APP_*` for k8s digest PRs — I25-155).
 - Publish: `.github/workflows/release.yml` on `v*` tags, job `environment: npm`, OIDC trusted publishing (no npm token secret). Trusted Publisher is configured; Daniel approves the `npm` environment on each tag publish.
 - Workflow edits under `.github/workflows/` require CODEOWNERS review (`@euporphium`).
 
