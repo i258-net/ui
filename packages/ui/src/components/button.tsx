@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { useRender } from "@base-ui/react/use-render";
+import { mergeProps } from "@base-ui/react/merge-props";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../lib/utils.js";
@@ -24,26 +25,49 @@ const buttonVariants = cva("i258-btn", {
   },
 });
 
-export type ButtonProps = React.ComponentProps<"button"> &
+export type ButtonProps = useRender.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
+    /**
+     * @deprecated Prefer `render` (Base UI composition). Kept so existing
+     * Radix-era `asChild` callers (Honeycomb board chrome) keep working.
+     */
     asChild?: boolean;
   };
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = React.forwardRef<HTMLElement, ButtonProps>(
   function Button(
-    { className, variant, size, asChild = false, type, ...props },
+    {
+      className,
+      variant,
+      size,
+      render,
+      asChild = false,
+      type,
+      children,
+      ...props
+    },
     ref,
   ) {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        ref={ref}
-        data-slot="button"
-        className={cn(buttonVariants({ variant, size }), className)}
-        type={asChild ? undefined : (type ?? "button")}
-        {...props}
-      />
-    );
+    const resolvedRender =
+      render ??
+      (asChild
+        ? (React.Children.only(children) as React.ReactElement)
+        : undefined);
+
+    return useRender({
+      defaultTagName: "button",
+      ref,
+      render: resolvedRender,
+      props: mergeProps<"button">(
+        {
+          className: cn(buttonVariants({ variant, size }), className),
+          type: resolvedRender ? undefined : (type ?? "button"),
+          children: asChild ? undefined : children,
+          "data-slot": "button",
+        } as React.ComponentProps<"button">,
+        props,
+      ),
+    });
   },
 );
 

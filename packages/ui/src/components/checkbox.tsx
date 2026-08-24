@@ -1,21 +1,21 @@
 import * as React from "react";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
+import type { CheckboxRootProps } from "@base-ui/react/checkbox";
 
 import { cn } from "../lib/utils.js";
 
-export type CheckboxProps = React.ComponentProps<typeof CheckboxPrimitive.Root>;
+export type CheckboxProps = CheckboxRootProps;
 
-export const Checkbox = React.forwardRef<
-  React.ComponentRef<typeof CheckboxPrimitive.Root>,
-  CheckboxProps
->(function Checkbox({ className, ...props }, ref) {
-  return (
-    <CheckboxPrimitive.Root
-      ref={ref}
-      data-slot="checkbox"
-      className={cn("i258-checkbox", className)}
-      {...props}
-    >
+export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(
+  function Checkbox({ className, nativeButton = true, ...props }, ref) {
+    return (
+      <CheckboxPrimitive.Root
+        ref={ref}
+        data-slot="checkbox"
+        className={cn("i258-checkbox", className)}
+        nativeButton={nativeButton}
+        {...props}
+      >
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
         className="i258-checkbox__indicator"
@@ -39,4 +39,5 @@ export const Checkbox = React.forwardRef<
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );
-});
+  },
+);

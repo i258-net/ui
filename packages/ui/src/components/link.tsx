@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { useRender } from "@base-ui/react/use-render";
+import { mergeProps } from "@base-ui/react/merge-props";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../lib/utils.js";
@@ -17,22 +18,40 @@ const linkVariants = cva("i258-link", {
   },
 });
 
-export type LinkProps = React.ComponentProps<"a"> &
+export type LinkProps = useRender.ComponentProps<"a"> &
   VariantProps<typeof linkVariants> & {
+    /** @deprecated Prefer `render`. */
     asChild?: boolean;
   };
 
-export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
-  function Link({ className, variant, asChild = false, ...props }, ref) {
-    const Comp = asChild ? Slot : "a";
-    return (
-      <Comp
-        ref={ref}
-        data-slot="link"
-        className={cn(linkVariants({ variant }), className)}
-        {...props}
-      />
-    );
+export const Link = React.forwardRef<HTMLElement, LinkProps>(
+  function Link({
+    className,
+    variant,
+    render,
+    asChild = false,
+    children,
+    ...props
+  }, ref) {
+    const resolvedRender =
+      render ??
+      (asChild
+        ? (React.Children.only(children) as React.ReactElement)
+        : undefined);
+
+    return useRender({
+      defaultTagName: "a",
+      ref,
+      render: resolvedRender,
+      props: mergeProps<"a">(
+        {
+          className: cn(linkVariants({ variant }), className),
+          children: asChild ? undefined : children,
+          "data-slot": "link",
+        } as React.ComponentProps<"a">,
+        props,
+      ),
+    });
   },
 );
 

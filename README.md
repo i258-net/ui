@@ -11,9 +11,9 @@ Scaffold + inside-out baseline in Storybook. Not a finished brand. First consume
 | | |
 |---|---|
 | Repo | public |
-| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.1.0` published; this branch targets `0.2.0` |
+| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.2.0` published; this branch targets `0.3.0` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Radix/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip |
 | Themes | light + dark semantic tokens |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
