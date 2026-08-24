@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { useRender } from "@base-ui/react/use-render";
+import { mergeProps } from "@base-ui/react/merge-props";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../lib/utils.js";
@@ -24,25 +25,44 @@ const surfaceVariants = cva("i258-surface", {
   },
 });
 
-export type SurfaceProps = React.ComponentProps<"div"> &
+export type SurfaceProps = useRender.ComponentProps<"div"> &
   VariantProps<typeof surfaceVariants> & {
+    /** @deprecated Prefer `render`. */
     asChild?: boolean;
   };
 
-export const Surface = React.forwardRef<HTMLDivElement, SurfaceProps>(
+export const Surface = React.forwardRef<HTMLElement, SurfaceProps>(
   function Surface(
-    { className, variant, padding, asChild = false, ...props },
+    {
+      className,
+      variant,
+      padding,
+      render,
+      asChild = false,
+      children,
+      ...props
+    },
     ref,
   ) {
-    const Comp = asChild ? Slot : "div";
-    return (
-      <Comp
-        ref={ref}
-        data-slot="surface"
-        className={cn(surfaceVariants({ variant, padding }), className)}
-        {...props}
-      />
-    );
+    const resolvedRender =
+      render ??
+      (asChild
+        ? (React.Children.only(children) as React.ReactElement)
+        : undefined);
+
+    return useRender({
+      defaultTagName: "div",
+      ref,
+      render: resolvedRender,
+      props: mergeProps<"div">(
+        {
+          className: cn(surfaceVariants({ variant, padding }), className),
+          children: asChild ? undefined : children,
+          "data-slot": "surface",
+        } as React.ComponentProps<"div">,
+        props,
+      ),
+    });
   },
 );
 

@@ -23,7 +23,9 @@ export default defineConfig({
     "react",
     "react-dom",
     "react/jsx-runtime",
-    "@radix-ui/react-slot",
-    "@radix-ui/react-checkbox",
+    "@base-ui/react",
+    "@base-ui/react/checkbox",
+    "@base-ui/react/use-render",
+    "@base-ui/react/merge-props",
   ],
 });

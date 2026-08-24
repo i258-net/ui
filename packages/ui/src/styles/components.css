@@ -208,8 +208,9 @@
       border-color var(--i258-duration-fast) var(--i258-ease-standard);
   }
 
-  .i258-checkbox[data-state="checked"],
-  .i258-checkbox[data-state="indeterminate"] {
+  /* Base UI emits data-checked / data-indeterminate (not Radix data-state). */
+  .i258-checkbox[data-checked],
+  .i258-checkbox[data-indeterminate] {
     background: var(--i258-accent);
     border-color: var(--i258-accent);
   }
