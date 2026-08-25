@@ -28,4 +28,23 @@ export type { AlertProps } from "./components/alert.js";
 export { ToggleChip, toggleChipVariants } from "./components/toggle-chip.js";
 export type { ToggleChipProps } from "./components/toggle-chip.js";
 
+export {
+  Disclosure,
+  DisclosureTrigger,
+  DisclosurePanel,
+} from "./components/disclosure.js";
+export type {
+  DisclosureProps,
+  DisclosureTriggerProps,
+  DisclosurePanelProps,
+} from "./components/disclosure.js";
+
+export {
+  ChoiceGroup,
+  Choice,
+  choiceGroupVariants,
+  choiceVariants,
+} from "./components/choice.js";
+export type { ChoiceGroupProps, ChoiceProps } from "./components/choice.js";
+
 export { cn } from "./lib/utils.js";
