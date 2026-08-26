@@ -7,7 +7,11 @@ const monorepoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const config: StorybookConfig = {
   framework: "@storybook/react-vite",
   stories: ["../src/**/*.stories.@(ts|tsx)"],
-  addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
+  addons: [
+    "@storybook/addon-a11y",
+    "@storybook/addon-docs",
+    "@storybook/addon-vitest",
+  ],
   docs: {
     defaultName: "Documentation",
   },

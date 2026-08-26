@@ -13,21 +13,31 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+// Base UI checkbox is role=checkbox on a non-labelable element — htmlFor alone
+// does not create an accessible name. Prefer aria-label or aria-labelledby.
+export const Default: Story = {
+  args: { "aria-label": "Example checkbox" },
+};
 
 export const WithLabel: Story = {
   render: (args) => (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <Checkbox id="terms" {...args} />
-      <Label htmlFor="terms">Accept terms</Label>
+      <Checkbox id="terms" aria-labelledby="terms-label" {...args} />
+      <Label id="terms-label" htmlFor="terms">
+        Accept terms
+      </Label>
     </div>
   ),
 };
 
 export const Checked: Story = {
-  args: { defaultChecked: true },
+  args: { defaultChecked: true, "aria-label": "Checked example" },
 };
 
 export const Disabled: Story = {
-  args: { disabled: true, defaultChecked: true },
+  args: {
+    disabled: true,
+    defaultChecked: true,
+    "aria-label": "Disabled example",
+  },
 };

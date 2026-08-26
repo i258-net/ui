@@ -8,14 +8,20 @@
   --i258-surface: #ffffff;
   --i258-surface-raised: #ffffff;
   --i258-foreground: #171717;
-  --i258-muted: #737373;
+  /* #5c5c5c clears 4.5:1 on --i258-background / chip washes (#737373 was 4.42). */
+  --i258-muted: #5c5c5c;
   --i258-border: #e5e5e5;
   --i258-accent: #2563eb;
   --i258-accent-foreground: #ffffff;
+  /* Text on accent-tinted washes (toggle/choice pressed) — #2563eb fails on those. */
+  --i258-accent-text: #1d4ed8;
   --i258-danger: #dc2626;
   --i258-danger-foreground: #ffffff;
   --i258-warning: #d97706;
-  --i258-success: #059669;
+  --i258-warning-foreground: #171717;
+  /* #059669 + white was 3.76 at 12px; #047857 clears 4.5:1. */
+  --i258-success: #047857;
+  --i258-success-foreground: #ffffff;
   --i258-focus-ring: #2563eb;
 }
 
@@ -31,10 +37,13 @@
     --i258-border: #2a2a2a;
     --i258-accent: #3b82f6;
     --i258-accent-foreground: #0a0a0a;
+    --i258-accent-text: #93c5fd;
     --i258-danger: #f87171;
     --i258-danger-foreground: #0a0a0a;
     --i258-warning: #fbbf24;
+    --i258-warning-foreground: #0a0a0a;
     --i258-success: #34d399;
+    --i258-success-foreground: #0a0a0a;
     --i258-focus-ring: #60a5fa;
   }
 }
@@ -50,9 +59,12 @@
   --i258-border: #2a2a2a;
   --i258-accent: #3b82f6;
   --i258-accent-foreground: #0a0a0a;
+  --i258-accent-text: #93c5fd;
   --i258-danger: #f87171;
   --i258-danger-foreground: #0a0a0a;
   --i258-warning: #fbbf24;
+  --i258-warning-foreground: #0a0a0a;
   --i258-success: #34d399;
+  --i258-success-foreground: #0a0a0a;
   --i258-focus-ring: #60a5fa;
 }

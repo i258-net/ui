@@ -30,8 +30,10 @@ export const VisibleFocus: Story = {
         <Input id="focus-input" placeholder="Tab here" />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Checkbox id="focus-check" />
-        <Label htmlFor="focus-check">Focusable checkbox</Label>
+        <Checkbox id="focus-check" aria-labelledby="focus-check-label" />
+        <Label id="focus-check-label" htmlFor="focus-check">
+          Focusable checkbox
+        </Label>
       </div>
       <Link href="#focus">Focusable link</Link>
     </div>

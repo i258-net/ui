@@ -248,24 +248,25 @@
     color: var(--i258-foreground);
   }
 
+  /* Solid fills — wash+tint failed axe color-contrast at 12px. */
   .i258-badge--accent {
-    background: color-mix(in srgb, var(--i258-accent) 16%, transparent);
-    color: var(--i258-accent);
+    background: var(--i258-accent);
+    color: var(--i258-accent-foreground);
   }
 
   .i258-badge--success {
-    background: color-mix(in srgb, var(--i258-success) 16%, transparent);
-    color: var(--i258-success);
+    background: var(--i258-success);
+    color: var(--i258-success-foreground);
   }
 
   .i258-badge--warning {
-    background: color-mix(in srgb, var(--i258-warning) 16%, transparent);
-    color: var(--i258-warning);
+    background: var(--i258-warning);
+    color: var(--i258-warning-foreground);
   }
 
   .i258-badge--danger {
-    background: color-mix(in srgb, var(--i258-danger) 16%, transparent);
-    color: var(--i258-danger);
+    background: var(--i258-danger);
+    color: var(--i258-danger-foreground);
   }
 
   /* —— Surface —— */
@@ -382,7 +383,7 @@
   .i258-toggle-chip[data-state="on"] {
     background: color-mix(in srgb, var(--i258-accent) 22%, var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
-    color: var(--i258-accent);
+    color: var(--i258-accent-text);
   }
 
   .i258-toggle-chip:disabled {
@@ -403,7 +404,7 @@
   }
 
   .i258-toggle-chip__count {
-    opacity: 0.75;
+    /* No opacity — muted at 0.75 fell under 4.5:1 on chip washes. */
     font-family: var(--i258-font-mono);
     font-size: 0.85em;
     font-weight: 400;
@@ -561,7 +562,7 @@
   .i258-choice[data-pressed] {
     background: color-mix(in srgb, var(--i258-accent) 22%, var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
-    color: var(--i258-accent);
+    color: var(--i258-accent-text);
   }
 
   .i258-choice:disabled {
@@ -606,7 +607,6 @@
   }
 
   .i258-choice__count {
-    opacity: 0.75;
     font-family: var(--i258-font-mono);
     font-size: 0.85em;
     font-weight: 400;

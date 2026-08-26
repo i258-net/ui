@@ -4,7 +4,8 @@ import "@i258/ui/styles.css";
 const preview: Preview = {
   parameters: {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
-    a11y: { test: "todo" },
+    // Fail story tests / CI on axe violations (was "todo" — panel-only).
+    a11y: { test: "error" },
     layout: "centered",
   },
   globalTypes: {
