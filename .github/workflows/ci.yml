@@ -30,15 +30,16 @@ jobs:
 
       - run: pnpm build
 
-      - run: pnpm test
-
-      - run: pnpm workshop:build
-
+      # Before `pnpm test`: workshop's test script runs `playwright install chromium`.
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - run: pnpm test
+
+      - run: pnpm workshop:build
 
       # `vrt` does not install browsers; `pnpm test` may have already, but
       # --with-deps covers ubuntu system libraries on a cold cache.
@@ -55,44 +56,3 @@ jobs:
           name: vrt-results
           path: apps/workshop/test-results/
           if-no-files-found: ignore
-
-  # One-shot on this branch only: regenerate linux baselines as an artifact so
-  # we can commit them and tighten maxDiffPixelRatio without a local Docker.
-  # Removed in the follow-up commit on this PR once snapshots are in-tree.
-  vrt-regen-linux:
-    if: github.event_name == 'pull_request' && github.head_ref == 'rivet/quality-ci-vrt'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-        with:
-          version: 11.12.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm build
-
-      - run: pnpm workshop:build
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright Chromium
-        run: pnpm --filter @i258/workshop exec playwright install --with-deps chromium
-
-      - name: Regenerate VRT snapshots (linux)
-        run: pnpm --filter @i258/workshop vrt:update
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: vrt-linux-snapshots
-          path: apps/workshop/vrt/primitives.spec.ts-snapshots/
