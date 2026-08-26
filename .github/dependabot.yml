@@ -11,7 +11,6 @@ updates:
         patterns:
           - "playwright"
           - "@playwright/*"
-        group-by: dependency-name
       npm-and-yarn:
         patterns:
           - "*"
