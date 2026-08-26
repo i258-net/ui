@@ -1,0 +1,67 @@
+# Chromatic visual-test pilot — optional, non-blocking, easy to delete.
+# Playwright VRT in ci.yml remains the merge gate; this workflow is informational.
+# Rollback: delete this file + apps/workshop/.storybook/modes.ts + preview's chromatic block.
+name: chromatic-pilot
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: chromatic-pilot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.12.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm workshop:build
+
+      - name: Detect Chromatic project token
+        id: token
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        run: |
+          if [ -n "$CHROMATIC_PROJECT_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "CHROMATIC_PROJECT_TOKEN not set — skipping pilot."
+          fi
+
+      - name: Publish to Chromatic (pilot)
+        if: steps.token.outputs.present == 'true'
+        uses: chromaui/action@v13
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          storybookBaseDir: apps/workshop
+          storybookBuildDir: apps/workshop/storybook-static
+          onlyStoryNames: >-
+            primitives-button--primary,
+            primitives-button--sizes,
+            primitives-input--default,
+            primitives-badge--status,
+            primitives-checkbox--with-label,
+            primitives-togglechip--row,
+            primitives-alert--tones,
+            primitives-surface--composition,
+            primitives-choice--single-select-chip
+          exitZeroOnChanges: true
