@@ -8,7 +8,7 @@
     "build-storybook": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo 'workshop lint: deferred'",
-    "test": "echo 'workshop tests: wire Storybook vitest addon next'"
+    "test": "playwright install chromium && vitest run"
   },
   "dependencies": {
     "@i258/ui": "workspace:*",
@@ -18,11 +18,16 @@
   "devDependencies": {
     "@storybook/addon-a11y": "^10.5.10",
     "@storybook/addon-docs": "^10.5.10",
+    "@storybook/addon-vitest": "10.5.10",
     "@storybook/react-vite": "^10.5.10",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@vitest/browser": "3.2.7",
+    "@vitest/runner": "3.2.7",
+    "playwright": "1.55.0",
     "storybook": "^10.5.10",
     "typescript": "7.0.2",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "3.2.7"
   }
 }

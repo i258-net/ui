@@ -6,16 +6,18 @@ Vision and decisions live in `i258-net/dotbuzz` → `PLANS/I258_DESIGN_SYSTEM_VI
 
 ## Status
 
-Scaffold + inside-out baseline in Storybook. Not a finished brand. First consumer migration: Honeycomb board chrome (`@i258/ui@0.1.0` live).
+Scaffold + inside-out baseline in Storybook. Not a finished brand. Consumers:
+Honeycomb + abacus on `@i258/ui@0.4.0` (this branch bumps package to `0.5.0` for a11y token fixes + solid status badges).
 
 | | |
 |---|---|
 | Repo | public |
-| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.3.0` published; this branch targets `0.4.0` |
+| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.4.0` published; this branch targets `0.5.0` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup |
 | Themes | light + dark semantic tokens |
+| Quality | Storybook vitest + addon-a11y (`test: "error"`) — `pnpm test` fails CI on axe violations |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
@@ -49,9 +51,13 @@ apps/workshop   # Storybook 10
 pnpm install
 pnpm build
 pnpm typecheck
-pnpm workshop   # http://localhost:6006
+pnpm test          # @i258/ui unit vitest + workshop story a11y (Playwright Chromium)
+pnpm workshop      # http://localhost:6006
 ```
 
+Story a11y runs via `@storybook/addon-vitest` + `@storybook/addon-a11y` with
+`parameters.a11y.test = "error"`. First run downloads Chromium via Playwright.
+No `.github/workflows/` change in the a11y PR — existing `pnpm test` CI step picks it up.
 ## Using `@i258/ui`
 
 ```ts

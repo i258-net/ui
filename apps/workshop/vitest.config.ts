@@ -1,0 +1,32 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+  test: {
+    projects: [
+      {
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, ".storybook"),
+            // Matches package.json "storybook" script; --ci skips browser open.
+            storybookScript: "pnpm storybook --ci",
+          }),
+        ],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            provider: "playwright",
+            headless: true,
+            instances: [{ browser: "chromium" }],
+          },
+          setupFiles: ["./.storybook/vitest.setup.ts"],
+        },
+      },
+    ],
+  },
+});
