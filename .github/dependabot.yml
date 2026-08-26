@@ -1,9 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directories:
-      - "/"
-      - "/apps/workshop"
+    directory: "/"
     schedule:
       interval: weekly
     groups:
