@@ -7,12 +7,12 @@ Vision and decisions live in `i258-net/dotbuzz` → `PLANS/I258_DESIGN_SYSTEM_VI
 ## Status
 
 Scaffold + inside-out baseline in Storybook. Not a finished brand. Consumers:
-Honeycomb + abacus on `@i258/ui@0.4.0` (this branch bumps package to `0.4.1` for a11y token fixes).
+Honeycomb + abacus on `@i258/ui@0.4.0` (this branch bumps package to `0.5.0` for a11y token fixes + solid status badges).
 
 | | |
 |---|---|
 | Repo | public |
-| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.4.0` published; this branch targets `0.4.1` |
+| Package | `@i258/ui` on npmjs.org (org `i258`) — `0.4.0` published; this branch targets `0.5.0` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup |
