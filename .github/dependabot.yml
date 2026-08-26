@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - "/"
+      - "/apps/workshop"
+    schedule:
+      interval: weekly
+    groups:
+      playwright:
+        patterns:
+          - "playwright"
+          - "@playwright/*"
+        group-by: dependency-name
+      npm-and-yarn:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "playwright"
+          - "@playwright/*"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
