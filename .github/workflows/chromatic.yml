@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
         with:
           version: 11.12.0
 
@@ -54,14 +54,14 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBaseDir: apps/workshop
           storybookBuildDir: apps/workshop/storybook-static
-          onlyStoryNames: >-
-            primitives-button--primary,
-            primitives-button--sizes,
-            primitives-input--default,
-            primitives-badge--status,
-            primitives-checkbox--with-label,
-            primitives-togglechip--row,
-            primitives-alert--tones,
-            primitives-surface--composition,
-            primitives-choice--single-select-chip
+          onlyStoryNames: |
+            Primitives/Button/Primary
+            Primitives/Button/Sizes
+            Primitives/Input/Default
+            Primitives/Badge/Status
+            Primitives/Checkbox/With Label
+            Primitives/ToggleChip/Row
+            Primitives/Alert/Tones
+            Primitives/Surface/Composition
+            Primitives/Choice/Single Select Chip
           exitZeroOnChanges: true
