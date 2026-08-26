@@ -17,7 +17,7 @@ Honeycomb + abacus on `@i258/ui@0.4.0` (this branch bumps package to `0.5.0` for
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup |
 | Themes | light + dark semantic tokens |
-| Quality | Storybook vitest + addon-a11y (`test: "error"`) — `pnpm test` fails CI on axe violations |
+| Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
@@ -58,6 +58,11 @@ pnpm workshop      # http://localhost:6006
 Story a11y runs via `@storybook/addon-vitest` + `@storybook/addon-a11y` with
 `parameters.a11y.test = "error"`. First run downloads Chromium via Playwright.
 No `.github/workflows/` change in the a11y PR — existing `pnpm test` CI step picks it up.
+
+**VRT:** `pnpm vrt` builds static Storybook and screenshots core primitives (light + dark).
+Update baselines with `pnpm vrt:update`. Snapshots live under
+`apps/workshop/vrt/*-snapshots/`. CI job for `pnpm vrt` is a separate PR (CODEOWNERS
+on `.github/workflows/`).
 ## Using `@i258/ui`
 
 ```ts

@@ -12,7 +12,9 @@
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "workshop": "pnpm --filter @i258/workshop storybook",
-    "workshop:build": "pnpm --filter @i258/workshop build-storybook"
+    "workshop:build": "pnpm --filter @i258/workshop build-storybook",
+    "vrt": "pnpm workshop:build && pnpm --filter @i258/workshop vrt",
+    "vrt:update": "pnpm workshop:build && pnpm --filter @i258/workshop vrt:update"
   },
   "devDependencies": {
     "typescript": "7.0.2"
