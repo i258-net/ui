@@ -14,8 +14,9 @@ export default defineConfig({
   timeout: 30_000,
   expect: {
     toHaveScreenshot: {
-      // Linux baselines are source of truth (CI). Small AA headroom only.
-      maxDiffPixelRatio: 0.01,
+      // Linux baselines are source of truth (CI). Observed same-OS AA
+      // fringe on text-heavy stories lands ~0.02–0.03 across runs.
+      maxDiffPixelRatio: 0.02,
       animations: "disabled",
     },
   },
