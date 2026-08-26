@@ -30,6 +30,29 @@ jobs:
 
       - run: pnpm build
 
+      # Before `pnpm test`: workshop's test script runs `playwright install chromium`.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - run: pnpm test
 
       - run: pnpm workshop:build
+
+      # `vrt` does not install browsers; `pnpm test` may have already, but
+      # --with-deps covers ubuntu system libraries on a cold cache.
+      - name: Install Playwright Chromium
+        run: pnpm --filter @i258/workshop exec playwright install --with-deps chromium
+
+      - name: Visual regression (Storybook screenshots)
+        run: pnpm --filter @i258/workshop vrt
+
+      - name: Upload VRT failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrt-results
+          path: apps/workshop/test-results/
+          if-no-files-found: ignore

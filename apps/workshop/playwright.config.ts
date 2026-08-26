@@ -14,9 +14,9 @@ export default defineConfig({
   timeout: 30_000,
   expect: {
     toHaveScreenshot: {
-      // Cross-OS AA (darwin baselines vs ubuntu CI). Tighten once linux
-      // baselines are regenerated in CI and committed.
-      maxDiffPixelRatio: 0.08,
+      // Linux baselines are source of truth (CI). Observed same-OS AA
+      // fringe on text-heavy stories lands ~0.02–0.03 across runs.
+      maxDiffPixelRatio: 0.02,
       animations: "disabled",
     },
   },
