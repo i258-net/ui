@@ -48,7 +48,7 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v3
 
@@ -112,11 +112,11 @@ jobs:
           owner: i258-net
           repositories: k8s
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: ui
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: i258-net/k8s
           token: ${{ steps.app-token.outputs.token }}
