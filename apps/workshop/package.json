@@ -8,7 +8,9 @@
     "build-storybook": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo 'workshop lint: deferred'",
-    "test": "playwright install chromium && vitest run"
+    "test": "playwright install chromium && vitest run",
+    "vrt": "playwright test",
+    "vrt:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@i258/ui": "workspace:*",
@@ -16,6 +18,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.0",
     "@storybook/addon-a11y": "^10.5.10",
     "@storybook/addon-docs": "^10.5.10",
     "@storybook/addon-vitest": "10.5.10",
