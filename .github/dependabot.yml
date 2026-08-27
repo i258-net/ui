@@ -1,9 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directories:
-      - "/"
-      - "/apps/workshop"
+    directory: "/"
     schedule:
       interval: weekly
     groups:
@@ -11,7 +9,6 @@ updates:
         patterns:
           - "playwright"
           - "@playwright/*"
-        group-by: dependency-name
       npm-and-yarn:
         patterns:
           - "*"
