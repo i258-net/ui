@@ -49,7 +49,7 @@ jobs:
 
       - name: Publish to Chromatic (pilot)
         if: steps.token.outputs.present == 'true'
-        uses: chromaui/action@v17
+        uses: chromaui/action@v18
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBaseDir: apps/workshop
