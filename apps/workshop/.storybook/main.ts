@@ -15,6 +15,11 @@ const config: StorybookConfig = {
   docs: {
     defaultName: "Documentation",
   },
+  features: {
+    // Emit the components manifest so the built Storybook (and the
+    // Chromatic-published copy) serves the MCP endpoint at /mcp.
+    componentsManifest: true,
+  },
   async viteFinal(config) {
     const { mergeConfig } = await import("vite");
     return mergeConfig(config, {
