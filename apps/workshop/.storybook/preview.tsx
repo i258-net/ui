@@ -40,6 +40,9 @@ const preview: Preview = {
         <div
           data-theme={theme}
           style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             padding: 24,
             background: "var(--i258-background)",
             color: "var(--i258-foreground)",

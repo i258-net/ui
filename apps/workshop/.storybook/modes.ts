@@ -4,9 +4,9 @@
  */
 export const allModes = {
   light: {
-    globals: { theme: "light" },
+    theme: "light",
   },
   dark: {
-    globals: { theme: "dark" },
+    theme: "dark",
   },
 } as const;
