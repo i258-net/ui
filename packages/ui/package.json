@@ -99,12 +99,12 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.12",
     "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
+    "@types/react-dom": "^19.2.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.12",
-    "tsdown": "^0.14.1",
+    "tsdown": "^0.22.14",
     "typescript": "7.0.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   }
 }
