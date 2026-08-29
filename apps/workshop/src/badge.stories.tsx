@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Badge",
@@ -32,6 +33,7 @@ export const Accent: Story = {
 };
 
 export const Status: Story = {
+  parameters: chromaticPilotParameters,
   render: () => (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       <Badge variant="success">Healthy</Badge>

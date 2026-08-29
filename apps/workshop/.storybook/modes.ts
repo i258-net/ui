@@ -1,6 +1,9 @@
 /**
  * Chromatic pilot modes — mirror Playwright VRT light/dark globals.
- * Remove this file (and preview's chromatic block) to drop Chromatic.
+ * Apply `chromaticPilotParameters` only on the 9 stories listed in
+ * `.github/workflows/chromatic.yml` `onlyStoryNames`. Keep modes off
+ * global preview so a shared decorator change does not expand the
+ * accept matrix to every story × mode.
  */
 export const allModes = {
   light: {
@@ -8,5 +11,15 @@ export const allModes = {
   },
   dark: {
     theme: "dark",
+  },
+} as const;
+
+/** Story-level `parameters` for the Chromatic pilot set. */
+export const chromaticPilotParameters = {
+  chromatic: {
+    modes: {
+      light: allModes.light,
+      dark: allModes.dark,
+    },
   },
 } as const;

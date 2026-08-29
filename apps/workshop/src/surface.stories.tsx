@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge, Button, Surface } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Surface",
@@ -42,6 +43,7 @@ export const Inset: Story = {
 };
 
 export const Composition: Story = {
+  parameters: chromaticPilotParameters,
   render: () => (
     <Surface variant="raised" padding="lg" style={{ maxWidth: 360 }}>
       <div style={{ display: "grid", gap: 12 }}>

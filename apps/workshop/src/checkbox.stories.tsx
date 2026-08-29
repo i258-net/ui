@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Checkbox, Label } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Checkbox",
@@ -25,6 +26,7 @@ export const Default: Story = {
 };
 
 export const WithLabel: Story = {
+  parameters: chromaticPilotParameters,
   render: (args) => (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <Checkbox id="terms" aria-labelledby="terms-label" {...args} />
