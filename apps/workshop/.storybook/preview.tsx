@@ -65,14 +65,26 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme as string) ?? "light";
+      // Honor Storybook layout: flex-center only when layout is "centered".
+      // Block + width 100% for padded/fullscreen so max-width stories fill
+      // their intended width (flex align-items:center shrinks them to content).
+      const layout = (context.parameters.layout as string) ?? "centered";
+      const centered = layout === "centered";
       return (
         <FontReady>
           <div
             data-theme={theme}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              ...(centered
+                ? {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }
+                : {
+                    display: "block",
+                    width: "100%",
+                  }),
               padding: 24,
               background: "var(--i258-background)",
               color: "var(--i258-foreground)",

@@ -48,6 +48,8 @@ export const Danger: Story = {
 };
 
 export const Tones: Story = {
+  // Block layout: max-width grid must fill under the decorator (not flex-shrink).
+  parameters: { layout: "padded" },
   render: () => (
     <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
       <Alert tone="info" title="Info">
