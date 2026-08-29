@@ -52,8 +52,8 @@ export const MultiSelectChip: Story = {
 };
 
 export const OptionList: Story = {
-  // Block layout: max-width option list must fill under the decorator (not flex-shrink).
-  parameters: { layout: "padded" },
+  // Full-bleed theme frame; max-width option list fills under block decorator.
+  parameters: { layout: "fullscreen" },
   render: function OptionListStory() {
     const [value, setValue] = React.useState<string[]>([]);
     return (

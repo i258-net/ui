@@ -35,8 +35,8 @@ export const Inset: Story = {
 };
 
 export const Composition: Story = {
-  // Block layout: max-width surface must fill under the decorator (not flex-shrink).
-  parameters: { layout: "padded" },
+  // Full-bleed theme frame; max-width surface fills under block decorator.
+  parameters: { layout: "fullscreen" },
   render: () => (
     <Surface variant="raised" padding="lg" style={{ maxWidth: 360 }}>
       <div style={{ display: "grid", gap: 12 }}>

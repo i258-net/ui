@@ -32,8 +32,8 @@ export const Subtle: Story = {
 };
 
 export const InCopy: Story = {
-  // Block layout: max-width copy must fill under the decorator (not flex-shrink).
-  parameters: { layout: "padded" },
+  // Full-bleed theme frame; max-width copy fills under block decorator.
+  parameters: { layout: "fullscreen" },
   render: () => (
     <p
       style={{

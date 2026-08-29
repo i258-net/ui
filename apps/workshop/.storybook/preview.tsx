@@ -65,10 +65,13 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme as string) ?? "light";
-      // Honor Storybook layout: flex-center only when layout is "centered".
-      // Block (no width) for padded/fullscreen so max-width stories fill —
-      // flex align-items:center shrinks them to content; width:100% + padding
-      // overflows without box-sizing:border-box (block fills on its own).
+      // Honor Storybook layout:
+      // - centered → flex-center card (intrinsic stories: Button, Badge, …)
+      // - padded/fullscreen → full-bleed theme frame (block + width 100% +
+      //   min-height 100vh) so max-width grids fill to their max and the
+      //   canvas is full height/width. box-sizing:border-box so width:100%
+      //   + padding does not overflow. flex align-items:center was what
+      //   content-shrunk Alert/Surface under #36.
       const layout = (context.parameters.layout as string) ?? "centered";
       const centered = layout === "centered";
       return (
@@ -81,17 +84,20 @@ const preview: Preview = {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    minWidth: 320,
+                    minHeight: 120,
+                    borderRadius: 8,
                   }
                 : {
                     display: "block",
+                    boxSizing: "border-box",
+                    width: "100%",
+                    minHeight: "100vh",
                   }),
               padding: 24,
               background: "var(--i258-background)",
               color: "var(--i258-foreground)",
               fontFamily: "var(--i258-font-sans)",
-              minWidth: 320,
-              minHeight: 120,
-              borderRadius: 8,
             }}
           >
             <Story />
