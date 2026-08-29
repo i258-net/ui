@@ -1,7 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button, Fieldset, ToggleChip } from "@i258/ui";
-import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Fieldset",
@@ -43,7 +42,6 @@ export const PrimaryLegend: Story = {
 
 /** Honeycomb BoardClient filter row shape — legend + ToggleChips + actions. */
 export const FilterRow: Story = {
-  parameters: chromaticPilotParameters,
   render: function FilterRowStory() {
     const [active, setActive] = React.useState(new Set(["todo", "in-progress"]));
     const toggle = (value: string) =>
