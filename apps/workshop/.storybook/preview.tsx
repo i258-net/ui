@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Preview } from "@storybook/react-vite";
 import "@i258/ui/styles.css";
 import { allModes } from "./modes";
@@ -33,9 +33,11 @@ function FontReady({ children }: { children: ReactNode }) {
 
 /**
  * Theme host only — no card chrome.
- * Sets `data-theme` for token inheritance (VRT locates this node).
- * In story view, paints the iframe body so the canvas matches the theme
- * instead of nesting a second painted surface.
+ * Single `data-theme` root for VRT (never also on `<html>` — that broke
+ * Playwright's strict locator). Flat `--i258-background` always so Docs
+ * examples aren't light text on Storybook's white preview. In story view,
+ * also paint iframe `body` from the host's computed tokens for full-bleed
+ * canvas without a second theme attribute.
  */
 function ThemeHost({
   theme,
@@ -46,15 +48,13 @@ function ThemeHost({
   paintCanvas: boolean;
   children: ReactNode;
 }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!paintCanvas) return;
+    if (!paintCanvas || !hostRef.current) return;
 
-    const html = document.documentElement;
     const body = document.body;
-    const prevHtmlTheme = html.getAttribute("data-theme");
-    html.setAttribute("data-theme", theme);
-
-    const styles = getComputedStyle(html);
+    const styles = getComputedStyle(hostRef.current);
     const prevBg = body.style.background;
     const prevColor = body.style.color;
     const prevFont = body.style.fontFamily;
@@ -63,8 +63,6 @@ function ThemeHost({
     body.style.fontFamily = styles.getPropertyValue("--i258-font-sans").trim();
 
     return () => {
-      if (prevHtmlTheme == null) html.removeAttribute("data-theme");
-      else html.setAttribute("data-theme", prevHtmlTheme);
       body.style.background = prevBg;
       body.style.color = prevColor;
       body.style.fontFamily = prevFont;
@@ -73,10 +71,12 @@ function ThemeHost({
 
   return (
     <div
+      ref={hostRef}
       data-theme={theme}
       style={{
         color: "var(--i258-foreground)",
         fontFamily: "var(--i258-font-sans)",
+        background: "var(--i258-background)",
       }}
     >
       {children}
