@@ -14,6 +14,18 @@ const DOCS_PAGE = {
 
 const THEMES = ["light", "dark"] as const;
 
+/** Mirrored onto `:root` by ThemeHost; backgrounds addon paints `.docs-story`. */
+const THEME_TOKEN: Record<(typeof THEMES)[number], string> = {
+  light: "#f7f7f5",
+  dark: "#0a0a0a",
+};
+
+/** Settled opaque canvas colour (not `rgba(..., α)` mid-transition). */
+const DOCS_STORY_BG: Record<(typeof THEMES)[number], string> = {
+  light: "rgb(247, 247, 245)",
+  dark: "rgb(10, 10, 10)",
+};
+
 function docsUrl(theme: (typeof THEMES)[number]): string {
   const globals = encodeURIComponent(`theme:${theme}`);
   return `/iframe.html?id=${DOCS_PAGE.id}&viewMode=docs&globals=${globals}`;
@@ -25,12 +37,38 @@ for (const theme of THEMES) {
     // `.sbdocs` alone matches every preview/action chrome; the page wrapper is unique.
     const docs = page.locator(".sbdocs.sbdocs-wrapper");
     await docs.waitFor({ state: "visible", timeout: 15_000 });
-    // Docs embeds many stories — each has its own data-theme host. Wait until
-    // at least one themed embed matches the toolbar before screenshotting.
-    await page
-      .locator(`.sbdocs.sbdocs-wrapper [data-theme="${theme}"]`)
-      .first()
-      .waitFor({ state: "visible", timeout: 15_000 });
+
+    // Docs embeds many stories. ThemeHost `[data-theme]` is button-sized and
+    // paints immediately; the visible canvas is `.docs-story`, filled by the
+    // backgrounds addon from `:root` tokens ThemeHost mirrors. Sibling host
+    // cleanups used to wipe those tokens (ui#42: Mac white canvases vs Linux
+    // dark, ratio 0.27). Wait until every preview has a themed host, `:root`
+    // holds the theme token, and each `.docs-story` is the opaque token colour
+    // (not a transitional `rgba`).
+    const expectedToken = THEME_TOKEN[theme];
+    const expectedBg = DOCS_STORY_BG[theme];
+    await page.waitForFunction(
+      ({ theme: t, expectedToken: token, expectedBg: bg }) => {
+        const root = document.querySelector(".sbdocs.sbdocs-wrapper");
+        if (!root) return false;
+        const previews = root.querySelectorAll(".sbdocs-preview");
+        const hosts = root.querySelectorAll(`[data-theme="${t}"]`);
+        const stories = [...root.querySelectorAll<HTMLElement>(".docs-story")];
+        if (previews.length === 0) return false;
+        if (hosts.length !== previews.length) return false;
+        if (stories.length !== previews.length) return false;
+        const rootToken = getComputedStyle(document.documentElement)
+          .getPropertyValue("--i258-background")
+          .trim();
+        if (rootToken !== token) return false;
+        return stories.every(
+          (el) => getComputedStyle(el).backgroundColor === bg,
+        );
+      },
+      { theme, expectedToken, expectedBg },
+      { timeout: 15_000 },
+    );
+
     await page.evaluate(async () => {
       await Promise.all([
         document.fonts.load('1em "Geist Sans"'),

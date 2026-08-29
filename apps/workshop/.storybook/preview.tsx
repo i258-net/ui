@@ -40,6 +40,15 @@ const CANVAS_TOKEN_VARS = [
 ] as const;
 
 /**
+ * Docs autodocs mounts one ThemeHost per embed in the same document. Each
+ * used to save/restore `:root` on cleanup; sibling unmounts (FontReady /
+ * Strict Mode) wiped the dark tokens mid-paint — Mac VRT captured white
+ * `.docs-story` canvases while Linux got settled dark (ui#42, ratio 0.27).
+ * Refcount: only clear `:root` when the last docs host unmounts.
+ */
+let docsRootMirrorCount = 0;
+
+/**
  * Theme host only — no card chrome.
  * Single `data-theme` root for VRT (never also on `<html>` — that broke
  * Playwright's strict locator). Docs keep a flat `--i258-background` so
@@ -68,21 +77,32 @@ function ThemeHost({
     const host = hostRef.current;
     const styles = getComputedStyle(host);
     const root = document.documentElement;
-    const prevRoot = new Map<string, string>();
-    for (const name of CANVAS_TOKEN_VARS) {
-      prevRoot.set(name, root.style.getPropertyValue(name));
-      root.style.setProperty(name, styles.getPropertyValue(name).trim());
-    }
 
+    const applyRootTokens = () => {
+      for (const name of CANVAS_TOKEN_VARS) {
+        root.style.setProperty(name, styles.getPropertyValue(name).trim());
+      }
+    };
+
+    // Docs: shared `:root` mirror — see docsRootMirrorCount above.
     if (!paintCanvas) {
+      docsRootMirrorCount += 1;
+      applyRootTokens();
       return () => {
-        for (const name of CANVAS_TOKEN_VARS) {
-          const prev = prevRoot.get(name) ?? "";
-          if (prev) root.style.setProperty(name, prev);
-          else root.style.removeProperty(name);
+        docsRootMirrorCount -= 1;
+        if (docsRootMirrorCount === 0) {
+          for (const name of CANVAS_TOKEN_VARS) {
+            root.style.removeProperty(name);
+          }
         }
       };
     }
+
+    const prevRoot = new Map<string, string>();
+    for (const name of CANVAS_TOKEN_VARS) {
+      prevRoot.set(name, root.style.getPropertyValue(name));
+    }
+    applyRootTokens();
 
     const body = document.body;
     const prevBg = body.style.background;
