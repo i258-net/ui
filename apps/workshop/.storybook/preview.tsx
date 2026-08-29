@@ -31,9 +31,69 @@ function FontReady({ children }: { children: ReactNode }) {
   return children;
 }
 
+/**
+ * Theme host only — no card chrome.
+ * Sets `data-theme` for token inheritance (VRT locates this node).
+ * In story view, paints the iframe body so the canvas matches the theme
+ * instead of nesting a second painted surface.
+ */
+function ThemeHost({
+  theme,
+  paintCanvas,
+  children,
+}: {
+  theme: string;
+  paintCanvas: boolean;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    if (!paintCanvas) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlTheme = html.getAttribute("data-theme");
+    html.setAttribute("data-theme", theme);
+
+    const styles = getComputedStyle(html);
+    const prevBg = body.style.background;
+    const prevColor = body.style.color;
+    const prevFont = body.style.fontFamily;
+    body.style.background = styles.getPropertyValue("--i258-background").trim();
+    body.style.color = styles.getPropertyValue("--i258-foreground").trim();
+    body.style.fontFamily = styles.getPropertyValue("--i258-font-sans").trim();
+
+    return () => {
+      if (prevHtmlTheme == null) html.removeAttribute("data-theme");
+      else html.setAttribute("data-theme", prevHtmlTheme);
+      body.style.background = prevBg;
+      body.style.color = prevColor;
+      body.style.fontFamily = prevFont;
+    };
+  }, [theme, paintCanvas]);
+
+  return (
+    <div
+      data-theme={theme}
+      style={{
+        color: "var(--i258-foreground)",
+        fontFamily: "var(--i258-font-sans)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 const preview: Preview = {
+  // Autodocs for every CSF file; foundation demos opt out with `tags: ["!autodocs"]`.
+  tags: ["autodocs"],
   parameters: {
-    controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
+    controls: {
+      matchers: { color: /(background|color)$/i, date: /Date$/i },
+      // Hide composition/escape-hatch props that leak from Base UI / HTML types.
+      // Per-story `controls.include` further whitelists design props.
+      exclude: ["asChild", "render", "className", "style", "ref", "nativeButton"],
+    },
     // Fail story tests / CI on axe violations (was "todo" — panel-only).
     a11y: { test: "error" },
     layout: "centered",
@@ -65,25 +125,13 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme as string) ?? "light";
+      // Docs embeds many stories in one document — don't fight over body paint.
+      const paintCanvas = context.viewMode === "story";
       return (
         <FontReady>
-          <div
-            data-theme={theme}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 24,
-              background: "var(--i258-background)",
-              color: "var(--i258-foreground)",
-              fontFamily: "var(--i258-font-sans)",
-              minWidth: 320,
-              minHeight: 120,
-              borderRadius: 8,
-            }}
-          >
+          <ThemeHost theme={theme} paintCanvas={paintCanvas}>
             <Story />
-          </div>
+          </ThemeHost>
         </FontReady>
       );
     },

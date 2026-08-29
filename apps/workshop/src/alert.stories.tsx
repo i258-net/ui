@@ -8,6 +8,11 @@ const meta = {
     title: "Heads up",
     children: "Something needs attention before you continue.",
   },
+  parameters: {
+    controls: {
+      include: ["tone", "title", "children"],
+    },
+  },
   argTypes: {
     tone: {
       control: "select",

@@ -7,6 +7,11 @@ const meta = {
   args: {
     placeholder: "Notes…",
   },
+  parameters: {
+    controls: {
+      include: ["placeholder", "size", "disabled", "rows"],
+    },
+  },
   argTypes: {
     size: {
       control: "select",

@@ -5,6 +5,19 @@ import { Choice, ChoiceGroup } from "@i258/ui";
 const meta = {
   title: "Primitives/Choice",
   component: ChoiceGroup,
+  parameters: {
+    controls: {
+      include: ["orientation", "multiple", "disabled"],
+    },
+  },
+  argTypes: {
+    orientation: {
+      control: "select",
+      options: ["horizontal", "vertical"],
+    },
+    multiple: { control: "boolean" },
+    disabled: { control: "boolean" },
+  },
 } satisfies Meta<typeof ChoiceGroup>;
 
 export default meta;

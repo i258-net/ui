@@ -7,6 +7,11 @@ const meta = {
   args: {
     children: "Badge",
   },
+  parameters: {
+    controls: {
+      include: ["children", "variant"],
+    },
+  },
   argTypes: {
     variant: {
       control: "select",

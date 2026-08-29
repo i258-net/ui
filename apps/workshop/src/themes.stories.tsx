@@ -3,6 +3,7 @@ import { Button, Input, Surface } from "@i258/ui";
 
 const meta = {
   title: "Foundation/Themes",
+  tags: ["!autodocs"],
   parameters: { layout: "padded" },
 } satisfies Meta;
 

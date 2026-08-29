@@ -7,12 +7,21 @@ const meta = {
   args: {
     placeholder: "Placeholder",
   },
+  parameters: {
+    controls: {
+      include: ["placeholder", "size", "disabled", "type"],
+    },
+  },
   argTypes: {
     size: {
       control: "select",
       options: ["sm", "md", "lg"],
     },
     disabled: { control: "boolean" },
+    type: {
+      control: "select",
+      options: ["text", "email", "password", "search", "url", "tel", "number"],
+    },
   },
 } satisfies Meta<typeof Input>;
 

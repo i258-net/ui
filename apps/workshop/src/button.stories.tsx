@@ -7,6 +7,11 @@ const meta = {
   args: {
     children: "Button",
   },
+  parameters: {
+    controls: {
+      include: ["children", "variant", "size", "disabled"],
+    },
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -17,6 +22,8 @@ const meta = {
       options: ["sm", "md", "lg"],
     },
     disabled: { control: "boolean" },
+    asChild: { table: { disable: true } },
+    render: { table: { disable: true } },
   },
 } satisfies Meta<typeof Button>;
 
