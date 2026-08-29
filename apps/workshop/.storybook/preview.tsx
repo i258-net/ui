@@ -42,12 +42,14 @@ const CANVAS_TOKEN_VARS = [
 /**
  * Theme host only — no card chrome.
  * Single `data-theme` root for VRT (never also on `<html>` — that broke
- * Playwright's strict locator). Flat `--i258-background` always so Docs
- * examples aren't light text on Storybook's white preview. In story view,
- * also paint iframe `body` from the host's computed tokens for full-bleed
- * canvas, and mirror those tokens onto `:root` so the backgrounds toolbar
- * (`var(--i258-*)`) resolves under the same theme without a second
- * `data-theme` attribute.
+ * Playwright's strict locator). Docs keep a flat `--i258-background` so
+ * examples aren't light text on Storybook's white preview. Story view: host
+ * is transparent so the backgrounds addon (`.sb-show-main !important`) can
+ * own the canvas — a painted host on a non-default swatch revived the
+ * double-surface island. Mirror host tokens onto `:root` so
+ * `var(--i258-*)` swatches resolve under the active theme without a second
+ * `data-theme`. Body still gets colour/font (and a default background the
+ * addon overrides when a swatch is selected).
  */
 function ThemeHost({
   theme,
@@ -109,7 +111,9 @@ function ThemeHost({
       style={{
         color: "var(--i258-foreground)",
         fontFamily: "var(--i258-font-sans)",
-        background: "var(--i258-background)",
+        // Story: transparent — canvas colour comes from body / backgrounds
+        // addon. Docs: flat page token so embedded examples aren't on white.
+        background: paintCanvas ? "transparent" : "var(--i258-background)",
       }}
     >
       {children}
@@ -132,6 +136,8 @@ const preview: Preview = {
     layout: "centered",
     // Canvas swatches resolve through ThemeHost-mirrored --i258-* on :root
     // so the backgrounds toolbar and theme toolbar stay one story.
+    // Note: in light theme --i258-surface and --i258-surface-raised are both
+    // #fff (themes.css); they diverge in dark. Not a duplicate to "fix".
     backgrounds: {
       options: {
         background: { name: "background", value: "var(--i258-background)" },
