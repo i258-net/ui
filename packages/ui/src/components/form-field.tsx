@@ -3,6 +3,8 @@ import { Field } from "@base-ui/react/field";
 
 import { cn } from "../lib/utils.js";
 import { Checkbox } from "./checkbox.js";
+import { Input } from "./input.js";
+import { Textarea } from "./textarea.js";
 
 export type FormFieldProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Visible label text/node. */
@@ -18,8 +20,8 @@ export type FormFieldProps = Omit<React.ComponentProps<"div">, "children"> & {
   orientation?: "vertical" | "horizontal";
   /**
    * Stable control id. When omitted, Base UI Field generates one.
-   * A child `id` prop wins over this. Forwarded to `Field.Control` for
-   * Input/Textarea, and onto Checkbox when the child has no `id` of its own.
+   * A child `id` prop wins over this. Forwarded onto Checkbox / Input /
+   * Textarea when the child has no `id` of its own.
    */
   id?: string;
   /** Single control element — FormField owns label/description/error wiring. */
@@ -48,9 +50,11 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     const hasError = error != null;
     const controlId = child.props.id ?? idProp;
     const disabled = child.props.disabled === true;
-    // Base UI Checkbox already reads Field context (labelId → aria-labelledby).
-    // Native Input/Textarea are not Field-aware — Field.Control registers them.
-    const isFieldAware = child.type === Checkbox;
+    // Checkbox, Input, and Textarea register with Field context natively.
+    const isFieldAware =
+      child.type === Checkbox ||
+      child.type === Input ||
+      child.type === Textarea;
 
     const fieldAwareChild =
       isFieldAware && controlId != null && child.props.id == null

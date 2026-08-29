@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../lib/utils.js";
@@ -19,10 +20,11 @@ const inputVariants = cva("i258-input", {
 export type InputProps = Omit<React.ComponentProps<"input">, "size"> &
   VariantProps<typeof inputVariants>;
 
+/** Field-aware `<input>` — registers with Base UI `Field` when inside FormField. */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   function Input({ className, size, type = "text", ...props }, ref) {
     return (
-      <input
+      <InputPrimitive
         ref={ref}
         data-slot="input"
         type={type}

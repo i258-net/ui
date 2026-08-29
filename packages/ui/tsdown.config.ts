@@ -38,5 +38,7 @@ export default defineConfig({
     "@base-ui/react/use-render",
     "@base-ui/react/merge-props",
     "@base-ui/react/fieldset",
+    "@base-ui/react/field",
+    "@base-ui/react/input",
   ],
 });
