@@ -20,6 +20,9 @@ export default defineConfig({
     "src/components/choice.tsx",
   ],
   format: ["esm"],
+  // tsdown ≥0.15 defaults fixedExtension=true on platform node → .mjs.
+  // package.json exports (and consumers) still resolve ./dist/*.js — keep .js.
+  fixedExtension: false,
   dts: false,
   clean: true,
   external: [
