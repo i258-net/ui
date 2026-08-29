@@ -30,6 +30,13 @@ for (const theme of THEMES) {
         await page.goto(storyUrl(story.id, theme), { waitUntil: "networkidle" });
         const root = page.locator(`[data-theme="${theme}"]`);
         await root.waitFor({ state: "visible", timeout: 15_000 });
+        await page.evaluate(async () => {
+          await Promise.all([
+            document.fonts.load('1em "Geist Sans"'),
+            document.fonts.load('1em "Geist Mono"'),
+          ]);
+          await document.fonts.ready;
+        });
         await expect(root).toHaveScreenshot(`${story.name}-${theme}.png`);
       });
     }

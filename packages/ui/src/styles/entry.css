@@ -10,6 +10,7 @@
 
 @layer i258-components;
 
+@import "./fonts.css";
 @import "./tokens.css";
 @import "./themes.css";
 @import "./components.css";

@@ -1,10 +1,9 @@
 /* Semantic design tokens — plain --i258-* custom properties (not @theme). */
 
 :root {
-  --i258-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --i258-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  --i258-font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --i258-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
 
   --i258-text-xs: 0.75rem;
   --i258-text-sm: 0.875rem;
