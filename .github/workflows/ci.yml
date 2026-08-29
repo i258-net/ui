@@ -30,6 +30,11 @@ jobs:
 
       - run: pnpm build
 
+      # Catch dangling package.json exports (e.g. .js vs .mjs after a tsdown bump)
+      # before they publish. Storybook imports src; typecheck only needs .d.ts.
+      - name: Verify packed exports resolve
+        run: pnpm --filter @i258/ui pack:verify
+
       # Before `pnpm test`: workshop's test script runs `playwright install chromium`.
       - name: Cache Playwright browsers
         uses: actions/cache@v6
