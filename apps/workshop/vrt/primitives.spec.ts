@@ -14,6 +14,7 @@ const STORIES = [
   { id: "primitives-alert--tones", name: "alert-tones" },
   { id: "primitives-surface--composition", name: "surface-composition" },
   { id: "primitives-choice--single-select-chip", name: "choice-single" },
+  { id: "primitives-formfield--matrix", name: "form-field-matrix" },
 ] as const;
 
 const THEMES = ["light", "dark"] as const;
