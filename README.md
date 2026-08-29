@@ -14,13 +14,13 @@ Honeycomb + abacus on `@i258/ui@0.4.0` (this branch bumps package to `0.5.0` for
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.4.0` published; this branch targets `0.5.0` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · Base UI/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup |
 | Themes | light + dark semantic tokens |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
-Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`).
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 
 **Cascade layers:** component rules ship in `@layer i258-components`, not Tailwind's shared `components` name. Layer order is first-declaration-wins, so a Tailwind consumer's preflight (`base`) can beat or lose to us depending on import order if we share `components`. Declare order **before** any `@import`:
 

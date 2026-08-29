@@ -1,4 +1,5 @@
 /* Tokens-only entry for @i258/ui/tokens.css — same tokens/themes, no components. */
 
+@import "./fonts.css";
 @import "./tokens.css";
 @import "./themes.css";
