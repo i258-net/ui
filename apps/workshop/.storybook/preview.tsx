@@ -66,8 +66,9 @@ const preview: Preview = {
     (Story, context) => {
       const theme = (context.globals.theme as string) ?? "light";
       // Honor Storybook layout: flex-center only when layout is "centered".
-      // Block + width 100% for padded/fullscreen so max-width stories fill
-      // their intended width (flex align-items:center shrinks them to content).
+      // Block (no width) for padded/fullscreen so max-width stories fill —
+      // flex align-items:center shrinks them to content; width:100% + padding
+      // overflows without box-sizing:border-box (block fills on its own).
       const layout = (context.parameters.layout as string) ?? "centered";
       const centered = layout === "centered";
       return (
@@ -83,7 +84,6 @@ const preview: Preview = {
                   }
                 : {
                     display: "block",
-                    width: "100%",
                   }),
               padding: 24,
               background: "var(--i258-background)",
