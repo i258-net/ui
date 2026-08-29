@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Alert } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Alert",
@@ -53,6 +54,7 @@ export const Danger: Story = {
 };
 
 export const Tones: Story = {
+  parameters: chromaticPilotParameters,
   render: () => (
     <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
       <Alert tone="info" title="Info">

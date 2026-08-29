@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Preview } from "@storybook/react-vite";
 import "@i258/ui/styles.css";
-import { allModes } from "./modes";
 
 /**
  * Gate Chromatic / Playwright VRT on the self-hosted face so snapshots
@@ -97,13 +96,9 @@ const preview: Preview = {
     // Fail story tests / CI on axe violations (was "todo" — panel-only).
     a11y: { test: "error" },
     layout: "centered",
-    // Chromatic pilot: light + dark per story (scoped in workflow via onlyStoryNames).
-    chromatic: {
-      modes: {
-        light: allModes.light,
-        dark: allModes.dark,
-      },
-    },
+    // Chromatic light/dark modes live on the 9 pilot stories only
+    // (see chromaticPilotParameters) — not here. Global modes × a shared
+    // decorator change inflated UI Tests accepts to 52×2 on ui#39.
   },
   globalTypes: {
     theme: {

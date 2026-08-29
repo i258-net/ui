@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ToggleChip } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/ToggleChip",
@@ -51,6 +52,7 @@ export const Interactive: Story = {
 };
 
 export const Row: Story = {
+  parameters: chromaticPilotParameters,
   render: function RowStory() {
     const [active, setActive] = React.useState("all");
     const chips = [

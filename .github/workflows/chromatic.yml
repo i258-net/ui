@@ -1,6 +1,9 @@
-# Chromatic visual-test pilot — optional, non-blocking, easy to delete.
-# Playwright VRT in ci.yml remains the merge gate; this workflow is informational.
-# Rollback: delete this file + apps/workshop/.storybook/modes.ts + preview's chromatic block.
+# Chromatic visual-test pilot — 9 stories × light/dark via onlyStoryNames.
+# The Chromatic "UI Tests" status check is a required merge gate on i258-net/ui.
+# In-repo Playwright VRT (ci.yml) is the other visual gate.
+# Modes are attached per pilot story (chromaticPilotParameters), not globally in
+# preview — so a shared decorator change should not ask for 52×2 accepts.
+# Rollback: delete this file + modes.ts + per-story chromaticPilotParameters.
 name: chromatic-pilot
 
 on:

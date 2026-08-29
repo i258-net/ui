@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "@i258/ui";
+import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/Button",
@@ -32,6 +33,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: { variant: "primary" },
+  parameters: chromaticPilotParameters,
 };
 
 export const Secondary: Story = {
@@ -47,6 +49,7 @@ export const Danger: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: chromaticPilotParameters,
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
       <Button size="sm">Small</Button>
