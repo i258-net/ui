@@ -48,6 +48,10 @@
       "types": "./dist/components/form-field.d.ts",
       "import": "./dist/components/form-field.js"
     },
+    "./fieldset": {
+      "types": "./dist/components/fieldset.d.ts",
+      "import": "./dist/components/fieldset.js"
+    },
     "./link": {
       "types": "./dist/components/link.d.ts",
       "import": "./dist/components/link.js"

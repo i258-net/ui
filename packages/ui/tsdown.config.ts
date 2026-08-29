@@ -10,6 +10,7 @@ export default defineConfig({
     "src/components/textarea.tsx",
     "src/components/label.tsx",
     "src/components/form-field.tsx",
+    "src/components/fieldset.tsx",
     "src/components/link.tsx",
     "src/components/checkbox.tsx",
     "src/components/badge.tsx",
@@ -36,5 +37,6 @@ export default defineConfig({
     "@base-ui/react/toggle-group",
     "@base-ui/react/use-render",
     "@base-ui/react/merge-props",
+    "@base-ui/react/fieldset",
   ],
 });

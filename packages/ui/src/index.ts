@@ -13,6 +13,9 @@ export type { LabelProps } from "./components/label.js";
 export { FormField } from "./components/form-field.js";
 export type { FormFieldProps } from "./components/form-field.js";
 
+export { Fieldset, fieldsetLegendVariants } from "./components/fieldset.js";
+export type { FieldsetProps } from "./components/fieldset.js";
+
 export { Link, linkVariants } from "./components/link.js";
 export type { LinkProps } from "./components/link.js";
 
