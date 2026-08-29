@@ -18,8 +18,8 @@ export type FormFieldProps = Omit<React.ComponentProps<"div">, "children"> & {
   orientation?: "vertical" | "horizontal";
   /**
    * Stable control id. When omitted, Base UI Field generates one.
-   * A child `id` prop wins over this. For Checkbox, prefer `id` on the child
-   * (Checkbox is Field-aware and is not wrapped in `Field.Control`).
+   * A child `id` prop wins over this. Forwarded to `Field.Control` for
+   * Input/Textarea, and onto Checkbox when the child has no `id` of its own.
    */
   id?: string;
   /** Single control element — FormField owns label/description/error wiring. */
@@ -52,8 +52,13 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     // Native Input/Textarea are not Field-aware — Field.Control registers them.
     const isFieldAware = child.type === Checkbox;
 
+    const fieldAwareChild =
+      isFieldAware && controlId != null && child.props.id == null
+        ? React.cloneElement(child, { id: controlId })
+        : child;
+
     const control = isFieldAware ? (
-      child
+      fieldAwareChild
     ) : (
       <Field.Control id={controlId} disabled={disabled} render={child} />
     );
