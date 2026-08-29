@@ -7,6 +7,11 @@ const meta = {
   args: {
     children: "Label",
   },
+  parameters: {
+    controls: {
+      include: ["children", "htmlFor"],
+    },
+  },
 } satisfies Meta<typeof Label>;
 
 export default meta;

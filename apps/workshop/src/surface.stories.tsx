@@ -7,6 +7,11 @@ const meta = {
   args: {
     children: "Surface content",
   },
+  parameters: {
+    controls: {
+      include: ["children", "variant", "padding"],
+    },
+  },
   argTypes: {
     variant: {
       control: "select",
@@ -16,6 +21,8 @@ const meta = {
       control: "select",
       options: ["none", "sm", "md", "lg"],
     },
+    asChild: { table: { disable: true } },
+    render: { table: { disable: true } },
   },
 } satisfies Meta<typeof Surface>;
 

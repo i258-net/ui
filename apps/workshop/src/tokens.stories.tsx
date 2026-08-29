@@ -42,6 +42,7 @@ function Swatch({ name }: { name: string }) {
 
 const meta = {
   title: "Foundation/Tokens",
+  tags: ["!autodocs"],
   parameters: { layout: "padded" },
 } satisfies Meta;
 

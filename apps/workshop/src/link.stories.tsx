@@ -8,11 +8,18 @@ const meta = {
     children: "Example link",
     href: "#",
   },
+  parameters: {
+    controls: {
+      include: ["children", "href", "variant"],
+    },
+  },
   argTypes: {
     variant: {
       control: "select",
       options: ["accent", "muted", "subtle"],
     },
+    asChild: { table: { disable: true } },
+    render: { table: { disable: true } },
   },
 } satisfies Meta<typeof Link>;
 

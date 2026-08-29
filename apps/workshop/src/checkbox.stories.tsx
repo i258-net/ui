@@ -4,6 +4,11 @@ import { Checkbox, Label } from "@i258/ui";
 const meta = {
   title: "Primitives/Checkbox",
   component: Checkbox,
+  parameters: {
+    controls: {
+      include: ["checked", "disabled", "defaultChecked"],
+    },
+  },
   argTypes: {
     disabled: { control: "boolean" },
     checked: { control: "boolean" },

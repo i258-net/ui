@@ -9,6 +9,11 @@ const meta = {
     children: "Filter",
     count: 12,
   },
+  parameters: {
+    controls: {
+      include: ["children", "count", "size", "pressed", "disabled"],
+    },
+  },
   argTypes: {
     size: {
       control: "select",

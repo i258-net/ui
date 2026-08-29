@@ -3,6 +3,7 @@ import { Button, Checkbox, Input, Label, Link } from "@i258/ui";
 
 const meta = {
   title: "Foundation/FocusAndMotion",
+  tags: ["!autodocs"],
   parameters: { layout: "padded" },
 } satisfies Meta;
 

@@ -11,6 +11,7 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
+    "@chromatic-com/storybook"
   ],
   docs: {
     defaultName: "Documentation",

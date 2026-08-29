@@ -5,6 +5,16 @@ import { Disclosure, DisclosurePanel, DisclosureTrigger } from "@i258/ui";
 const meta = {
   title: "Primitives/Disclosure",
   component: Disclosure,
+  parameters: {
+    controls: {
+      include: ["open", "defaultOpen", "disabled"],
+    },
+  },
+  argTypes: {
+    open: { control: "boolean" },
+    defaultOpen: { control: "boolean" },
+    disabled: { control: "boolean" },
+  },
 } satisfies Meta<typeof Disclosure>;
 
 export default meta;
