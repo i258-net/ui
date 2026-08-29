@@ -24,7 +24,9 @@
     border-radius: var(--i258-radius-md);
     font-family: var(--i258-font-sans);
     font-weight: 500;
-    line-height: var(--i258-leading-tight);
+    /* Match Badge/ToggleChip. Geist + leading-tight (1.25) left ink ~2px high
+       in a flex-centered fixed-height control (measured on Primary). */
+    line-height: 1;
     text-decoration: none;
     cursor: pointer;
     user-select: none;
