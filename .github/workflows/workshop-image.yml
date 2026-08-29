@@ -125,6 +125,7 @@ jobs:
       - name: Pin digest in k8s manifests
         env:
           DIGEST: ${{ needs.build.outputs.digest }}
+          SOURCE_SHA: ${{ github.sha }}
           K8S_ROOT: k8s
         run: python3 ui/.github/scripts/pin-storybook-digest.py
 
