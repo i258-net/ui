@@ -10,6 +10,9 @@ export type { TextareaProps } from "./components/textarea.js";
 export { Label } from "./components/label.js";
 export type { LabelProps } from "./components/label.js";
 
+export { FormField } from "./components/form-field.js";
+export type { FormFieldProps } from "./components/form-field.js";
+
 export { Link, linkVariants } from "./components/link.js";
 export type { LinkProps } from "./components/link.js";
 

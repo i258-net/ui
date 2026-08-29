@@ -9,6 +9,7 @@ export default defineConfig({
     "src/components/input.tsx",
     "src/components/textarea.tsx",
     "src/components/label.tsx",
+    "src/components/form-field.tsx",
     "src/components/link.tsx",
     "src/components/checkbox.tsx",
     "src/components/badge.tsx",

@@ -156,6 +156,42 @@
     opacity: 0.5;
   }
 
+  /* —— FormField ——
+     Layout + description/error type only — no extra chrome. Label / Input /
+     Textarea / Checkbox keep their own surfaces. */
+  .i258-form-field {
+    display: grid;
+    gap: var(--i258-space-1);
+    min-width: 0;
+  }
+
+  .i258-form-field--horizontal {
+    grid-template-columns: auto 1fr;
+    gap: var(--i258-space-2);
+    align-items: start;
+  }
+
+  .i258-form-field__copy {
+    display: grid;
+    gap: var(--i258-space-1);
+    min-width: 0;
+  }
+
+  .i258-form-field__description,
+  .i258-form-field__error {
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-tight);
+  }
+
+  .i258-form-field__description {
+    color: var(--i258-muted);
+  }
+
+  .i258-form-field__error {
+    color: var(--i258-danger);
+  }
+
   /* —— Link —— */
   .i258-link {
     font-family: var(--i258-font-sans);

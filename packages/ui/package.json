@@ -44,6 +44,10 @@
       "types": "./dist/components/label.d.ts",
       "import": "./dist/components/label.js"
     },
+    "./form-field": {
+      "types": "./dist/components/form-field.d.ts",
+      "import": "./dist/components/form-field.js"
+    },
     "./link": {
       "types": "./dist/components/link.d.ts",
       "import": "./dist/components/link.js"
