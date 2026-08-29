@@ -185,6 +185,9 @@
   }
 
   .i258-form-field__description {
+    /* Field.Description renders a <p>; zero host UA margins so layout matches
+       the previous <div> and doesn't depend on the consumer's p reset. */
+    margin: 0;
     color: var(--i258-muted);
   }
 

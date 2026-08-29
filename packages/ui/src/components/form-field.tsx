@@ -1,17 +1,8 @@
 import * as React from "react";
+import { Field } from "@base-ui/react/field";
 
 import { cn } from "../lib/utils.js";
 import { Checkbox } from "./checkbox.js";
-import { Label } from "./label.js";
-
-function mergeIds(
-  ...parts: Array<string | undefined | null | false>
-): string | undefined {
-  const ids = parts
-    .flatMap((part) => (typeof part === "string" ? part.split(/\s+/) : []))
-    .filter(Boolean);
-  return ids.length > 0 ? [...new Set(ids)].join(" ") : undefined;
-}
 
 export type FormFieldProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Visible label text/node. */
@@ -26,11 +17,12 @@ export type FormFieldProps = Omit<React.ComponentProps<"div">, "children"> & {
    */
   orientation?: "vertical" | "horizontal";
   /**
-   * Stable control id. When omitted, FormField generates one with `useId`.
-   * A child `id` prop wins over this.
+   * Stable control id. When omitted, Base UI Field generates one.
+   * A child `id` prop wins over this. Forwarded to `Field.Control` for
+   * Input/Textarea, and onto Checkbox when the child has no `id` of its own.
    */
   id?: string;
-  /** Single control element — FormField injects id / aria wiring. */
+  /** Single control element — FormField owns label/description/error wiring. */
   children: React.ReactElement;
 };
 
@@ -48,88 +40,63 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     },
     ref,
   ) {
-    const generatedId = React.useId();
     const child = React.Children.only(children) as React.ReactElement<{
       id?: string;
       disabled?: boolean;
-      "aria-describedby"?: string;
-      "aria-labelledby"?: string;
-      "aria-invalid"?: boolean | "true" | "false";
     }>;
 
-    const controlId = child.props.id ?? idProp ?? generatedId;
-    const labelId = `${controlId}-label`;
-    const descriptionId =
-      description != null ? `${controlId}-description` : undefined;
     const hasError = error != null;
-    const errorId = hasError ? `${controlId}-error` : undefined;
-    const describedBy = mergeIds(descriptionId, errorId);
+    const controlId = child.props.id ?? idProp;
+    const disabled = child.props.disabled === true;
+    // Base UI Checkbox already reads Field context (labelId → aria-labelledby).
+    // Native Input/Textarea are not Field-aware — Field.Control registers them.
+    const isFieldAware = child.type === Checkbox;
 
-    // Base UI Checkbox is not a labelable native control — htmlFor alone does
-    // not name it. Always pair with aria-labelledby for Checkbox (and for
-    // horizontal layouts generally).
-    const needsLabelledBy =
-      orientation === "horizontal" || child.type === Checkbox;
+    const fieldAwareChild =
+      isFieldAware && controlId != null && child.props.id == null
+        ? React.cloneElement(child, { id: controlId })
+        : child;
 
-    const nextDescribedBy = mergeIds(
-      child.props["aria-describedby"],
-      describedBy,
+    const control = isFieldAware ? (
+      fieldAwareChild
+    ) : (
+      <Field.Control id={controlId} disabled={disabled} render={child} />
     );
-    const nextLabelledBy = needsLabelledBy
-      ? mergeIds(child.props["aria-labelledby"], labelId)
-      : undefined;
-
-    const control = React.cloneElement(child, {
-      id: controlId,
-      ...(nextDescribedBy != null
-        ? { "aria-describedby": nextDescribedBy }
-        : {}),
-      ...(hasError
-        ? { "aria-invalid": child.props["aria-invalid"] ?? true }
-        : {}),
-      ...(nextLabelledBy != null
-        ? { "aria-labelledby": nextLabelledBy }
-        : {}),
-    });
 
     const labelEl = (
-      <Label
-        id={labelId}
-        htmlFor={controlId}
-        data-disabled={child.props.disabled ? "" : undefined}
-      >
+      <Field.Label className="i258-label" data-slot="label">
         {label}
-      </Label>
+      </Field.Label>
     );
 
     const descriptionEl =
-      descriptionId != null ? (
-        <div
-          id={descriptionId}
+      description != null ? (
+        <Field.Description
           data-slot="form-field-description"
           className="i258-form-field__description"
         >
           {description}
-        </div>
+        </Field.Description>
       ) : null;
 
-    const errorEl =
-      errorId != null ? (
-        <div
-          id={errorId}
-          data-slot="form-field-error"
-          className="i258-form-field__error"
-          role="alert"
-        >
-          {error}
-        </div>
-      ) : null;
+    const errorEl = hasError ? (
+      <Field.Error
+        match
+        data-slot="form-field-error"
+        className="i258-form-field__error"
+        role="alert"
+      >
+        {error}
+      </Field.Error>
+    ) : null;
 
     return (
-      <div
+      <Field.Root
         ref={ref}
         data-slot="form-field"
         data-orientation={orientation}
+        invalid={hasError || undefined}
+        disabled={disabled || undefined}
         className={cn(
           "i258-form-field",
           orientation === "horizontal" && "i258-form-field--horizontal",
@@ -154,7 +121,7 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
             {errorEl}
           </>
         )}
-      </div>
+      </Field.Root>
     );
   },
 );
