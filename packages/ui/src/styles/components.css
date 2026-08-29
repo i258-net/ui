@@ -195,6 +195,43 @@
     color: var(--i258-danger);
   }
 
+  /* —— Fieldset ——
+     Horizontal filter rows: legend + wrap-flow controls (ToggleChip, Button, …). */
+  .i258-fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem var(--i258-space-2);
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .i258-fieldset__legend {
+    flex: 0 0 auto;
+    min-width: 7.5rem;
+    font-family: var(--i258-font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: var(--i258-leading-tight);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .i258-fieldset__legend--default {
+    color: var(--i258-muted);
+  }
+
+  .i258-fieldset__legend--primary {
+    color: var(--i258-foreground);
+  }
+
+  .i258-fieldset[data-disabled] .i258-fieldset__legend,
+  .i258-fieldset:disabled .i258-fieldset__legend {
+    opacity: 0.5;
+  }
+
   /* —— Link —— */
   .i258-link {
     font-family: var(--i258-font-sans);
