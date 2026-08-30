@@ -78,7 +78,7 @@ For a user-controlled theme with no first-paint flash, inject `themeScript()` be
 ```tsx
 import { ThemeToggle, themeScript } from "@i258/ui";
 
-<html lang="en">
+<html lang="en" suppressHydrationWarning>
   <head>
     <script dangerouslySetInnerHTML={{ __html: themeScript() }} />
   </head>
@@ -89,7 +89,7 @@ import { ThemeToggle, themeScript } from "@i258/ui";
 </html>
 ```
 
-Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute.
+Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute. `suppressHydrationWarning` is required on `<html>`: the script sets `data-theme` before React hydrates, so the server markup (no attribute) and the client DOM will disagree without it.
 
 ## Releases
 

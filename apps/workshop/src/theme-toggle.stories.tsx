@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ThemeToggle } from "@i258/ui";
-import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
   title: "Primitives/ThemeToggle",
@@ -26,6 +25,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  parameters: chromaticPilotParameters,
-};
+export const Default: Story = {};
