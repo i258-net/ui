@@ -34,6 +34,20 @@ export type { AlertProps } from "./components/alert.js";
 export { ToggleChip, toggleChipVariants } from "./components/toggle-chip.js";
 export type { ToggleChipProps } from "./components/toggle-chip.js";
 
+export { ThemeToggle } from "./components/theme-toggle.js";
+export type { ThemeToggleProps } from "./components/theme-toggle.js";
+
+export {
+  THEME_STORAGE_KEY,
+  DEFAULT_THEME,
+  resolveTheme,
+  readStoredTheme,
+  applyTheme,
+  persistTheme,
+  themeScript,
+} from "./lib/theme.js";
+export type { Theme } from "./lib/theme.js";
+
 export {
   Disclosure,
   DisclosureTrigger,
