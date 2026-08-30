@@ -1,70 +1,79 @@
-/* Baseline theme v1 — restrained light/dark. Not final brand. */
+/* Tokyo Night — Night + Day palettes mapped to semantic tokens.
+   Source: https://github.com/folke/tokyonight.nvim (extras/alacritty).
+   Muted/accent-foreground values WCAG-adjusted where the editor palette
+   falls short on UI surfaces — noted inline. */
 
 :root,
 [data-theme="light"] {
   color-scheme: light;
 
-  --i258-background: #f7f7f5;
-  --i258-surface: #ffffff;
-  --i258-surface-raised: #ffffff;
-  --i258-foreground: #171717;
-  /* #5c5c5c clears 4.5:1 on --i258-background / chip washes (#737373 was 4.42). */
-  --i258-muted: #5c5c5c;
-  --i258-border: #e5e5e5;
-  --i258-accent: #2563eb;
+  --i258-background: #e1e2e7;
+  --i258-surface: #d5d6db;
+  --i258-surface-raised: #c4c8da;
+  --i258-foreground: #2d4d96;
+  /* #2d4d96 clears 4.5:1 on --i258-surface-raised (#3760bf was 3.52). */
+  /* #485274 clears 4.5:1 on chip washes (#5a638c was 3.71 on 6% fg mix). */
+  --i258-muted: #485274;
+  --i258-border: #b4b5b9;
+  --i258-accent: #2270dc;
+  /* #ffffff clears 4.5:1 on --i258-accent (#16161e was 4.48 on #2e7de9). */
   --i258-accent-foreground: #ffffff;
-  /* Text on accent-tinted washes (toggle/choice pressed) — #2563eb fails on those. */
-  --i258-accent-text: #1d4ed8;
-  --i258-danger: #dc2626;
-  --i258-danger-foreground: #ffffff;
-  --i258-warning: #d97706;
-  --i258-warning-foreground: #171717;
-  /* #059669 + white was 3.76 at 12px; #047857 clears 4.5:1. */
-  --i258-success: #047857;
+  /* Text on accent-tinted washes (toggle/choice pressed). */
+  --i258-accent-text: #1e4690;
+  --i258-danger: #f52a65;
+  --i258-danger-foreground: #16161e;
+  /* Inline error copy on page background (#f52a65 was 3.01). */
+  --i258-danger-text: #c2185b;
+  --i258-warning: #8c6c3e;
+  --i258-warning-foreground: #ffffff;
+  --i258-success: #587539;
   --i258-success-foreground: #ffffff;
-  --i258-focus-ring: #2563eb;
+  --i258-focus-ring: #2e7de9;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --i258-background: #0a0a0a;
-    --i258-surface: #141414;
-    --i258-surface-raised: #1c1c1c;
-    --i258-foreground: #f5f5f5;
-    --i258-muted: #a3a3a3;
-    --i258-border: #2a2a2a;
-    --i258-accent: #3b82f6;
-    --i258-accent-foreground: #0a0a0a;
-    --i258-accent-text: #93c5fd;
-    --i258-danger: #f87171;
-    --i258-danger-foreground: #0a0a0a;
-    --i258-warning: #fbbf24;
-    --i258-warning-foreground: #0a0a0a;
-    --i258-success: #34d399;
-    --i258-success-foreground: #0a0a0a;
-    --i258-focus-ring: #60a5fa;
+    --i258-background: #1a1b26;
+    --i258-surface: #16161e;
+    --i258-surface-raised: #292e42;
+    --i258-foreground: #c0caf5;
+    /* #9099be clears 4.5:1 on --i258-surface-raised (#7a82af was 3.61). */
+    --i258-muted: #9099be;
+    --i258-border: #3b4261;
+    --i258-accent: #7aa2f7;
+    --i258-accent-foreground: #1a1b26;
+    --i258-accent-text: #7aa2f7;
+    --i258-danger: #f7768e;
+    --i258-danger-foreground: #1a1b26;
+    --i258-danger-text: #f7768e;
+    --i258-warning: #e0af68;
+    --i258-warning-foreground: #1a1b26;
+    --i258-success: #9ece6a;
+    --i258-success-foreground: #1a1b26;
+    --i258-focus-ring: #7aa2f7;
   }
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --i258-background: #0a0a0a;
-  --i258-surface: #141414;
-  --i258-surface-raised: #1c1c1c;
-  --i258-foreground: #f5f5f5;
-  --i258-muted: #a3a3a3;
-  --i258-border: #2a2a2a;
-  --i258-accent: #3b82f6;
-  --i258-accent-foreground: #0a0a0a;
-  --i258-accent-text: #93c5fd;
-  --i258-danger: #f87171;
-  --i258-danger-foreground: #0a0a0a;
-  --i258-warning: #fbbf24;
-  --i258-warning-foreground: #0a0a0a;
-  --i258-success: #34d399;
-  --i258-success-foreground: #0a0a0a;
-  --i258-focus-ring: #60a5fa;
+  --i258-background: #1a1b26;
+  --i258-surface: #16161e;
+  --i258-surface-raised: #292e42;
+  --i258-foreground: #c0caf5;
+  --i258-muted: #9099be;
+  --i258-border: #3b4261;
+  --i258-accent: #7aa2f7;
+  --i258-accent-foreground: #1a1b26;
+  --i258-accent-text: #7aa2f7;
+  --i258-danger: #f7768e;
+  --i258-danger-foreground: #1a1b26;
+  --i258-danger-text: #f7768e;
+  --i258-warning: #e0af68;
+  --i258-warning-foreground: #1a1b26;
+  --i258-success: #9ece6a;
+  --i258-success-foreground: #1a1b26;
+  --i258-focus-ring: #7aa2f7;
 }

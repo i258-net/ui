@@ -192,7 +192,7 @@
   }
 
   .i258-form-field__error {
-    color: var(--i258-danger);
+    color: var(--i258-danger-text);
   }
 
   /* —— Fieldset ——
@@ -244,12 +244,12 @@
   }
 
   .i258-link--accent {
-    color: var(--i258-accent);
+    color: var(--i258-accent-text);
     text-decoration: underline;
   }
 
   .i258-link--accent:hover {
-    filter: brightness(1.1);
+    color: var(--i258-accent);
   }
 
   .i258-link--muted {

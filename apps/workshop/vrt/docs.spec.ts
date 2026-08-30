@@ -16,14 +16,14 @@ const THEMES = ["light", "dark"] as const;
 
 /** Mirrored onto `:root` by ThemeHost; backgrounds addon paints `.docs-story`. */
 const THEME_TOKEN: Record<(typeof THEMES)[number], string> = {
-  light: "#f7f7f5",
-  dark: "#0a0a0a",
+  light: "#e1e2e7",
+  dark: "#1a1b26",
 };
 
 /** Settled opaque canvas colour (not `rgba(..., α)` mid-transition). */
 const DOCS_STORY_BG: Record<(typeof THEMES)[number], string> = {
-  light: "rgb(247, 247, 245)",
-  dark: "rgb(10, 10, 10)",
+  light: "rgb(225, 226, 231)",
+  dark: "rgb(26, 27, 38)",
 };
 
 function docsUrl(theme: (typeof THEMES)[number]): string {
