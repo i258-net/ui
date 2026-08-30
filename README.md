@@ -15,7 +15,7 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.5.1` tagged broken for bundlers; this branch targets `0.5.2` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
-| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup |
+| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
 | Themes | light + dark semantic tokens |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
@@ -72,6 +72,24 @@ import { Button } from "@i258/ui";
 Import CSS from your app stylesheet (with the `@layer` order line above), not only from JS — JS-side CSS imports often land after Tailwind and freeze the wrong layer order.
 
 Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Without an explicit theme, dark follows `prefers-color-scheme`.
+
+For a user-controlled theme with no first-paint flash, inject `themeScript()` before paint and render `ThemeToggle` (persists to `localStorage` key `i258-theme`, default `dark`):
+
+```tsx
+import { ThemeToggle, themeScript } from "@i258/ui";
+
+<html lang="en" suppressHydrationWarning>
+  <head>
+    <script dangerouslySetInnerHTML={{ __html: themeScript() }} />
+  </head>
+  <body>
+    <ThemeToggle />
+    {children}
+  </body>
+</html>
+```
+
+Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute. `suppressHydrationWarning` is required on `<html>`: the script sets `data-theme` before React hydrates, so the server markup (no attribute) and the client DOM will disagree without it.
 
 ## Releases
 
