@@ -156,8 +156,8 @@ const preview: Preview = {
     layout: "centered",
     // Canvas swatches resolve through ThemeHost-mirrored --i258-* on :root
     // so the backgrounds toolbar and theme toolbar stay one story.
-    // Note: light/dark --i258-surface and --i258-surface-raised differ in both
-    // themes (Tokyo Night Day / Night in themes.css).
+    // Note: in light --i258-surface and --i258-surface-raised are both #ffffff
+    // (themes.css); they diverge in dark (Tokyo Night). Not a duplicate to "fix".
     backgrounds: {
       options: {
         background: { name: "background", value: "var(--i258-background)" },
