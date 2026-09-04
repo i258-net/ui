@@ -61,8 +61,9 @@ No `.github/workflows/` change in the a11y PR — existing `pnpm test` CI step p
 
 **VRT:** `pnpm vrt` builds static Storybook and screenshots core primitives (light + dark).
 Update baselines with `pnpm vrt:update`. Snapshots live under
-`apps/workshop/vrt/*-snapshots/`. CI job for `pnpm vrt` is a separate PR (CODEOWNERS
-on `.github/workflows/`).
+`apps/workshop/vrt/*-snapshots/`. Linux CI is the source of truth — take baselines from the
+CI `vrt-results` `*-actual.png` artifacts; Darwin renders differ in text widths by ~2px and
+fail CI. CI job for `pnpm vrt` is a separate PR (CODEOWNERS on `.github/workflows/`).
 ## Using `@i258/ui`
 
 ```ts

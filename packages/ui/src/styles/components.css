@@ -24,9 +24,8 @@
     border-radius: var(--i258-radius-md);
     font-family: var(--i258-font-sans);
     font-weight: 500;
-    /* Match Badge/ToggleChip. Geist + leading-tight (1.25) left ink ~2px high
-       in a flex-centered fixed-height control (measured on Primary). */
-    line-height: 1;
+    /* text-box trims to cap/baseline so fixed-height flex centering is optical, no line-height override needed */
+    text-box: trim-both cap alphabetic;
     text-decoration: none;
     cursor: pointer;
     user-select: none;
@@ -317,7 +316,7 @@
     font-family: var(--i258-font-sans);
     font-size: var(--i258-text-xs);
     font-weight: 500;
-    line-height: 1;
+    text-box: trim-both cap alphabetic;
     white-space: nowrap;
   }
 
@@ -444,7 +443,7 @@
     color: var(--i258-muted);
     font-family: var(--i258-font-sans);
     font-weight: 500;
-    line-height: 1;
+    text-box: trim-both cap alphabetic;
     cursor: pointer;
     user-select: none;
     transition:
@@ -650,7 +649,7 @@
 
   .i258-choice--chip {
     border-radius: var(--i258-radius-full);
-    line-height: 1;
+    text-box: trim-both cap alphabetic;
   }
 
   .i258-choice--chip.i258-choice--sm {
