@@ -90,7 +90,7 @@ import { ThemeToggle, themeScript } from "@i258/ui";
 </html>
 ```
 
-Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute. `suppressHydrationWarning` is required on `<html>`: the script sets `data-theme` before React hydrates, so the server markup (no attribute) and the client DOM will disagree without it.
+Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute. `suppressHydrationWarning` is required on `<html>`: the script sets `data-theme` before React hydrates, so the server markup (no attribute) and the client DOM will disagree without it. `ThemeToggle` itself starts from the kit default (`dark`) until a layout effect reads storage (before paint); motion stays off until after that paint so a light-stored preference does not animate moon→sun on every load.
 
 ## Releases
 
