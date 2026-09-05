@@ -689,6 +689,75 @@
     font-weight: 400;
   }
 
+  /* —— ThemeToggle (Classic sun→moon; aria-pressed=true = dark) —— */
+  .i258-btn.i258-theme-toggle {
+    aspect-ratio: 1;
+    padding-inline: 0;
+    font-size: 1.125rem;
+  }
+
+  .i258-btn--sm.i258-theme-toggle {
+    width: 2rem;
+  }
+
+  .i258-btn--md.i258-theme-toggle {
+    width: 2.25rem;
+  }
+
+  .i258-btn--lg.i258-theme-toggle {
+    width: 2.75rem;
+    font-size: 1.25rem;
+  }
+
+  .i258-theme-toggle__svg {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .i258-theme-toggle__core {
+    transform-origin: center;
+    transform-box: fill-box;
+    transition: transform var(--i258-theme-toggle-duration, 400ms)
+      var(--i258-ease-standard);
+  }
+
+  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__core {
+    transform: scale(1.7);
+  }
+
+  .i258-theme-toggle__clip {
+    transition:
+      d var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard),
+      transform var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard);
+  }
+
+  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__clip {
+    d: path("M0 2h13a1 1 0 0010 10v14H0Z");
+    transition-delay: calc(var(--i258-theme-toggle-duration, 400ms) * 0.15);
+  }
+
+  /* Browsers that cannot animate SVG path `d` — nudge the clip instead. */
+  @supports not (d: path("M0 0")) {
+    .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__clip {
+      transform: translate(-0.8125rem, 0.125rem);
+    }
+  }
+
+  .i258-theme-toggle__ray {
+    transform-box: view-box;
+    transform-origin: center;
+    transition:
+      transform var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard),
+      opacity var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard);
+    transition-delay: calc(var(--i258-theme-toggle-duration, 400ms) * 0.15);
+  }
+
+  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__ray {
+    transform: scale(0);
+    opacity: 0;
+    transition-delay: 0s;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .i258-btn,
     .i258-input,
@@ -697,7 +766,10 @@
     .i258-checkbox,
     .i258-toggle-chip,
     .i258-disclosure__trigger,
-    .i258-choice {
+    .i258-choice,
+    .i258-theme-toggle__core,
+    .i258-theme-toggle__clip,
+    .i258-theme-toggle__ray {
       transition: none;
     }
   }
