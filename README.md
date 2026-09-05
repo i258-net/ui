@@ -74,7 +74,7 @@ Import CSS from your app stylesheet (with the `@layer` order line above), not on
 
 Wrap the app (or a subtree) with `data-theme="light"` or `data-theme="dark"`. Without an explicit theme, dark follows `prefers-color-scheme`.
 
-For a user-controlled theme with no first-paint flash, inject `themeScript()` before paint and render `ThemeToggle` (persists to `localStorage` key `i258-theme`, default `dark`):
+For a user-controlled theme with no first-paint flash, inject `themeScript()` before paint and render `ThemeToggle` (persists to `localStorage` key `i258-theme`, default `dark`). The control is an animated Classic sun/moon icon (adapted from [toggles.dev Classic](https://toggles.dev/toggles/classic), MIT) driven by `aria-pressed`, not Tailwind `dark:`:
 
 ```tsx
 import { ThemeToggle, themeScript } from "@i258/ui";

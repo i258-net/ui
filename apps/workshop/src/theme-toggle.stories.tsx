@@ -6,7 +6,7 @@ const meta = {
   component: ThemeToggle,
   parameters: {
     controls: {
-      include: ["size", "variant", "disabled"],
+      include: ["size", "variant", "disabled", "duration"],
     },
   },
   argTypes: {
@@ -19,6 +19,7 @@ const meta = {
       options: ["sm", "md", "lg"],
     },
     disabled: { control: "boolean" },
+    duration: { control: { type: "number", min: 0, max: 1000, step: 50 } },
   },
 } satisfies Meta<typeof ThemeToggle>;
 
