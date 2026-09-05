@@ -239,7 +239,10 @@
     text-underline-offset: 0.15em;
     border-radius: var(--i258-radius-sm);
     cursor: pointer;
-    transition: color var(--i258-duration-fast) var(--i258-ease-standard);
+    transition:
+      color var(--i258-duration-fast) var(--i258-ease-standard),
+      text-decoration-thickness var(--i258-duration-fast) var(--i258-ease-standard),
+      text-underline-offset var(--i258-duration-fast) var(--i258-ease-standard);
   }
 
   .i258-link--accent {
@@ -247,8 +250,12 @@
     text-decoration: underline;
   }
 
+  /* Hover stays on --i258-accent-text: Day --i258-accent is fill-tuned and
+     fails 4.5:1 as text on --i258-background (ui#56). Dark already had
+     accent === accent-text, so the old colour swap was a no-op there. */
   .i258-link--accent:hover {
-    color: var(--i258-accent);
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.2em;
   }
 
   .i258-link--muted {

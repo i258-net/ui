@@ -1,6 +1,6 @@
 {
   "name": "@i258/ui",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "i258 Design System — shared UI primitives for i258 apps",
   "type": "module",
   "license": "MIT",
