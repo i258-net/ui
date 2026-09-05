@@ -214,8 +214,6 @@
     font-size: 0.8rem;
     font-weight: 600;
     line-height: var(--i258-leading-tight);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
   .i258-fieldset__legend--default {
