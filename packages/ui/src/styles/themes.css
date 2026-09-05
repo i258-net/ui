@@ -1,32 +1,34 @@
-/* Tokyo Night dark + baseline light v1.
-   Dark palette: https://github.com/folke/tokyonight.nvim (extras/alacritty).
-   Light palette: original neutral baseline — kept per product preference.
-   Muted/accent values WCAG-adjusted where the palette falls short — noted inline. */
+/* Tokyo Night — Night + Day palettes mapped to semantic tokens.
+   Source: https://github.com/folke/tokyonight.nvim (extras/lua + alacritty).
+   Muted/accent values WCAG-adjusted where the editor palette falls short on
+   UI surfaces — noted inline. */
 
 :root,
 [data-theme="light"] {
   color-scheme: light;
 
-  --i258-background: #f7f7f5;
-  --i258-surface: #ffffff;
-  --i258-surface-raised: #ffffff;
-  --i258-foreground: #171717;
-  /* #5c5c5c clears 4.5:1 on --i258-background / chip washes (#737373 was 4.42). */
-  --i258-muted: #5c5c5c;
-  --i258-border: #e5e5e5;
-  --i258-accent: #2563eb;
+  --i258-background: #e1e2e7;
+  --i258-surface: #d5d6db;
+  --i258-surface-raised: #c4c8da;
+  --i258-foreground: #2d4d96;
+  /* #2d4d96 clears 4.5:1 on --i258-surface-raised (#3760bf was 3.52). */
+  /* #485274 clears 4.5:1 on chip washes (#5a638c was 3.71 on 6% fg mix). */
+  --i258-muted: #485274;
+  --i258-border: #b4b5b9;
+  --i258-accent: #2270dc;
+  /* #ffffff clears 4.5:1 on --i258-accent (#16161e was 4.48 on #2e7de9). */
   --i258-accent-foreground: #ffffff;
-  /* Text on accent-tinted washes (toggle/choice pressed) — #2563eb fails on those. */
-  --i258-accent-text: #1d4ed8;
-  --i258-danger: #dc2626;
-  --i258-danger-foreground: #ffffff;
-  --i258-danger-text: #dc2626;
-  --i258-warning: #d97706;
-  --i258-warning-foreground: #171717;
-  /* #059669 + white was 3.76 at 12px; #047857 clears 4.5:1. */
-  --i258-success: #047857;
+  /* Text on accent-tinted washes (toggle/choice pressed). */
+  --i258-accent-text: #1e4690;
+  --i258-danger: #f52a65;
+  --i258-danger-foreground: #16161e;
+  /* Inline error copy on page background (#f52a65 was 3.01). */
+  --i258-danger-text: #c2185b;
+  --i258-warning: #8c6c3e;
+  --i258-warning-foreground: #ffffff;
+  --i258-success: #587539;
   --i258-success-foreground: #ffffff;
-  --i258-focus-ring: #2563eb;
+  --i258-focus-ring: #2e7de9;
 }
 
 @media (prefers-color-scheme: dark) {
