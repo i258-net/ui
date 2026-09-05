@@ -11,7 +11,10 @@ export type AppShellProps = Omit<React.ComponentProps<"header">, "title"> & {
   title: React.ReactNode;
   /** Short qualifier beside the title, e.g. "Beans operator view". */
   subtitle?: React.ReactNode;
-  /** Primary in-app nav. */
+  /**
+   * Primary in-app nav. The kit renders the `<nav>` landmark, for the same
+   * reason it renders the `<h1>` — pass the links, not a wrapper.
+   */
   nav?: React.ReactNode;
   /** Secondary facts — counts, paths, freshness. Monospaced and muted. */
   meta?: React.ReactNode;
@@ -60,7 +63,11 @@ export const AppShell = React.forwardRef<HTMLElement, AppShellProps>(
             <p className="i258-app-shell__subtitle">{subtitle}</p>
           ) : null}
         </div>
-        {nav != null ? <div className="i258-app-shell__nav">{nav}</div> : null}
+        {nav != null ? (
+          <nav aria-label="Primary" className="i258-app-shell__nav">
+            {nav}
+          </nav>
+        ) : null}
         {meta != null ? (
           <div className="i258-app-shell__meta">{meta}</div>
         ) : null}
