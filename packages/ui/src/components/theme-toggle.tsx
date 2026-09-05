@@ -53,16 +53,26 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
   ) {
     const reactId = React.useId();
     const clipMainId = `i258-theme-toggle-clip-${reactId.replace(/:/g, "")}`;
+    // SSR + first client paint use DEFAULT_THEME so markup matches. Storage is
+    // applied in layout before paint; motion stays off until after that paint so
+    // a light-stored user does not animate moon→sun on every load (Astra, ui#55).
     const [theme, setTheme] = React.useState<Theme>(DEFAULT_THEME);
+    const [motionReady, setMotionReady] = React.useState(false);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       const stored = readStoredTheme(storageKey);
       setTheme(stored);
       applyTheme(stored);
     }, [storageKey]);
 
+    React.useEffect(() => {
+      const id = requestAnimationFrame(() => setMotionReady(true));
+      return () => cancelAnimationFrame(id);
+    }, [storageKey]);
+
     const next: Theme = theme === "dark" ? "light" : "dark";
     const dark = theme === "dark";
+    const motionMs = motionReady ? duration : 0;
 
     return (
       <Button
@@ -78,7 +88,7 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
         style={
           {
             ...style,
-            ["--i258-theme-toggle-duration" as string]: `${duration}ms`,
+            ["--i258-theme-toggle-duration" as string]: `${motionMs}ms`,
           } as React.CSSProperties
         }
         onClick={() => {
