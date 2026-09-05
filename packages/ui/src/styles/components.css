@@ -763,6 +763,80 @@
     transition-delay: 0s;
   }
 
+  /* —— AppShell (shared application chrome) —— */
+  .i258-app-shell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--i258-space-3) var(--i258-space-6);
+    padding-bottom: var(--i258-space-3);
+    border-bottom: 1px solid var(--i258-border);
+    font-family: var(--i258-font-sans);
+  }
+
+  .i258-app-shell__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--i258-space-3);
+  }
+
+  /* Fixed here, not per app: every app title is the same step. */
+  .i258-app-shell__title {
+    margin: 0;
+    color: var(--i258-foreground);
+    font-size: var(--i258-text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .i258-app-shell__subtitle {
+    margin: 0;
+    color: var(--i258-muted);
+    font-size: var(--i258-text-sm);
+    text-box: trim-both cap alphabetic;
+  }
+
+  .i258-app-shell__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--i258-space-2);
+  }
+
+  .i258-app-shell__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--i258-space-2) var(--i258-space-4);
+    color: var(--i258-muted);
+    font-family: var(--i258-font-mono);
+    font-size: var(--i258-text-sm);
+  }
+
+  .i258-app-shell__end {
+    margin-inline-start: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--i258-space-2);
+  }
+
+  .i258-app-shell__user {
+    max-width: 12rem;
+    overflow: hidden;
+    color: var(--i258-muted);
+    font-size: var(--i258-text-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* App identity components render null when forward-auth headers are absent. */
+  .i258-app-shell__user:empty {
+    display: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .i258-btn,
     .i258-input,
