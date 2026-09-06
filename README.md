@@ -17,9 +17,29 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
 | Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) |
-| Themes | light + dark semantic tokens |
+| Themes | Tokyo Day (light) + Tokyo Night (dark) — one family, two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
+
+### Tone tokens
+
+Each tone (`accent`, `danger`, `warning`, `success`) ships four values, and
+which one you reach for is the whole grammar:
+
+| Token | Use it for |
+| --- | --- |
+| `--i258-<tone>` | a **fill** — a filled button, a checkbox tick, the source colour a wash is mixed from |
+| `--i258-<tone>-foreground` | text **on** that fill, and nothing else |
+| `--i258-<tone>-text` | the tone as **type** — on the page, on a surface, or on a soft wash of itself (quiet tags, inline errors, chip labels) |
+| `--i258-<tone>-hover` | the fill's hover step for this exposure (`accent` and `danger` only) |
+
+`--i258-<tone>` is mid-lightness in Day so it can carry its `-foreground`; that
+makes it unreadable as type on a light background. Use `-text` there. Day
+`-text` values are the same hue darkened; Night `-text` equals the tone.
+
+Status tags are a soft wash of the tone plus a hairline plus `-text` — not a
+solid pill. `Badge` already does this; app-level tags should bridge to it
+rather than restate their own hexes, which do not survive a theme flip.
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 

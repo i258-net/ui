@@ -18,16 +18,34 @@
   --i258-accent: #2270dc;
   /* #ffffff clears 4.5:1 on --i258-accent (#16161e was 4.48 on #2e7de9). */
   --i258-accent-foreground: #ffffff;
-  /* Text on accent-tinted washes (toggle/choice pressed). */
+  /* Text on accent-tinted washes (toggle/choice pressed, soft Badge). */
   --i258-accent-text: #1e4690;
+  /* Day deepens filled controls on hover; --i258-accent-foreground is white,
+     so a darker fill raises its contrast (#ffffff on #1a5cba = 6.4). */
+  --i258-accent-hover: #1a5cba;
+  /* Share of --i258-accent in a selected chip's wash. Day carries a stronger
+     fill than Night and still clears 4.5:1 for --i258-accent-text on
+     background, surface *and* surface-raised — 20%+ does not. */
+  --i258-chip-selected-mix: 18%;
   --i258-danger: #f52a65;
   --i258-danger-foreground: #16161e;
-  /* Inline error copy on page background (#f52a65 was 3.01). */
-  --i258-danger-text: #c2185b;
+  /* Inline error copy and soft danger washes. #c2185b cleared the page
+     background at 4.54 but only 4.05 on --i258-surface and 3.4 on a 12%
+     danger wash; #92072f is the same hue at 4.79 worst case. */
+  --i258-danger-text: #92072f;
+  /* The only Day fill that brightens on hover rather than deepening:
+     --i258-danger-foreground is near-black (white fails at 3.89 on
+     --i258-danger), so deepening the fill would drop it under 4.5.
+     #16161e on #f74a7a = 5.32, up from 4.63 at rest. */
+  --i258-danger-hover: #f74a7a;
   --i258-warning: #8c6c3e;
   --i258-warning-foreground: #ffffff;
+  /* Same hue as --i258-warning (35°), darkened for text on soft washes. */
+  --i258-warning-text: #5c4729;
   --i258-success: #587539;
   --i258-success-foreground: #ffffff;
+  /* Same hue as --i258-success (89°), darkened for text on soft washes. */
+  --i258-success-text: #3b4f26;
   --i258-focus-ring: #2e7de9;
 }
 
@@ -36,22 +54,38 @@
     color-scheme: dark;
 
     --i258-background: #1a1b26;
-    --i258-surface: #16161e;
-    --i258-surface-raised: #292e42;
+    /* Night elevates monotonically: background → surface → raised. The old
+       --i258-surface (#16161e, bg_dark) sat *below* the page while raised sat
+       above it, so a card read as a hole and its hover state as a lift. */
+    --i258-surface: #1f2335;
+    --i258-surface-raised: #24283b;
     --i258-foreground: #c0caf5;
-    /* #9099be clears 4.5:1 on --i258-surface-raised (#7a82af was 3.61). */
+    /* #9099be clears 4.5:1 on --i258-surface-raised (#7a82af was 3.61, and
+       Tokyo Night's own comment step #565f89 is 2.35 — not a text token). */
     --i258-muted: #9099be;
     --i258-border: #3b4261;
     --i258-accent: #7aa2f7;
     --i258-accent-foreground: #1a1b26;
     --i258-accent-text: #7aa2f7;
+    /* Night lifts filled controls on hover; the tone foregrounds are dark, so
+       a lighter fill raises their contrast (#1a1b26 on #8fb3f9 = 8.13). */
+    --i258-accent-hover: #8fb3f9;
+    /* Night's surfaces are closer to --i258-accent-text than Day's are to
+       theirs, so the same wash reads louder and clears less: 14% is the
+       ceiling that holds 4.5:1 on surface-raised. The previous 22% was
+       already under it there (3.88) — it only passed axe because the old
+       --i258-surface was #16161e, darker than the page. */
+    --i258-chip-selected-mix: 14%;
     --i258-danger: #f7768e;
     --i258-danger-foreground: #1a1b26;
     --i258-danger-text: #f7768e;
+    --i258-danger-hover: #f98da1;
     --i258-warning: #e0af68;
     --i258-warning-foreground: #1a1b26;
+    --i258-warning-text: #e0af68;
     --i258-success: #9ece6a;
     --i258-success-foreground: #1a1b26;
+    --i258-success-text: #9ece6a;
     --i258-focus-ring: #7aa2f7;
   }
 }
@@ -60,20 +94,25 @@
   color-scheme: dark;
 
   --i258-background: #1a1b26;
-  --i258-surface: #16161e;
-  --i258-surface-raised: #292e42;
+  --i258-surface: #1f2335;
+  --i258-surface-raised: #24283b;
   --i258-foreground: #c0caf5;
   --i258-muted: #9099be;
   --i258-border: #3b4261;
   --i258-accent: #7aa2f7;
   --i258-accent-foreground: #1a1b26;
   --i258-accent-text: #7aa2f7;
+  --i258-accent-hover: #8fb3f9;
+  --i258-chip-selected-mix: 14%;
   --i258-danger: #f7768e;
   --i258-danger-foreground: #1a1b26;
   --i258-danger-text: #f7768e;
+  --i258-danger-hover: #f98da1;
   --i258-warning: #e0af68;
   --i258-warning-foreground: #1a1b26;
+  --i258-warning-text: #e0af68;
   --i258-success: #9ece6a;
   --i258-success-foreground: #1a1b26;
+  --i258-success-text: #9ece6a;
   --i258-focus-ring: #7aa2f7;
 }
