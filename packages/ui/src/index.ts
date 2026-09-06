@@ -45,6 +45,7 @@ export {
   DEFAULT_THEME,
   resolveTheme,
   readStoredTheme,
+  subscribeToTheme,
   applyTheme,
   persistTheme,
   themeScript,

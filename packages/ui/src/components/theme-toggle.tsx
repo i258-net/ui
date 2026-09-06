@@ -16,6 +16,7 @@ import {
   DEFAULT_THEME,
   persistTheme,
   readStoredTheme,
+  subscribeToTheme,
   THEME_STORAGE_KEY,
   type Theme,
 } from "../lib/theme.js";
@@ -69,6 +70,17 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
       const id = requestAnimationFrame(() => setMotionReady(true));
       return () => cancelAnimationFrame(id);
     }, [storageKey]);
+
+    // Another tab (or a second toggle on this page) changed the stored theme.
+    // Storage is the single source of truth; mirror it rather than diffing.
+    React.useEffect(
+      () =>
+        subscribeToTheme((stored) => {
+          setTheme(stored);
+          applyTheme(stored);
+        }, storageKey),
+      [storageKey],
+    );
 
     const next: Theme = theme === "dark" ? "light" : "dark";
     const dark = theme === "dark";

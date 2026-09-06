@@ -45,6 +45,28 @@ export function persistTheme(
 }
 
 /**
+ * Sync `data-theme` with a change made in another tab.
+ *
+ * The `storage` event only fires in *other* documents on the same origin, so
+ * this never re-enters for the tab that made the change. A `null` `key` means
+ * `localStorage.clear()`; treat that as a reset to {@link DEFAULT_THEME}.
+ *
+ * Returns an unsubscribe function; no-op on the server.
+ */
+export function subscribeToTheme(
+  onChange: (theme: Theme) => void,
+  storageKey: string = THEME_STORAGE_KEY,
+): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = (event: StorageEvent) => {
+    if (event.key !== null && event.key !== storageKey) return;
+    onChange(resolveTheme(event.key === null ? null : event.newValue));
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
+
+/**
  * Blocking inline script for `<html>` layouts. Run before first paint so the
  * page does not flash the wrong theme. Keep this string free of newlines that
  * would break a single-line `dangerouslySetInnerHTML` inject.
