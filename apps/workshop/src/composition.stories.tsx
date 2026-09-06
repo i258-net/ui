@@ -130,14 +130,34 @@ export const InvertedChrome: Story = {
 };
 
 export const AccentChrome: Story = {
-  name: "Accent chrome",
+  name: "Accent band (not a default)",
   render: () => (
     <PageFrame>
       <div style={{ fontSize: 13, color: "var(--i258-muted)" }}>
-        Accent band uses <code>--i258-accent</code> /{" "}
-        <code>--i258-accent-foreground</code> — another composition surface,
-        not a ThemeHost.
+        Accent is for links, selection, focus and primary actions. Painting a
+        whole band with it makes the product name compete with the one control
+        the user is meant to press. Prefer the top row; the bottom row is the
+        escape hatch, for a band that genuinely is an interactive surface.
       </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "12px 16px",
+          borderRadius: "var(--i258-radius-md)",
+          background: "var(--i258-surface)",
+          color: "var(--i258-foreground)",
+          fontFamily: "var(--i258-font-sans)",
+          border: "1px solid var(--i258-border)",
+        }}
+      >
+        <strong style={{ fontSize: 14 }}>Identity on foreground</strong>
+        <Badge variant="accent">live</Badge>
+      </div>
+
       <div
         style={{
           display: "flex",
@@ -151,7 +171,7 @@ export const AccentChrome: Story = {
           fontFamily: "var(--i258-font-sans)",
         }}
       >
-        <strong style={{ fontSize: 14 }}>Accent chrome</strong>
+        <strong style={{ fontSize: 14 }}>Accent band — sparingly</strong>
         <Badge
           variant="neutral"
           style={{
@@ -163,10 +183,11 @@ export const AccentChrome: Story = {
           live
         </Badge>
       </div>
+
       <Surface variant="default" padding="md">
         <span style={{ fontSize: 14, color: "var(--i258-muted)" }}>
-          Default surface under the band — page hierarchy without decorator
-          chrome.
+          Both are composition surfaces, not decorator chrome — but only the
+          first is the house style.
         </span>
       </Surface>
     </PageFrame>

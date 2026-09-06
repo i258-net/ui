@@ -1,22 +1,42 @@
+import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-const semanticColors = [
+/*
+  Grouped the way the tokens are meant to be reached for:
+  - surfaces + type: the page ladder,
+  - tone fills (`--i258-<tone>`) + their `-foreground`: filled controls only,
+  - tone text (`--i258-<tone>-text`): the tone as *type*, on a page, a surface
+    or a soft wash — this is what quiet tags and inline errors use,
+  - `-hover`: the filled-control hover step for this exposure.
+*/
+const surfaceColors = [
   "background",
   "surface",
   "surface-raised",
   "foreground",
   "muted",
   "border",
-  "accent",
-  "accent-foreground",
-  "danger",
-  "danger-foreground",
-  "warning",
-  "success",
   "focus-ring",
 ] as const;
 
-const typeScale = ["xs", "sm", "md", "lg"] as const;
+const toneColors = [
+  "accent",
+  "accent-foreground",
+  "accent-text",
+  "accent-hover",
+  "danger",
+  "danger-foreground",
+  "danger-text",
+  "danger-hover",
+  "warning",
+  "warning-foreground",
+  "warning-text",
+  "success",
+  "success-foreground",
+  "success-text",
+] as const;
+
+const typeScale = ["xs", "sm", "md", "lg", "xl"] as const;
 const spaceScale = ["1", "2", "3", "4", "6", "8"] as const;
 const radiusScale = ["sm", "md", "lg", "full"] as const;
 
@@ -49,8 +69,8 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-export const SemanticColor: Story = {
-  render: () => (
+function SwatchGrid({ names }: { names: readonly string[] }) {
+  return (
     <div
       style={{
         display: "grid",
@@ -58,9 +78,35 @@ export const SemanticColor: Story = {
         gap: 16,
       }}
     >
-      {semanticColors.map((name) => (
+      {names.map((name) => (
         <Swatch key={name} name={name} />
       ))}
+    </div>
+  );
+}
+
+function GroupHeading({ children }: { children: ReactNode }) {
+  return (
+    <div
+      style={{
+        fontFamily: "var(--i258-font-sans)",
+        fontSize: "var(--i258-text-sm)",
+        fontWeight: 600,
+        color: "var(--i258-foreground)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export const SemanticColor: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 24 }}>
+      <GroupHeading>Surfaces and type</GroupHeading>
+      <SwatchGrid names={surfaceColors} />
+      <GroupHeading>Tones — fill, its foreground, text, hover</GroupHeading>
+      <SwatchGrid names={toneColors} />
     </div>
   ),
 };
