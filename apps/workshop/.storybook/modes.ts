@@ -1,6 +1,6 @@
 /**
  * Chromatic pilot modes — mirror Playwright VRT light/dark globals.
- * Apply `chromaticPilotParameters` only on the 9 stories listed in
+ * Apply `chromaticPilotParameters` only on the stories listed in
  * `.github/workflows/chromatic.yml` `onlyStoryNames`. Keep modes off
  * global preview so a shared decorator change does not expand the
  * accept matrix to every story × mode.

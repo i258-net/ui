@@ -62,21 +62,49 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
     const attachRef = React.useCallback(
       (node: HTMLElement | null) => {
         nodeRef.current = node;
-        if (node) setTheme(readAppliedTheme(node));
         if (typeof ref === "function") ref(node);
         else if (ref) ref.current = node;
       },
       [ref],
     );
 
+    // The icon is CSS, so it follows `data-theme` no matter who wrote it; the
+    // label and `aria-pressed` have to be told. Watching the host we read from
+    // makes this the single writer of `theme` — a change from anywhere else (a
+    // second toggle, an app-level control, the Storybook toolbar) would
+    // otherwise leave the announcement contradicting the icon, which is worse
+    // than the two being wrong together.
+    React.useEffect(() => {
+      const node = nodeRef.current;
+      if (!node) return;
+      const sync = () => setTheme(readAppliedTheme(node));
+      sync();
+
+      const observer = new MutationObserver(sync);
+      observer.observe(themeHostOf(node), {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+
+      // An unthemed page follows `prefers-color-scheme`: the computed value
+      // flips with no attribute to mutate.
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      media.addEventListener("change", sync);
+
+      return () => {
+        observer.disconnect();
+        media.removeEventListener("change", sync);
+      };
+    }, []);
+
     // Another tab changed the stored theme. `storage` never fires in the
-    // document that wrote it, so this cannot echo the local click.
+    // document that wrote it, so this cannot echo the local click. Only the
+    // attribute is written here; the observer above carries it to the label.
     React.useEffect(
       () =>
         subscribeToTheme((stored) => {
           if (!nodeRef.current) return;
           applyTheme(stored, themeHostOf(nodeRef.current));
-          setTheme(stored);
         }, storageKey),
       [storageKey],
     );
@@ -106,7 +134,6 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
             readAppliedTheme(host) === "dark" ? "light" : "dark";
           applyTheme(next, host);
           persistTheme(next, storageKey);
-          setTheme(next);
         }}
         {...props}
       >

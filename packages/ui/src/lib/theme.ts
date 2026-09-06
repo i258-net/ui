@@ -41,12 +41,18 @@ export function themeHostOf(node: Element): HTMLElement {
 /**
  * The theme in force at `node`, read from the same custom property the
  * stylesheet branches on — so an unthemed page following the OS reads true.
+ *
+ * Read as a number rather than matched against `"1"`: the CSS is arithmetic on
+ * this token, so a consumer theme block writing `1.0` must not render dark and
+ * report light. An empty string (stylesheet absent) is `0`, i.e. light.
+ *
+ * Client-only — needs a live element and its computed style.
  */
 export function readAppliedTheme(node: Element): Theme {
   const isDark = getComputedStyle(node)
     .getPropertyValue("--i258-theme-is-dark")
     .trim();
-  return isDark === "1" ? "dark" : "light";
+  return Number(isDark) > 0 ? "dark" : "light";
 }
 
 export function persistTheme(
