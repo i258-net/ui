@@ -93,6 +93,8 @@ import { ThemeToggle, themeScript } from "@i258/ui";
 
 Do not hardcode `data-theme` on `<html>` when using the script — the script owns the attribute. `suppressHydrationWarning` is required on `<html>`: the script sets `data-theme` before React hydrates, so the server markup (no attribute) and the client DOM will disagree without it. `ThemeToggle` itself starts from the kit default (`dark`) until a layout effect reads storage (before paint); motion stays off until after that paint so a light-stored preference does not animate moon→sun on every load.
 
+Every mounted `ThemeToggle` also listens for the `storage` event, so a change made in one tab lands in every other open tab without a reload. Storage is the source of truth — a `localStorage.clear()` elsewhere resets the page to the kit default. Use `subscribeToTheme(onChange, storageKey?)` directly if a surface needs to follow the theme without rendering a toggle; it returns an unsubscribe function and is a no-op on the server.
+
 ## Releases
 
 - CI: `.github/workflows/ci.yml` (default `GITHUB_TOKEN`; `workshop-image` uses org `CI_APP_*` for k8s digest PRs — I25-155).
