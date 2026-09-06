@@ -71,8 +71,11 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
       return () => cancelAnimationFrame(id);
     }, [storageKey]);
 
-    // Another tab (or a second toggle on this page) changed the stored theme.
-    // Storage is the single source of truth; mirror it rather than diffing.
+    // Another tab changed the stored theme. Storage is the single source of
+    // truth; mirror it rather than diffing. This does not cover a second
+    // toggle in *this* document -- `storage` never fires in the document that
+    // wrote the value, so same-page toggles still desync (see
+    // `subscribeToTheme`).
     React.useEffect(
       () =>
         subscribeToTheme((stored) => {
