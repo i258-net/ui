@@ -1,0 +1,20 @@
+# Chromatic visual-test pilot capture set — one "Title/Name" per story, exactly
+# as it appears in storybook-static/index.json (entry.title + "/" + entry.name).
+#
+# This file is the single source of truth: chromatic.yml reads it into the
+# action's onlyStoryNames input, and .github/scripts/verify-chromatic-stories.py
+# fails the job if any line here resolves to no story. Without that check an
+# entry that matches nothing is captured as nothing and the required "UI Tests"
+# status stays green — see i258-net/dotbuzz#446.
+#
+# Blank lines and "#" comments are ignored. Glob patterns are not supported.
+Primitives/Button/Primary
+Primitives/Button/Sizes
+Primitives/Input/Default
+Primitives/Badge/Status
+Primitives/Checkbox/With Label
+Primitives/ToggleChip/Row
+Primitives/Alert/Tones
+Primitives/Surface/Composition
+Primitives/Choice/Single Select Chip
+Primitives/ThemeToggle/Default
