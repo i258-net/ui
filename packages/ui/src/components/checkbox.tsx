@@ -6,14 +6,18 @@ import { cn } from "../lib/utils.js";
 
 export type CheckboxProps = CheckboxRootProps;
 
+// `nativeButton` is left at Base UI's default (`false`). Checkbox.Root renders a
+// <span role="checkbox">, so claiming a native button suppresses the non-native
+// keyboard path (Space stops toggling) and puts a `disabled` attribute on the
+// span instead of `aria-disabled`. Only set it alongside a `render` prop that
+// actually supplies a <button>.
 export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(
-  function Checkbox({ className, nativeButton = true, ...props }, ref) {
+  function Checkbox({ className, ...props }, ref) {
     return (
       <CheckboxPrimitive.Root
         ref={ref}
         data-slot="checkbox"
         className={cn("i258-checkbox", className)}
-        nativeButton={nativeButton}
         {...props}
       >
       <CheckboxPrimitive.Indicator
