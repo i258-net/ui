@@ -64,8 +64,12 @@
     color: var(--i258-accent-foreground);
   }
 
+  /* Tokenized rather than `filter: brightness(1.05)`: brightness lightens the
+     label along with the fill, which drops contrast in Day and washes the fill
+     out in Night. The `-hover` tokens move each fill in whichever direction
+     raises its own `-foreground` contrast for that exposure. */
   .i258-btn--primary:hover:not(:disabled) {
-    filter: brightness(1.05);
+    background: var(--i258-accent-hover);
   }
 
   .i258-btn--secondary {
@@ -93,7 +97,7 @@
   }
 
   .i258-btn--danger:hover:not(:disabled) {
-    filter: brightness(1.05);
+    background: var(--i258-danger-hover);
   }
 
   /* —— Input —— */
@@ -114,6 +118,17 @@
 
   .i258-input::placeholder {
     color: var(--i258-muted);
+  }
+
+  /* Base UI's Field.Root sets `data-invalid` on the control when FormField is
+     given an `error`. The error caption alone carried the whole signal before
+     — colour on the border is the part people see without reading. */
+  .i258-input[data-invalid] {
+    border-color: var(--i258-danger);
+  }
+
+  .i258-input[data-invalid]:focus-visible {
+    outline-color: var(--i258-danger);
   }
 
   .i258-input:disabled {
@@ -299,6 +314,14 @@
     border-color: var(--i258-accent);
   }
 
+  .i258-checkbox[data-invalid]:not([data-checked]):not([data-indeterminate]) {
+    border-color: var(--i258-danger);
+  }
+
+  .i258-checkbox[data-invalid]:focus-visible {
+    outline-color: var(--i258-danger);
+  }
+
   .i258-checkbox[data-disabled] {
     opacity: 0.5;
     cursor: not-allowed;
@@ -317,6 +340,10 @@
     gap: var(--i258-space-1);
     height: 1.5rem;
     padding: 0 var(--i258-space-2);
+    /* Transparent base border, like .i258-btn: every variant carries a
+       hairline, so geometry does not move between them and the kit does not
+       depend on the consumer's box-sizing. */
+    border: 1px solid transparent;
     border-radius: var(--i258-radius-full);
     font-family: var(--i258-font-sans);
     font-size: var(--i258-text-xs);
@@ -327,28 +354,40 @@
 
   .i258-badge--neutral {
     background: color-mix(in srgb, var(--i258-foreground) 8%, transparent);
+    border-color: var(--i258-border);
     color: var(--i258-foreground);
   }
 
-  /* Solid fills — wash+tint failed axe color-contrast at 12px. */
+  /* Tone badges are a soft wash + hue hairline, not a solid pill: a row of
+     status tags should read as annotation on the row, not as a row of buttons.
+     The earlier note here said wash+tint failed axe at 12px — it did, because
+     the *tone* was used as the label colour. These use the `-text` tokens,
+     which are the tone darkened (Day) or the tone as-is (Night); every
+     combination clears 4.5:1 on background, surface and surface-raised.
+     Border mixes the `-text` token rather than the tone so the Day hairline
+     is actually visible against a light wash. */
   .i258-badge--accent {
-    background: var(--i258-accent);
-    color: var(--i258-accent-foreground);
+    background: color-mix(in srgb, var(--i258-accent) 12%, var(--i258-surface));
+    border-color: color-mix(in srgb, var(--i258-accent-text) 50%, var(--i258-border));
+    color: var(--i258-accent-text);
   }
 
   .i258-badge--success {
-    background: var(--i258-success);
-    color: var(--i258-success-foreground);
+    background: color-mix(in srgb, var(--i258-success) 12%, var(--i258-surface));
+    border-color: color-mix(in srgb, var(--i258-success-text) 50%, var(--i258-border));
+    color: var(--i258-success-text);
   }
 
   .i258-badge--warning {
-    background: var(--i258-warning);
-    color: var(--i258-warning-foreground);
+    background: color-mix(in srgb, var(--i258-warning) 12%, var(--i258-surface));
+    border-color: color-mix(in srgb, var(--i258-warning-text) 50%, var(--i258-border));
+    color: var(--i258-warning-text);
   }
 
   .i258-badge--danger {
-    background: var(--i258-danger);
-    color: var(--i258-danger-foreground);
+    background: color-mix(in srgb, var(--i258-danger) 12%, var(--i258-surface));
+    border-color: color-mix(in srgb, var(--i258-danger-text) 50%, var(--i258-border));
+    color: var(--i258-danger-text);
   }
 
   /* —— Surface —— */
@@ -463,7 +502,11 @@
   }
 
   .i258-toggle-chip[data-state="on"] {
-    background: color-mix(in srgb, var(--i258-accent) 22%, var(--i258-surface));
+    background: color-mix(
+      in srgb,
+      var(--i258-accent) var(--i258-chip-selected-mix),
+      var(--i258-surface)
+    );
     border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
     color: var(--i258-accent-text);
   }
@@ -511,6 +554,14 @@
 
   .i258-textarea::placeholder {
     color: var(--i258-muted);
+  }
+
+  .i258-textarea[data-invalid] {
+    border-color: var(--i258-danger);
+  }
+
+  .i258-textarea[data-invalid]:focus-visible {
+    outline-color: var(--i258-danger);
   }
 
   .i258-textarea:disabled {
@@ -642,7 +693,11 @@
   }
 
   .i258-choice[data-pressed] {
-    background: color-mix(in srgb, var(--i258-accent) 22%, var(--i258-surface));
+    background: color-mix(
+      in srgb,
+      var(--i258-accent) var(--i258-chip-selected-mix),
+      var(--i258-surface)
+    );
     border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
     color: var(--i258-accent-text);
   }
