@@ -749,7 +749,7 @@
     font-weight: 400;
   }
 
-  /* —— ThemeToggle (Classic sun→moon; aria-pressed=true = dark) —— */
+  /* —— ThemeToggle (Classic sun→moon) —— */
   .i258-btn.i258-theme-toggle {
     aspect-ratio: 1;
     padding-inline: 0;
@@ -777,45 +777,36 @@
   .i258-theme-toggle__core {
     transform-origin: center;
     transform-box: fill-box;
+    transform: scale(calc(1 + 0.7 * var(--i258-theme-is-dark)));
     transition: transform var(--i258-theme-toggle-duration, 400ms)
       var(--i258-ease-standard);
   }
 
-  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__core {
-    transform: scale(1.7);
-  }
-
   .i258-theme-toggle__clip {
-    transition:
-      d var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard),
-      transform var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard);
-  }
-
-  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__clip {
-    d: path("M0 2h13a1 1 0 0010 10v14H0Z");
-    transition-delay: calc(var(--i258-theme-toggle-duration, 400ms) * 0.15);
-  }
-
-  /* Browsers that cannot animate SVG path `d` — nudge the clip instead. */
-  @supports not (d: path("M0 0")) {
-    .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__clip {
-      transform: translate(-0.8125rem, 0.125rem);
-    }
+    transform: translate(
+      calc(-0.8125rem * var(--i258-theme-is-dark)),
+      calc(0.125rem * var(--i258-theme-is-dark))
+    );
+    transition: transform var(--i258-theme-toggle-duration, 400ms)
+      var(--i258-ease-standard);
+    transition-delay: calc(
+      var(--i258-theme-toggle-duration, 400ms) * 0.15 *
+        var(--i258-theme-is-dark)
+    );
   }
 
   .i258-theme-toggle__ray {
     transform-box: view-box;
     transform-origin: center;
+    transform: scale(calc(1 - var(--i258-theme-is-dark)));
+    opacity: calc(1 - var(--i258-theme-is-dark));
     transition:
       transform var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard),
       opacity var(--i258-theme-toggle-duration, 400ms) var(--i258-ease-standard);
-    transition-delay: calc(var(--i258-theme-toggle-duration, 400ms) * 0.15);
-  }
-
-  .i258-theme-toggle[aria-pressed="true"] .i258-theme-toggle__ray {
-    transform: scale(0);
-    opacity: 0;
-    transition-delay: 0s;
+    transition-delay: calc(
+      var(--i258-theme-toggle-duration, 400ms) * 0.15 *
+        (1 - var(--i258-theme-is-dark))
+    );
   }
 
   /* —— AppShell (shared application chrome) —— */

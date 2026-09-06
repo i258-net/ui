@@ -6,6 +6,7 @@
 :root,
 [data-theme="light"] {
   color-scheme: light;
+  --i258-theme-is-dark: 0;
 
   --i258-background: #e1e2e7;
   --i258-surface: #d5d6db;
@@ -52,6 +53,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
+    --i258-theme-is-dark: 1;
 
     --i258-background: #1a1b26;
     /* Night elevates monotonically: background → surface → raised. The old
@@ -92,6 +94,7 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
+  --i258-theme-is-dark: 1;
 
   --i258-background: #1a1b26;
   --i258-surface: #1f2335;

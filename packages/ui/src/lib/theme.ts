@@ -33,6 +33,22 @@ export function applyTheme(
   root.setAttribute("data-theme", theme);
 }
 
+/** The element whose `data-theme` a control inside `node` reads and sets. */
+export function themeHostOf(node: Element): HTMLElement {
+  return node.closest<HTMLElement>("[data-theme]") ?? document.documentElement;
+}
+
+/**
+ * The theme in force at `node`, read from the same custom property the
+ * stylesheet branches on — so an unthemed page following the OS reads true.
+ */
+export function readAppliedTheme(node: Element): Theme {
+  const isDark = getComputedStyle(node)
+    .getPropertyValue("--i258-theme-is-dark")
+    .trim();
+  return isDark === "1" ? "dark" : "light";
+}
+
 export function persistTheme(
   theme: Theme,
   storageKey: string = THEME_STORAGE_KEY,

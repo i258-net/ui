@@ -11,6 +11,7 @@ const STORIES = [
   { id: "primitives-badge--status", name: "badge-status" },
   { id: "primitives-checkbox--with-label", name: "checkbox-with-label" },
   { id: "primitives-togglechip--row", name: "toggle-chip-row" },
+  { id: "primitives-themetoggle--default", name: "theme-toggle" },
   { id: "primitives-alert--tones", name: "alert-tones" },
   { id: "primitives-surface--composition", name: "surface-composition" },
   { id: "primitives-choice--single-select-chip", name: "choice-single" },
@@ -33,9 +34,6 @@ for (const theme of THEMES) {
     for (const story of STORIES) {
       test(`${story.name}`, async ({ page }) => {
         await page.goto(storyUrl(story.id, theme), { waitUntil: "networkidle" });
-        // Scoped to the story root: ThemeToggle writes `data-theme` onto
-        // <html> on mount, so an unscoped locator matches twice in dark and
-        // trips Playwright strict mode (AppShell stories, ui#59).
         const root = page.locator(`#storybook-root [data-theme="${theme}"]`);
         await root.waitFor({ state: "visible", timeout: 15_000 });
         await page.evaluate(async () => {
