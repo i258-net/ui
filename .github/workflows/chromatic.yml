@@ -3,7 +3,11 @@
 # In-repo Playwright VRT (ci.yml) is the other visual gate.
 # Modes are attached per pilot story (chromaticPilotParameters), not globally in
 # preview — so a shared decorator change should not ask for 52×2 accepts.
-# Rollback: delete this file + modes.ts + per-story chromaticPilotParameters.
+# The capture set lives in apps/workshop/chromatic-stories.txt, not inline here:
+# verify-chromatic-stories.py fails the job if an entry resolves to no story,
+# which the Chromatic status check cannot tell you (dotbuzz#446).
+# Rollback: delete this file + chromatic-stories.txt + modes.ts + per-story
+# chromaticPilotParameters.
 name: chromatic-pilot
 
 on:
@@ -38,6 +42,10 @@ jobs:
 
       - run: pnpm workshop:build
 
+      - name: Resolve pilot story list
+        id: stories
+        run: python3 .github/scripts/verify-chromatic-stories.py
+
       - name: Detect Chromatic project token
         id: token
         env:
@@ -57,15 +65,5 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBaseDir: apps/workshop
           storybookBuildDir: apps/workshop/storybook-static
-          onlyStoryNames: |
-            Primitives/Button/Primary
-            Primitives/Button/Sizes
-            Primitives/Input/Default
-            Primitives/Badge/Status
-            Primitives/Checkbox/With Label
-            Primitives/ToggleChip/Row
-            Primitives/Alert/Tones
-            Primitives/Surface/Composition
-            Primitives/Choice/Single Select Chip
-            Primitives/ThemeToggle/Default
+          onlyStoryNames: ${{ steps.stories.outputs.names }}
           exitZeroOnChanges: true
