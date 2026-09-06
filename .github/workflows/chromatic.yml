@@ -1,4 +1,4 @@
-# Chromatic visual-test pilot — 9 stories × light/dark via onlyStoryNames.
+# Chromatic visual-test pilot — 10 stories × light/dark via onlyStoryNames.
 # The Chromatic "UI Tests" status check is a required merge gate on i258-net/ui.
 # In-repo Playwright VRT (ci.yml) is the other visual gate.
 # Modes are attached per pilot story (chromaticPilotParameters), not globally in
@@ -67,4 +67,5 @@ jobs:
             Primitives/Alert/Tones
             Primitives/Surface/Composition
             Primitives/Choice/Single Select Chip
+            Primitives/ThemeToggle/Default
           exitZeroOnChanges: true
