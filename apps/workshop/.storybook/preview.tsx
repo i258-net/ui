@@ -50,8 +50,10 @@ let docsRootMirrorCount = 0;
 
 /**
  * Theme host only — no card chrome.
- * Single `data-theme` root for VRT (never also on `<html>` — that broke
- * Playwright's strict locator). Docs keep a flat `--i258-background` so
+ * Single `data-theme` root for VRT. `<html>` can also carry one — a
+ * story containing ThemeToggle sets it on mount — so VRT locators scope to
+ * `#storybook-root`; an unscoped `[data-theme]` matches twice and trips
+ * Playwright strict mode (ui#59). Docs keep a flat `--i258-background` so
  * examples aren't light text on Storybook's white preview. Story view: host
  * is transparent so the backgrounds addon (`.sb-show-main !important`) can
  * own the canvas — a painted host on a non-default swatch revived the

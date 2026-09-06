@@ -18,6 +18,7 @@ export default defineConfig({
     "src/components/alert.tsx",
     "src/components/toggle-chip.tsx",
     "src/components/theme-toggle.tsx",
+    "src/components/app-shell.tsx",
     "src/lib/theme.ts",
     "src/components/disclosure.tsx",
     "src/components/choice.tsx",

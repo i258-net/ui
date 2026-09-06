@@ -37,6 +37,9 @@ export type { ToggleChipProps } from "./components/toggle-chip.js";
 export { ThemeToggle } from "./components/theme-toggle.js";
 export type { ThemeToggleProps } from "./components/theme-toggle.js";
 
+export { AppShell } from "./components/app-shell.js";
+export type { AppShellProps } from "./components/app-shell.js";
+
 export {
   THEME_STORAGE_KEY,
   DEFAULT_THEME,

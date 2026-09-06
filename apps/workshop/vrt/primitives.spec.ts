@@ -16,6 +16,9 @@ const STORIES = [
   { id: "primitives-choice--single-select-chip", name: "choice-single" },
   { id: "primitives-formfield--matrix", name: "form-field-matrix" },
   { id: "primitives-fieldset--matrix", name: "fieldset-matrix" },
+  // Patterns: the shared app bar, whose whole point is being identical per app.
+  { id: "patterns-appshell--with-nav", name: "app-shell-with-nav" },
+  { id: "patterns-appshell--with-subtitle", name: "app-shell-with-subtitle" },
 ] as const;
 
 const THEMES = ["light", "dark"] as const;
@@ -30,7 +33,10 @@ for (const theme of THEMES) {
     for (const story of STORIES) {
       test(`${story.name}`, async ({ page }) => {
         await page.goto(storyUrl(story.id, theme), { waitUntil: "networkidle" });
-        const root = page.locator(`[data-theme="${theme}"]`);
+        // Scoped to the story root: ThemeToggle writes `data-theme` onto
+        // <html> on mount, so an unscoped locator matches twice in dark and
+        // trips Playwright strict mode (AppShell stories, ui#59).
+        const root = page.locator(`#storybook-root [data-theme="${theme}"]`);
         await root.waitFor({ state: "visible", timeout: 15_000 });
         await page.evaluate(async () => {
           await Promise.all([
