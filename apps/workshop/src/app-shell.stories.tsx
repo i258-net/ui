@@ -5,11 +5,6 @@ import { AppShell, Badge, Link, ToggleChip } from "@i258/ui";
  * The bar every app wears. Sizes and spacing are fixed by the kit — the two
  * stories below are the honeycomb and abacus headers, and their titles must
  * render at the same step (ui#59, from Daniel's side-by-side screenshot).
- *
- * The toggle shows its dark default in every story, including light ones:
- * Storybook has no `themeScript` in the document head, so nothing syncs the
- * control to the toolbar theme. Deterministic, so VRT is stable — apps that
- * do run `themeScript` never see it.
  */
 const meta = {
   title: "Patterns/AppShell",

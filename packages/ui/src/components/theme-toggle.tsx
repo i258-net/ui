@@ -3,8 +3,8 @@
 /**
  * Sun/moon motion adapted from toggles.dev Classic
  * (https://toggles.dev/toggles/classic — MIT, theme-toggles / Alfie Jones).
- * Rewritten for `@i258/ui`: plain CSS under `@layer i258-components`, driven by
- * `aria-pressed` (dark) instead of Tailwind `dark:` utilities.
+ * Rewritten for `@i258/ui`: plain CSS under `@layer i258-components`, drawn
+ * from the theme's own `--i258-theme-is-dark` instead of Tailwind `dark:`.
  */
 
 import * as React from "react";
@@ -13,10 +13,10 @@ import { Button, type ButtonProps } from "./button.js";
 import { cn } from "../lib/utils.js";
 import {
   applyTheme,
-  DEFAULT_THEME,
   persistTheme,
-  readStoredTheme,
+  readAppliedTheme,
   subscribeToTheme,
+  themeHostOf,
   THEME_STORAGE_KEY,
   type Theme,
 } from "../lib/theme.js";
@@ -33,9 +33,9 @@ export type ThemeToggleProps = Omit<
 };
 
 /**
- * Ghost icon button that toggles `data-theme` between light and dark and
- * persists the choice. Pair with {@link themeScript} in the document head so
- * the first paint matches storage.
+ * Ghost icon button that flips `data-theme` on the nearest themed ancestor and
+ * persists the choice. The icon is drawn from the active theme in CSS, so the
+ * server HTML is already right; state carries the label only.
  */
 export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
   function ThemeToggle(
@@ -54,61 +54,85 @@ export const ThemeToggle = React.forwardRef<HTMLElement, ThemeToggleProps>(
   ) {
     const reactId = React.useId();
     const clipMainId = `i258-theme-toggle-clip-${reactId.replace(/:/g, "")}`;
-    // SSR + first client paint use DEFAULT_THEME so markup matches. Storage is
-    // applied in layout before paint; motion stays off until after that paint so
-    // a light-stored user does not animate moon→sun on every load (Astra, ui#55).
-    const [theme, setTheme] = React.useState<Theme>(DEFAULT_THEME);
-    const [motionReady, setMotionReady] = React.useState(false);
+    const nodeRef = React.useRef<HTMLElement | null>(null);
+    // `null` until mounted: the server cannot know the theme, and only the
+    // label needs it. The icon comes from CSS.
+    const [theme, setTheme] = React.useState<Theme | null>(null);
 
-    React.useLayoutEffect(() => {
-      const stored = readStoredTheme(storageKey);
-      setTheme(stored);
-      applyTheme(stored);
-    }, [storageKey]);
+    const attachRef = React.useCallback(
+      (node: HTMLElement | null) => {
+        nodeRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref],
+    );
 
+    // The icon is CSS, so it follows `data-theme` no matter who wrote it; the
+    // label and `aria-pressed` have to be told. Watching the host we read from
+    // makes this the single writer of `theme` — a change from anywhere else (a
+    // second toggle, an app-level control, the Storybook toolbar) would
+    // otherwise leave the announcement contradicting the icon, which is worse
+    // than the two being wrong together.
     React.useEffect(() => {
-      const id = requestAnimationFrame(() => setMotionReady(true));
-      return () => cancelAnimationFrame(id);
-    }, [storageKey]);
+      const node = nodeRef.current;
+      if (!node) return;
+      const sync = () => setTheme(readAppliedTheme(node));
+      sync();
 
-    // Another tab changed the stored theme. Storage is the single source of
-    // truth; mirror it rather than diffing. This does not cover a second
-    // toggle in *this* document -- `storage` never fires in the document that
-    // wrote the value, so same-page toggles still desync (see
-    // `subscribeToTheme`).
+      const observer = new MutationObserver(sync);
+      observer.observe(themeHostOf(node), {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+
+      // An unthemed page follows `prefers-color-scheme`: the computed value
+      // flips with no attribute to mutate.
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      media.addEventListener("change", sync);
+
+      return () => {
+        observer.disconnect();
+        media.removeEventListener("change", sync);
+      };
+    }, []);
+
+    // Another tab changed the stored theme. `storage` never fires in the
+    // document that wrote it, so this cannot echo the local click. Only the
+    // attribute is written here; the observer above carries it to the label.
     React.useEffect(
       () =>
         subscribeToTheme((stored) => {
-          setTheme(stored);
-          applyTheme(stored);
+          if (!nodeRef.current) return;
+          applyTheme(stored, themeHostOf(nodeRef.current));
         }, storageKey),
       [storageKey],
     );
 
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    const dark = theme === "dark";
-    const motionMs = motionReady ? duration : 0;
-
     return (
       <Button
-        ref={ref}
+        ref={attachRef}
         data-slot="theme-toggle"
         variant={variant}
         size={size}
         type={type ?? "button"}
         title={title}
-        aria-label={`Switch to ${next} theme`}
-        aria-pressed={dark}
+        aria-label={
+          theme === null ? title : `Switch to ${theme === "dark" ? "light" : "dark"} theme`
+        }
+        aria-pressed={theme === null ? undefined : theme === "dark"}
         className={cn("i258-theme-toggle", className)}
         style={
           {
             ...style,
-            ["--i258-theme-toggle-duration" as string]: `${motionMs}ms`,
+            ["--i258-theme-toggle-duration" as string]: `${duration}ms`,
           } as React.CSSProperties
         }
-        onClick={() => {
-          setTheme(next);
-          applyTheme(next);
+        onClick={(event) => {
+          const host = themeHostOf(event.currentTarget);
+          const next: Theme =
+            readAppliedTheme(host) === "dark" ? "light" : "dark";
+          applyTheme(next, host);
           persistTheme(next, storageKey);
         }}
         {...props}

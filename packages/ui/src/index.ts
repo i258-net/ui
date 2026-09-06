@@ -47,6 +47,8 @@ export {
   readStoredTheme,
   subscribeToTheme,
   applyTheme,
+  themeHostOf,
+  readAppliedTheme,
   persistTheme,
   themeScript,
 } from "./lib/theme.js";
