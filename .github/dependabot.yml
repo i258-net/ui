@@ -15,6 +15,14 @@ updates:
         exclude-patterns:
           - "playwright"
           - "@playwright/*"
+    ignore:
+      # apps/workshop runs Storybook's Vitest plugin, and @storybook/addon-vitest
+      # declares vitest ^3 || ^4. Hold the Vitest family at 4.x until the addon
+      # supports 5 (storybookjs/storybook#36082), then drop this block.
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
