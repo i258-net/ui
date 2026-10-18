@@ -62,7 +62,9 @@ Density is a token switch: put `data-density="compact"` on any ancestor and cont
 heights, `--i258-row-height`, `--i258-row-pad-y`, `--i258-cell-pad-y` and the
 `--i258-pane-*` rhythm move together (`data-density="comfortable"` restores them in a
 subtree). `--i258-control-xs` stays 24px (the WCAG 2.2 target floor) and coarse
-pointers keep 44px targets in either density.
+pointers keep 44×44 targets in either density — width as well as height, and the
+16px checkbox's 24px/44px hit area holds under either `box-sizing`
+(`apps/workshop/vrt/target-size.spec.ts`).
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 

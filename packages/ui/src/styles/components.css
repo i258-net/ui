@@ -327,11 +327,18 @@
     border-color: var(--i258-indicator);
   }
 
-  /* 16px box, 24px target: the hit area reaches 4px past every edge. */
+  /* 16px box, 24px target. An explicit centred box rather than a negative
+     inset: an inset is measured from the padding edge, so under a consumer's
+     `* { box-sizing: border-box }` it loses the 1px border on each side and
+     the target falls 2px short. Sized this way it is the same either way. */
   .i258-checkbox::after {
     content: "";
     position: absolute;
-    inset: -0.25rem;
+    top: 50%;
+    left: 50%;
+    width: var(--i258-control-xs);
+    height: var(--i258-control-xs);
+    translate: -50% -50%;
   }
 
   .i258-checkbox[data-invalid]:not([data-checked]):not([data-indeterminate]) {
@@ -908,7 +915,8 @@
 
   /* —— Coarse pointers: 44px targets ——
      Fine-pointer heights follow the density set; touch never goes under
-     44px whatever the density. */
+     44×44 whatever the density. Width too: a one-character chip or an
+     icon button is 44px tall but well under 44px wide otherwise. */
   @media (pointer: coarse) {
     .i258-btn,
     .i258-input,
@@ -916,14 +924,19 @@
     .i258-choice,
     .i258-disclosure__trigger {
       min-height: var(--i258-target-coarse);
-    }
-
-    .i258-btn.i258-theme-toggle {
       min-width: var(--i258-target-coarse);
     }
 
+    /* Chips are start-aligned flex; keep a short label centred once the
+       min-width widens the pill. Option rows are full-width and stay left. */
+    .i258-toggle-chip,
+    .i258-choice--chip {
+      justify-content: center;
+    }
+
     .i258-checkbox::after {
-      inset: -0.875rem;
+      width: var(--i258-target-coarse);
+      height: var(--i258-target-coarse);
     }
   }
 
