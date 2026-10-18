@@ -11,24 +11,33 @@ import { expect, test, type Page } from "@playwright/test";
  * reached past the element without taking layout space failed this: on a
  * coarse pointer the next box's 44px target covered the previous box's
  * visible right edge and took its clicks.
+ *
+ * The same layout is run with `render={<button />} nativeButton`, where the
+ * root is a real <button>: its UA border, padding and background must not
+ * grow the target or paint round the drawn box.
  */
 
-const STORY = "/iframe.html?id=primitives-checkbox--close-spacing&viewMode=story";
+const STORIES = {
+  span: "/iframe.html?id=primitives-checkbox--close-spacing&viewMode=story",
+  button: "/iframe.html?id=primitives-checkbox--close-spacing-native-button&viewMode=story",
+} as const;
+
+type Root = keyof typeof STORIES;
 
 type BoxSizing = "content-box" | "border-box";
 type Density = "comfortable" | "compact";
 
 const NAMES = ["Row A", "Row B", "Row C", "Alpha", "Beta", "One", "Two", "Three"];
 
-async function mount(page: Page, boxSizing: BoxSizing, density: Density) {
-  await page.goto(STORY, { waitUntil: "networkidle" });
-  const root = page.getByTestId("close-spacing");
-  await root.waitFor({ state: "visible", timeout: 15_000 });
+async function mount(page: Page, root: Root, boxSizing: BoxSizing, density: Density) {
+  await page.goto(STORIES[root], { waitUntil: "networkidle" });
+  const story = page.getByTestId("close-spacing");
+  await story.waitFor({ state: "visible", timeout: 15_000 });
   // Unlayered, as a consumer reset would be, so it beats @layer i258-components.
   await page.addStyleTag({
     content: `*, *::before, *::after { box-sizing: ${boxSizing}; }`,
   });
-  await root.evaluate((el, d) => el.setAttribute("data-density", d), density);
+  await story.evaluate((el, d) => el.setAttribute("data-density", d), density);
 }
 
 /** aria-checked of every checkbox in the story, in document order. */
@@ -96,11 +105,35 @@ function flip(state: string | null) {
   return state === "true" ? "false" : "true";
 }
 
-async function run(page: Page, boxSizing: BoxSizing, density: Density, coarse: boolean) {
-  await mount(page, boxSizing, density);
+async function run(page: Page, root: Root, boxSizing: BoxSizing, density: Density, coarse: boolean) {
+  await mount(page, root, boxSizing, density);
   expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(coarse);
   const size = coarse ? 44 : 24;
   const edge = boxSizing === "border-box" ? 16 : 18;
+
+  // The root draws nothing of its own: no UA button border, padding,
+  // background or native appearance, whatever element Base UI renders.
+  const chrome = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="checkbox"]')].map((el) => {
+      const s = getComputedStyle(el);
+      return {
+        tag: el.tagName.toLowerCase(),
+        border: [s.borderTopWidth, s.borderRightWidth, s.borderBottomWidth, s.borderLeftWidth].join(" "),
+        padding: s.padding,
+        background: s.backgroundColor,
+        appearance: s.appearance,
+      };
+    }),
+  );
+  for (const c of chrome) {
+    expect.soft(c, "checkbox root chrome").toEqual({
+      tag: root,
+      border: "0px 0px 0px 0px",
+      padding: "0px",
+      background: "rgba(0, 0, 0, 0)",
+      appearance: "none",
+    });
+  }
 
   const geo = Object.fromEntries(
     await Promise.all(NAMES.map(async (n) => [n, await geometry(page, n)] as const)),
@@ -177,6 +210,19 @@ async function run(page: Page, boxSizing: BoxSizing, density: Density, coarse: b
     expect.soft(await states(page), `label ${label}`).toEqual(expected);
   }
 
+  // Disabled holds: no toggle, and the attribute Base UI chose for the root.
+  {
+    const disabled = page.getByRole("checkbox", { name: "Row disabled", exact: true });
+    await expect(disabled).toBeDisabled();
+    if (root === "button") await expect(disabled).toHaveAttribute("disabled", "");
+    else await expect(disabled).toHaveAttribute("aria-disabled", "true");
+    const g = await geometry(page, "Row disabled");
+    expect.soft(g.target.w, "Row disabled target width").toBeCloseTo(size, 1);
+    const before = await states(page);
+    await press(page, coarse, g.cx, g.cy);
+    expect.soft(await states(page), "disabled box").toEqual(before);
+  }
+
   // Role, name, mixed state and keyboard are untouched.
   const mixed = page.getByRole("checkbox", { name: "Row mixed", exact: true });
   await expect(mixed).toHaveAttribute("aria-checked", "mixed");
@@ -188,20 +234,41 @@ async function run(page: Page, boxSizing: BoxSizing, density: Density, coarse: b
   const expected = [...before];
   expected[iA] = flip(before[iA]);
   expect(await states(page), "Space toggles the focused box only").toEqual(expected);
+
+  // Tab reaches the next box, and the ring is drawn round the box, not the
+  // target or the button.
+  await page.keyboard.press("Tab");
+  const ring = await page.evaluate(() => {
+    const el = document.activeElement!;
+    return {
+      name: el.getAttribute("aria-label"),
+      root: getComputedStyle(el).outlineStyle,
+      box: getComputedStyle(el, "::before").outlineStyle,
+    };
+  });
+  expect(ring).toEqual({ name: "Row B", root: "none", box: "solid" });
 }
 
-for (const boxSizing of ["content-box", "border-box"] as const) {
-  for (const density of ["comfortable", "compact"] as const) {
-    test.describe(`${boxSizing}, ${density}`, () => {
+// Density does not reach the checkbox (--i258-control-xs is density-fixed);
+// it is run on the default span root to prove that, and the button root is
+// run at the default density.
+const CONFIGS = [
+  ...(["comfortable", "compact"] as const).map((density) => ({ root: "span" as const, density })),
+  { root: "button" as const, density: "comfortable" as const },
+];
+
+for (const { root, density } of CONFIGS) {
+  for (const boxSizing of ["content-box", "border-box"] as const) {
+    test.describe(`${root} root, ${boxSizing}, ${density}`, () => {
       test("fine pointer: each click changes only the checkbox it lands on", async ({ page }) => {
-        await run(page, boxSizing, density, false);
+        await run(page, root, boxSizing, density, false);
       });
 
       test.describe("coarse pointer", () => {
         test.use({ hasTouch: true, isMobile: true });
 
         test("each tap changes only the checkbox it lands on", async ({ page }) => {
-          await run(page, boxSizing, density, true);
+          await run(page, root, boxSizing, density, true);
         });
       });
     });

@@ -70,6 +70,8 @@ layout on fine pointers and 44×44 on coarse ones, so checkboxes placed side by 
 stacked never overlap each other's hit areas (`vrt/checkbox-activation.spec.ts` clicks
 real checkboxes 12px apart and stacked flush). If you spaced a 16px checkbox by hand,
 expect it to sit 4px (fine) or 14px (coarse) further from its neighbours than before.
+The same holds with `render={<button />} nativeButton`: the kit clears the button's
+UA border, padding, background and appearance itself, so no consumer reset is needed.
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 

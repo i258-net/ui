@@ -312,7 +312,10 @@
      one won clicks on the earlier one's visible edge. Sized as the element,
      each target is space the layout reserves: 24px on fine pointers, 44×44
      on coarse, under either box-sizing (the element has no border or
-     padding to count). */
+     padding to count). The root may be a <button> (`render={<button />}
+     nativeButton`), so its UA chrome is cleared here rather than left to a
+     consumer reset: a border or padding would grow a content-box target and
+     paint round the drawn box. */
   .i258-checkbox {
     display: inline-flex;
     align-items: center;
@@ -320,7 +323,15 @@
     position: relative;
     width: var(--i258-control-xs);
     height: var(--i258-control-xs);
+    min-width: 0;
+    min-height: 0;
     flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    appearance: none;
+    font: inherit;
     color: var(--i258-accent-foreground);
     cursor: pointer;
   }

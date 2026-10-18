@@ -104,34 +104,50 @@ export const LabelAssociation: Story = {
 /*
   Checkboxes as close as list screens put them: side by side at a 12px gap
   (the themes row story) and stacked with no gap at all, each with a real
-  associated label. vrt/target-size.spec.ts clicks this story's visible
-  edges and target margins under both box-sizing models, both densities and
-  both pointer types, and checks only the intended box changes.
+  associated label. vrt/checkbox-activation.spec.ts clicks this story's
+  visible edges and target margins under both box-sizing models, both
+  densities and both pointer types, and checks only the intended box changes.
 */
-export const CloseSpacing: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => (
+function CloseSpacingLayout({ native = false }: { native?: boolean }) {
+  // The supported native-button form: Base UI puts `disabled` on the button
+  // and leaves keyboard activation to it.
+  const as = native ? { render: <button type="button" />, nativeButton: true } : {};
+  return (
     <div data-testid="close-spacing" style={{ display: "grid", gap: 24 }}>
       <div data-testid="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Checkbox id="row-a" aria-label="Row A" />
-        <Checkbox id="row-b" aria-label="Row B" defaultChecked />
-        <Checkbox id="row-c" aria-label="Row C" />
-        <Checkbox id="row-mixed" aria-label="Row mixed" indeterminate />
+        <Checkbox {...as} id="row-a" aria-label="Row A" />
+        <Checkbox {...as} id="row-b" aria-label="Row B" defaultChecked />
+        <Checkbox {...as} id="row-c" aria-label="Row C" />
+        <Checkbox {...as} id="row-mixed" aria-label="Row mixed" indeterminate />
+        <Checkbox {...as} id="row-disabled" aria-label="Row disabled" disabled />
       </div>
       <div data-testid="labelled-row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Checkbox id="lr-a" />
+        <Checkbox {...as} id="lr-a" />
         <Label htmlFor="lr-a">Alpha</Label>
-        <Checkbox id="lr-b" />
+        <Checkbox {...as} id="lr-b" />
         <Label htmlFor="lr-b">Beta</Label>
       </div>
       <div data-testid="stack" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
         {["One", "Two", "Three"].map((name) => (
           <div key={name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Checkbox id={`stack-${name}`} />
+            <Checkbox {...as} id={`stack-${name}`} />
             <Label htmlFor={`stack-${name}`}>{name}</Label>
           </div>
         ))}
       </div>
     </div>
-  ),
+  );
+}
+
+export const CloseSpacing: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <CloseSpacingLayout />,
+};
+
+/* The same layout with `render={<button />} nativeButton`. The root is a real
+   <button>, so its UA border, padding, background and appearance must not
+   add to the target or paint round the drawn box. */
+export const CloseSpacingNativeButton: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => <CloseSpacingLayout native />,
 };
