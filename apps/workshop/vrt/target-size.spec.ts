@@ -10,9 +10,11 @@ import { expect, test, type Page } from "@playwright/test";
  * React components: what is under test is the shipped CSS, under both
  * box-sizing models a consumer might have, at both densities.
  *
- * The checkbox's visible edge is 1rem under border-box and 1rem plus its 1px
- * border under content-box; that is the visible box as it already ships and
- * is not what this guards. The target is a fixed centred size either way.
+ * The checkbox element is its target; the box you see is its ::before,
+ * 1rem under border-box and 1rem plus its 1px border under content-box. That
+ * is the visible box as it already ships and is not what this guards. The
+ * target is a fixed centred size either way. checkbox-activation.spec.ts
+ * clicks real checkboxes packed close together.
  */
 
 const CHECKBOX_EDGE = { "border-box": 16, "content-box": 18 } as const;
@@ -58,6 +60,13 @@ async function hitTest(page: Page, id: string) {
   return page.evaluate((id) => {
     const el = document.getElementById(id)!;
     const r = el.getBoundingClientRect();
+    // A checkbox draws its visible box as ::before inside the target.
+    const before = getComputedStyle(el, "::before");
+    const drawn =
+      before.content !== "none" && before.position === "absolute"
+        ? parseFloat(before.width) +
+          (before.boxSizing === "content-box" ? parseFloat(before.borderLeftWidth) * 2 : 0)
+        : null;
     const cx = r.left + r.width / 2;
     const cy = r.top + r.height / 2;
     const hits = (dx: number, dy: number) => {
@@ -75,7 +84,7 @@ async function hitTest(page: Page, id: string) {
     const x = span("x");
     const y = span("y");
     return {
-      visible: { w: r.width, h: r.height },
+      visible: drawn == null ? { w: r.width, h: r.height } : { w: drawn, h: drawn },
       hit: { w: x.size, h: y.size },
       // Centred: the target reaches as far past one edge as the other.
       skew: { x: x.hi + x.lo, y: y.hi + y.lo },
@@ -116,9 +125,12 @@ for (const boxSizing of ["content-box", "border-box"] as const) {
             expect(t.visible).toEqual({ w: CHECKBOX_EDGE[boxSizing], h: CHECKBOX_EDGE[boxSizing] });
             expectTarget(t, 44, id);
           }
-          // The target overlaps the label's leading edge; that is the same
-          // action (the label toggles it too), and the label beyond it is
-          // still its own element.
+          // The target takes layout space, so the label starts after it.
+          const labelNear = await page.evaluate(() => {
+            const r = document.getElementById("cb-label")!.getBoundingClientRect();
+            return document.elementFromPoint(r.left + 1, r.top + r.height / 2)?.id;
+          });
+          expect(labelNear).toBe("cb-label");
           const labelFar = await page.evaluate(() => {
             const r = document.getElementById("cb-label")!.getBoundingClientRect();
             return document.elementFromPoint(r.right - 2, r.top + r.height / 2)?.id;
