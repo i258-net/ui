@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Badge, Fieldset, Surface, ToggleChip } from "@i258/ui";
+import { Badge, Button, Checkbox, Fieldset, Input, Surface, ToggleChip } from "@i258/ui";
 
 const meta = {
   title: "Foundation/Themes",
@@ -11,17 +11,17 @@ export default meta;
 type Story = StoryObj;
 
 /*
-  Deliberately shaped like a Honeycomb triage screen rather than a generic
-  card: a filter row of chips with mono counts over a dense list whose rows
-  carry quiet status tags. Day and Night are one family at two exposures, so
-  the thing worth comparing side by side is the same grammar, not two
-  swatches.
+  Shaped like a triage screen rather than a generic card: a filter row of
+  chips with mono counts over a dense list whose rows carry quiet status
+  tags. Day and Night are one family at two exposures, so the thing worth
+  comparing side by side is the same grammar, not two swatches. Rows are
+  synthetic — no real register data in this public repo.
 */
 const ROWS = [
-  { id: "I25-146", title: "Roster answer supersedes the removal", tone: "accent" },
-  { id: "I25-161", title: "Root install done, blocked on seat reset", tone: "warning" },
-  { id: "I25-175", title: "Digest bump lands from the CI App", tone: "success" },
-  { id: "I25-116", title: "Register entry contradicts live state", tone: "danger" },
+  { id: "X-101", title: "Choose the retention window", tone: "accent" },
+  { id: "X-102", title: "Waiting on an upstream release", tone: "warning" },
+  { id: "X-103", title: "Rollout under way", tone: "success" },
+  { id: "X-104", title: "Owner not set", tone: "danger" },
 ] as const;
 
 const TAG_LABEL = {
@@ -49,7 +49,7 @@ function ThemeCard({ theme }: { theme: "light" | "dark" }) {
       }}
     >
       <div style={{ fontWeight: 600 }}>
-        Tokyo {theme === "light" ? "Day" : "Night"}
+        {theme === "light" ? "Day" : "Night"}
       </div>
 
       <Surface variant="default" padding="sm">
@@ -124,6 +124,81 @@ export const LightAndDark: Story = {
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
       <ThemeCard theme="light" />
       <ThemeCard theme="dark" />
+    </div>
+  ),
+};
+
+/*
+  The adjacency that list screens actually produce: controls sitting on a
+  row at rest, hovered and selected. Every identifying edge here (input,
+  checkbox, chip, the selected row's indicator bar) is held at 3:1 against
+  the row it sits on by packages/ui/src/lib/contrast.test.ts; this story is
+  the rendered check of the same thing, and axe audits its text.
+*/
+const ROW_STATES = [
+  { state: "rest", background: "var(--i258-background)" },
+  { state: "hover", background: "var(--i258-hover)" },
+  { state: "selected", background: "var(--i258-selected)" },
+] as const;
+
+function RowsCard({ theme }: { theme: "light" | "dark" }) {
+  return (
+    <div
+      data-theme={theme}
+      style={{
+        display: "grid",
+        padding: 16,
+        borderRadius: 12,
+        background: "var(--i258-background)",
+        color: "var(--i258-foreground)",
+        fontFamily: "var(--i258-font-sans)",
+        fontSize: "var(--i258-text-sm)",
+        minWidth: 340,
+        flex: "1 1 340px",
+      }}
+    >
+      {ROW_STATES.map(({ state, background }, i) => (
+        <div
+          key={state}
+          data-row-state={state}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            boxSizing: "border-box",
+            minHeight: "var(--i258-row-height)",
+            padding: "var(--i258-row-pad-y) 12px",
+            background,
+            borderTop: i === 0 ? undefined : "1px solid var(--i258-border)",
+            boxShadow:
+              state === "selected"
+                ? "inset 2px 0 0 var(--i258-indicator)"
+                : undefined,
+          }}
+        >
+          <Checkbox aria-label={`Select ${state} row`} />
+          <Checkbox aria-label={`Select ${state} row (checked)`} defaultChecked />
+          <span style={{ width: 64, color: "var(--i258-muted)" }}>{state}</span>
+          <ToggleChip size="sm">off</ToggleChip>
+          <ToggleChip size="sm" pressed>
+            on
+          </ToggleChip>
+          <Input size="sm" aria-label={`Note for ${state} row`} placeholder="Note" style={{ width: 96 }} />
+          <Button size="sm" variant="secondary">
+            Open
+          </Button>
+          <Badge variant="warning">blocked</Badge>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export const ControlsOnRows: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+      <RowsCard theme="light" />
+      <RowsCard theme="dark" />
     </div>
   ),
 };
