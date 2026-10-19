@@ -1,33 +1,28 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { Preview } from "@storybook/react-vite";
 import "@i258/ui/styles.css";
 
 /**
  * Gate Chromatic / Playwright VRT on the self-hosted face so snapshots
  * never capture system fallback metrics.
+ *
+ * A loader, not a decorator: loaders finish before the story renders, so a
+ * play function never queries an empty canvas. As a decorator that rendered
+ * `null` until the fonts resolved, any play story that ran first on a fresh
+ * page (shuffled order, or `-t` on one story) found `<div />` and failed
+ * (I25-117).
  */
-function FontReady({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        await Promise.all([
-          document.fonts.load('1em "Geist Sans"'),
-          document.fonts.load('1em "Geist Mono"'),
-        ]);
-        await document.fonts.ready;
-      } catch {
-        // Fall through — better a fallback snapshot than a hung story.
-      }
-      if (!cancelled) setReady(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  if (!ready) return null;
-  return children;
+async function fontsReady() {
+  try {
+    await Promise.all([
+      document.fonts.load('1em "Geist Sans"'),
+      document.fonts.load('1em "Geist Mono"'),
+    ]);
+    await document.fonts.ready;
+  } catch {
+    // Fall through — better a fallback snapshot than a hung story.
+  }
+  return {};
 }
 
 /** Token names the Storybook backgrounds toolbar resolves via CSS vars. */
@@ -41,9 +36,10 @@ const CANVAS_TOKEN_VARS = [
 
 /**
  * Docs autodocs mounts one ThemeHost per embed in the same document. Each
- * used to save/restore `:root` on cleanup; sibling unmounts (FontReady /
- * Strict Mode) wiped the dark tokens mid-paint — Mac VRT captured white
- * `.docs-story` canvases while Linux got settled dark (ui#42, ratio 0.27).
+ * used to save/restore `:root` on cleanup; sibling unmounts (the old
+ * FontReady gate / Strict Mode) wiped the dark tokens mid-paint — Mac VRT
+ * captured white `.docs-story` canvases while Linux got settled dark (ui#42,
+ * ratio 0.27).
  * Refcount: only clear `:root` when the last docs host unmounts.
  */
 let docsRootMirrorCount = 0;
@@ -192,17 +188,16 @@ const preview: Preview = {
     theme: "light",
     backgrounds: { value: "background" },
   },
+  loaders: [fontsReady],
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme as string) ?? "light";
       // Docs embeds many stories in one document — don't fight over body paint.
       const paintCanvas = context.viewMode === "story";
       return (
-        <FontReady>
-          <ThemeHost theme={theme} paintCanvas={paintCanvas}>
-            <Story />
-          </ThemeHost>
-        </FontReady>
+        <ThemeHost theme={theme} paintCanvas={paintCanvas}>
+          <Story />
+        </ThemeHost>
       );
     },
   ],
