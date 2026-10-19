@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useMediaQueryState } from "./media-query-state.js";
 
 /**
  * Subscribe to a CSS media query.
@@ -10,21 +10,5 @@ import * as React from "react";
  * and pass the result to AppFrame as `sidebarMode` / `inspectorOpen`.
  */
 export function useMediaQuery(query: string, fallback = false): boolean {
-  const subscribe = React.useCallback(
-    (onChange: () => void) => {
-      if (typeof window === "undefined" || !window.matchMedia) return () => {};
-      const mql = window.matchMedia(query);
-      mql.addEventListener("change", onChange);
-      return () => mql.removeEventListener("change", onChange);
-    },
-    [query],
-  );
-  return React.useSyncExternalStore(
-    subscribe,
-    () =>
-      typeof window === "undefined" || !window.matchMedia
-        ? fallback
-        : window.matchMedia(query).matches,
-    () => fallback,
-  );
+  return useMediaQueryState(query) ?? fallback;
 }

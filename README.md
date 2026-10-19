@@ -100,6 +100,8 @@ That puts our primitives above preflight/`components` and below utilities (so ut
 - **Kit owns:** layout, resize handles (window-splitter `role="separator"`), the icon rail, landmarks (sidebar `aside` + primary `nav`, header banner, `main`, inspector `aside`), the skip link, scroll padding under the sticky header, and the narrow-screen sheets.
 - **Shared breakpoints:** below **768px** (`FRAME_NARROW_NAV`) the sidebar is a modal start sheet; below **980px** (`FRAME_NARROW_INSPECTOR`) the inspector is a modal end sheet. `useFrameLayout()` tells header controls which applies (a menu button opening `navSheetOpen`, or a rail toggle).
 - **App owns:** sidebar/inspector content, routing, the open/selected state (`sidebarMode`, `navSheetOpen`, `inspectorOpen`), closing the nav sheet on navigation, and persisting widths.
+- **One sheet at a time:** if both sheets are asked for, the newer one shows and the frame calls the other's `on…OpenChange(false)` (both at once: the inspector wins). A narrow page hydrated with `navSheetOpen` keeps it; only a real narrow → wide change closes it.
+- **Widths fit the frame:** drawn widths (and what the handles announce) are clamped so `main` keeps `mainMinWidth` (default 320px); pane minimums are floors, and stored/controlled widths are not rewritten.
 - **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`.
 
 ## Workspace

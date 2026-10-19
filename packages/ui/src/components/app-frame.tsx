@@ -11,7 +11,7 @@ import {
   SidebarModeContext,
   type SidebarMode,
 } from "../lib/frame-context.js";
-import { useMediaQuery } from "../lib/use-media-query.js";
+import { useMediaQueryState } from "../lib/media-query-state.js";
 import { cn } from "../lib/utils.js";
 
 export type { SidebarMode };
@@ -29,8 +29,65 @@ export const FRAME_NARROW_INSPECTOR = "(max-width: 61.24rem)";
  */
 export function useFrameLayout(): { navIsSheet: boolean; inspectorIsSheet: boolean } {
   return {
-    navIsSheet: useMediaQuery(FRAME_NARROW_NAV),
-    inspectorIsSheet: useMediaQuery(FRAME_NARROW_INSPECTOR),
+    navIsSheet: useMediaQueryState(FRAME_NARROW_NAV) ?? false,
+    inspectorIsSheet: useMediaQueryState(FRAME_NARROW_INSPECTOR) ?? false,
+  };
+}
+
+type Sheet = "nav" | "inspector";
+type SheetAsks = { nav: boolean; inspector: boolean; owner: Sheet | null };
+
+/**
+ * One modal sheet at a time. Two sibling modal dialogs would each hide the
+ * other from assistive tech and fight over focus, so when both are asked
+ * for, the one asked for most recently owns the screen; if both arrive in
+ * the same render (a deep link, a hydrated narrow page) the inspector does.
+ */
+function nextSheetAsks(prev: SheetAsks, nav: boolean, inspector: boolean): SheetAsks {
+  let owner: Sheet | null = nav ? "nav" : inspector ? "inspector" : null;
+  if (nav && inspector) {
+    const navNew = !prev.nav;
+    const inspectorNew = !prev.inspector;
+    owner = navNew && !inspectorNew ? "nav" : inspectorNew && !navNew ? "inspector" : (prev.owner ?? "inspector");
+  }
+  return { nav, inspector, owner };
+}
+
+/**
+ * Pane widths that fit the frame. Each pane keeps its own min as a floor;
+ * the main pane keeps `mainMin` whenever the minima allow it. The sidebar
+ * may grow until the inspector is at its min; the inspector takes what is
+ * left. Stored widths are not rewritten, so a pane squeezed by a narrow
+ * frame returns to its width when the frame widens again.
+ */
+function fitPanes(o: {
+  frame: number | null;
+  mainMin: number;
+  sidebar: number | null;
+  sidebarMin: number;
+  sidebarMax: number;
+  /** Rail: a fixed width the sidebar takes regardless. */
+  sidebarFixed: number | null;
+  inspector: number | null;
+  inspectorMin: number;
+  inspectorMax: number;
+}) {
+  const room = o.frame == null ? Infinity : o.frame - o.mainMin;
+  const fit = (v: number, min: number, max: number) =>
+    Math.round(Math.max(min, Math.min(max, v)));
+  const sidebarMax =
+    o.sidebar == null
+      ? o.sidebarMin
+      : Math.max(o.sidebarMin, Math.min(o.sidebarMax, room - (o.inspector == null ? 0 : o.inspectorMin)));
+  const sidebar = o.sidebar == null ? null : fit(o.sidebar, o.sidebarMin, sidebarMax);
+  const taken = o.sidebarFixed ?? sidebar ?? 0;
+  const inspectorMax = Math.max(o.inspectorMin, Math.min(o.inspectorMax, room - taken));
+  const inspector = o.inspector == null ? null : fit(o.inspector, o.inspectorMin, inspectorMax);
+  return {
+    sidebar,
+    sidebarMax: Math.round(sidebarMax),
+    inspector,
+    inspectorMax: Math.round(inspectorMax),
   };
 }
 
@@ -43,7 +100,11 @@ export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
    * is a sheet instead, opened with `navSheetOpen`.
    */
   sidebarMode?: SidebarMode | undefined;
-  /** Expanded sidebar width in px. Uncontrolled when omitted. */
+  /**
+   * Expanded sidebar width in px. Uncontrolled when omitted. The width drawn
+   * (and announced by the handle) is fitted to the frame — see
+   * `mainMinWidth` — without rewriting this value.
+   */
   sidebarWidth?: number | undefined;
   defaultSidebarWidth?: number | undefined;
   onSidebarWidthChange?: ((width: number) => void) | undefined;
@@ -58,6 +119,12 @@ export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
    * button that opens it (see `useFrameLayout`) and closes it on navigation;
    * the frame closes it on Escape, the backdrop, its close button, and when
    * the window widens past the breakpoint.
+   *
+   * Only one sheet is shown at a time. Opening the nav sheet while the
+   * inspector sheet is open (or the reverse) shows the newer one and calls
+   * the other's `on…OpenChange(false)`; if both open together the inspector
+   * wins. A sheet the app keeps open anyway shows again once the other
+   * closes.
    */
   navSheetOpen?: boolean | undefined;
   onNavSheetOpenChange?: ((open: boolean) => void) | undefined;
@@ -68,6 +135,12 @@ export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
   /** Usually a `<FrameHeader>`; sticky at the top of the main pane. */
   header?: React.ReactNode | undefined;
   children?: React.ReactNode | undefined;
+  /**
+   * The main pane's minimum width in px (default 320). Pane widths are fitted
+   * so the main pane keeps it, as far as the panes' own minimum widths allow:
+   * those are floors.
+   */
+  mainMinWidth?: number | undefined;
   /** Id of the `<main>`; the skip link targets it. Generated when omitted. */
   mainId?: string | undefined;
   skipLinkLabel?: string | undefined;
@@ -157,6 +230,7 @@ export function AppFrame({
   closeNavSheetLabel = "Close navigation",
   header,
   children,
+  mainMinWidth = 320,
   mainId: mainIdProp,
   skipLinkLabel = "Skip to main content",
   inspector,
@@ -190,7 +264,11 @@ export function AppFrame({
     onInspectorWidthChange,
   );
 
-  const { navIsSheet, inspectorIsSheet } = useFrameLayout();
+  // `null` until measured: the server and hydration render the wide layout.
+  const navQuery = useMediaQueryState(FRAME_NARROW_NAV);
+  const inspectorQuery = useMediaQueryState(FRAME_NARROW_INSPECTOR);
+  const navIsSheet = navQuery === true;
+  const inspectorIsSheet = inspectorQuery === true;
   const sidebarWanted = sidebar != null && sidebarMode !== "hidden";
   const hasSidebar = sidebarWanted && !navIsSheet;
   const navSheet = sidebarWanted && navIsSheet;
@@ -198,14 +276,82 @@ export function AppFrame({
   const showInspector = inspectorWanted && !inspectorIsSheet;
   const inspectorSheet = inspector != null && inspectorIsSheet;
 
-  // Widened past the breakpoint with the sheet open: the sheet is gone, so
-  // say so — otherwise it would reopen on the next narrowing.
-  const navSheetStale = navSheetOpen && !navIsSheet;
-  React.useEffect(() => {
-    if (navSheetStale) onNavSheetOpenChange?.(false);
-  }, [navSheetStale, onNavSheetOpenChange]);
+  // —— sheet ownership ——
+  const navAsk = navSheet && navSheetOpen;
+  const inspectorAsk = inspectorSheet && inspectorWanted;
+  const [asks, setAsks] = React.useState<SheetAsks>(() =>
+    nextSheetAsks({ nav: false, inspector: false, owner: null }, navAsk, inspectorAsk),
+  );
+  let sheetOwner = asks.owner;
+  if (asks.nav !== navAsk || asks.inspector !== inspectorAsk) {
+    const next = nextSheetAsks(asks, navAsk, inspectorAsk);
+    sheetOwner = next.owner;
+    setAsks(next);
+  }
+  const navShown = navAsk && sheetOwner === "nav";
+  const inspectorShown = inspectorAsk && sheetOwner === "inspector";
+  const sheetOwnerRef = React.useRef(sheetOwner);
+  React.useLayoutEffect(() => {
+    sheetOwnerRef.current = sheetOwner;
+  }, [sheetOwner]);
 
+  // The displaced sheet is told it closed, so app state matches the screen.
+  const navDisplaced = navAsk && !navShown;
+  const inspectorDisplaced = inspectorAsk && !inspectorShown;
+  React.useEffect(() => {
+    if (navDisplaced) onNavSheetOpenChange?.(false);
+  }, [navDisplaced, onNavSheetOpenChange]);
+  React.useEffect(() => {
+    if (inspectorDisplaced) onInspectorOpenChange?.(false);
+  }, [inspectorDisplaced, onInspectorOpenChange]);
+
+  // Widened past the breakpoint with the sheet open: the sheet is gone, so
+  // say so — otherwise it would reopen on the next narrowing. Only on a real
+  // narrow → wide change: not for the wide fallback before the viewport is
+  // measured, which would close a sheet a narrow page hydrated open.
+  const prevNavQuery = React.useRef(navQuery);
+  React.useEffect(() => {
+    const was = prevNavQuery.current;
+    prevNavQuery.current = navQuery;
+    if (was === true && navQuery === false && navSheetOpen) onNavSheetOpenChange?.(false);
+  }, [navQuery, navSheetOpen, onNavSheetOpenChange]);
+
+  // —— pane widths fitted to the frame ——
+  const frameRef = React.useRef<HTMLDivElement>(null);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const [frameWidth, setFrameWidth] = React.useState<number | null>(null);
+  const [railWidth, setRailWidth] = React.useState(0);
+  const isRail = hasSidebar && sidebarMode === "rail";
+  React.useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const sync = () => {
+      setFrameWidth(frame.clientWidth);
+      const pane = sidebarRef.current;
+      setRailWidth(pane ? pane.getBoundingClientRect().width : 0);
+    };
+    sync();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(sync);
+    ro.observe(frame);
+    if (isRail && sidebarRef.current) ro.observe(sidebarRef.current);
+    return () => ro.disconnect();
+  }, [isRail]);
+
+  const fitted = fitPanes({
+    frame: frameWidth,
+    mainMin: mainMinWidth,
+    sidebar: hasSidebar && sidebarMode === "expanded" ? sidebarWidth : null,
+    sidebarMin: sidebarMinWidth,
+    sidebarMax: sidebarMaxWidth,
+    sidebarFixed: isRail ? railWidth : null,
+    inspector: showInspector ? inspectorWidth : null,
+    inspectorMin: inspectorMinWidth,
+    inspectorMax: inspectorMaxWidth,
+  });
+  const drawnSidebarWidth = fitted.sidebar ?? sidebarWidth;
+  const drawnInspectorWidth = fitted.inspector ?? inspectorWidth;
+
   const mainPaneRef = React.useRef<HTMLDivElement>(null);
   const [portal, setPortal] = React.useState<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = React.useState(false);
@@ -235,17 +381,23 @@ export function AppFrame({
   }, [headerEl]);
 
   // —— focus continuity ——
-  const lastFocus = React.useRef<{ el: HTMLElement; region: Region } | null>(null);
+  const lastFocus = React.useRef<{ el: HTMLElement; region: Region; inSheet: boolean } | null>(
+    null,
+  );
   const lastOutsideInspector = React.useRef<HTMLElement | null>(null);
+  const lastOutsideSheets = React.useRef<HTMLElement | null>(null);
 
   const onFocusCapture = (e: React.FocusEvent<HTMLDivElement>) => {
     const el = e.target as HTMLElement;
+    // Noted now: once a sheet unmounts, its elements have no ancestors.
+    const inSheet = el.closest(".i258-frame__layer") != null;
+    if (!inSheet) lastOutsideSheets.current = el;
     const region: Region = el.closest("[data-frame-pane='sidebar']")
       ? "sidebar"
       : el.closest("[data-frame-pane='inspector']")
         ? "inspector"
         : "other";
-    lastFocus.current = { el, region };
+    lastFocus.current = { el, region, inSheet };
     if (region !== "inspector") lastOutsideInspector.current = el;
   };
 
@@ -269,20 +421,35 @@ export function AppFrame({
           null;
       }
     } else {
-      const back = lastOutsideInspector.current;
+      // From an inspector sheet (whose content the app dropped, so the
+      // dialog is gone without returning focus): back to what had focus
+      // before any sheet, not to something inside another sheet.
+      const back = last.inSheet
+        ? lastOutsideSheets.current
+        : lastOutsideInspector.current;
       if (back && visible(back)) target = back;
     }
     (target ?? main)?.focus();
   }, [sidebarMode, hasSidebar, showInspector, inspectorWanted, mainId]);
+
+  // A closing sheet returns focus to what had it before (the default), or
+  // to the main pane if that is gone — but not when the other sheet has just
+  // taken over: that one places focus itself.
+  const sheetFinalFocus = React.useCallback((): boolean | HTMLElement | null => {
+    if (sheetOwnerRef.current) return false;
+    const back = lastOutsideSheets.current;
+    if (back && visible(back) && !back.closest("[inert]")) return back;
+    return document.getElementById(mainId);
+  }, [mainId]);
 
   const sidebarHandle =
     sidebarMode === "expanded" && sidebarResizable ? (
       <PaneResizeHandle
         label="Resize sidebar"
         edge="end"
-        value={sidebarWidth}
+        value={drawnSidebarWidth}
         min={sidebarMinWidth}
-        max={sidebarMaxWidth}
+        max={fitted.sidebarMax}
         onValueChange={setSidebarWidth}
         onActivate={onSidebarHandleActivate}
         controls={sidebarId}
@@ -291,6 +458,7 @@ export function AppFrame({
 
   return (
     <div
+      ref={frameRef}
       data-slot="app-frame"
       className={cn("i258-frame", className)}
       data-density={density}
@@ -303,8 +471,8 @@ export function AppFrame({
             ? "0px"
             : sidebarMode === "rail"
               ? "var(--i258-sidebar-rail)"
-              : `${sidebarWidth}px`,
-          "--i258-frame-inspector": showInspector ? `${inspectorWidth}px` : "0px",
+              : `${drawnSidebarWidth}px`,
+          "--i258-frame-inspector": showInspector ? `${drawnInspectorWidth}px` : "0px",
           ...style,
         } as React.CSSProperties
       }
@@ -358,7 +526,7 @@ export function AppFrame({
 
         {navSheet ? (
           <Dialog.Root
-            open={navSheetOpen}
+            open={navShown}
             onOpenChange={(open) => onNavSheetOpenChange?.(open)}
           >
             <Dialog.Portal container={portal}>
@@ -366,6 +534,7 @@ export function AppFrame({
               <Dialog.Popup
                 className="i258-frame__sheet"
                 data-placement="start"
+                finalFocus={sheetFinalFocus}
                 data-frame-pane="sidebar"
               >
                 <Dialog.Title className="i258-sr-only">{navSheetLabel}</Dialog.Title>
@@ -391,7 +560,7 @@ export function AppFrame({
 
         {inspectorSheet ? (
           <Dialog.Root
-            open={inspectorOpen}
+            open={inspectorShown}
             onOpenChange={(open) => onInspectorOpenChange?.(open)}
           >
             <Dialog.Portal container={portal}>
@@ -400,6 +569,7 @@ export function AppFrame({
                 className="i258-frame__sheet"
                 data-placement="end"
                 data-frame-pane="inspector"
+                finalFocus={sheetFinalFocus}
                 aria-label={inspectorLabel}
               >
                 {inspector}
@@ -419,9 +589,9 @@ export function AppFrame({
               <PaneResizeHandle
                 label="Resize inspector"
                 edge="start"
-                value={inspectorWidth}
+                value={drawnInspectorWidth}
                 min={inspectorMinWidth}
-                max={inspectorMaxWidth}
+                max={fitted.inspectorMax}
                 onValueChange={setInspectorWidth}
                 controls={inspectorId}
               />

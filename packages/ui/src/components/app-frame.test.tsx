@@ -45,6 +45,26 @@ describe("AppFrame on the server", () => {
     expect(html).not.toContain('role="dialog"');
   });
 
+  it("renders no sheet and unfitted, finite handle values before the viewport is known", () => {
+    const html = renderToString(
+      <AppFrame
+        sidebar={<Sidebar />}
+        sidebarWidth={400}
+        navSheetOpen
+        inspector={<Inspector title="Details" />}
+        inspectorOpen
+        inspectorWidth={720}
+      >
+        content
+      </AppFrame>,
+    );
+    expect(html).not.toContain('role="dialog"');
+    expect(html).toContain('aria-valuenow="400"');
+    expect(html).toContain('aria-valuemax="400"');
+    expect(html).toContain('aria-valuenow="720"');
+    expect(html).toContain('aria-valuemax="720"');
+  });
+
   it("useMediaQuery returns its fallback", () => {
     function Probe() {
       return <>{String(useMediaQuery("(min-width: 1px)", true))}</>;

@@ -1163,8 +1163,9 @@
   /* —— Pane resize handle ——
      A hit strip beside the pane edge, on the side with no scrollbar: just
      past a start pane's end edge, just inside an end pane's start edge.
-     At rest only the pane's hairline shows; hover, focus and dragging draw
-     a 2px --i258-indicator line (3:1) on the edge. */
+     At rest a short grip on the edge, in --i258-border-strong (3:1), marks
+     the control — the pane's hairline is decorative. Hover, focus and
+     dragging draw a 2px --i258-indicator line (3:1) the full height. */
   .i258-resize-handle {
     position: absolute;
     top: 0;
@@ -1181,6 +1182,31 @@
 
   .i258-resize-handle[data-edge="start"] {
     inset-inline-start: 0;
+  }
+
+  .i258-resize-handle::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    inset-inline-start: -2px;
+    width: 4px;
+    height: 1.5rem;
+    margin-top: -0.75rem;
+    border-radius: 2px;
+    background: var(--i258-border-strong);
+    transition: background-color var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  /* An end pane clips its overflow: keep the grip inside its edge. */
+  .i258-resize-handle[data-edge="start"]::before {
+    inset-inline-start: 0;
+  }
+
+  .i258-resize-handle:hover::before,
+  .i258-resize-handle:focus-visible::before,
+  :root[data-i258-resizing] .i258-resize-handle::before {
+    background: var(--i258-indicator);
   }
 
   .i258-resize-handle::after {
@@ -1646,6 +1672,14 @@
       min-height: var(--i258-target-coarse);
     }
 
+    /* No padding or border on the link, so the box is the same under either
+       box-sizing; a short label stays centred in the wider box. */
+    .i258-breadcrumb a {
+      justify-content: center;
+      min-width: var(--i258-target-coarse);
+      min-height: var(--i258-target-coarse);
+    }
+
     /* Chips are start-aligned flex; keep a short label centred once the
        min-width widens the pill. Option rows are full-width and stay left. */
     .i258-toggle-chip,
@@ -1678,7 +1712,15 @@
       outline-offset: -2px;
     }
 
+    .i258-resize-handle::before {
+      background: CanvasText;
+      forced-color-adjust: none;
+    }
+
     .i258-sidebar__item[data-current]::before,
+    .i258-resize-handle:hover::before,
+    .i258-resize-handle:focus-visible::before,
+    :root[data-i258-resizing] .i258-resize-handle::before,
     .i258-resize-handle:hover::after,
     .i258-resize-handle:focus-visible::after,
     :root[data-i258-resizing] .i258-resize-handle::after {
@@ -1702,6 +1744,7 @@
     .i258-disclosure__trigger,
     .i258-choice,
     .i258-sidebar__chevron,
+    .i258-resize-handle::before,
     .i258-resize-handle::after,
     .i258-frame-header::after,
     .i258-frame__backdrop,
