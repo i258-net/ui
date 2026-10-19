@@ -16,7 +16,7 @@ const meta = {
 } satisfies Meta;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
 
 function Readout() {
   const nav = useMediaQuery(FRAME_NARROW_NAV);
