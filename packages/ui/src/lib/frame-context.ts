@@ -33,3 +33,13 @@ export const FramePortalContext = React.createContext<HTMLElement | null>(null);
 export const FrameHeaderRefContext = React.createContext<
   ((el: HTMLElement | null) => void) | null
 >(null);
+
+/**
+ * The frame's own layout, for `useFrameLayout` inside it: which panes are
+ * sheets, including the inspector's narrow-container fallback. `null`
+ * outside a frame.
+ */
+export const FrameLayoutContext = React.createContext<{
+  navIsSheet: boolean;
+  inspectorIsSheet: boolean;
+} | null>(null);

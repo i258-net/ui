@@ -4,8 +4,11 @@ import { useRender } from "@base-ui/react/use-render";
 
 import { Button } from "./button.js";
 import { PaneResizeHandle } from "./pane-resize-handle.js";
+import { useComposedRefs } from "../lib/compose-refs.js";
+import { fitPanes, inspectorFits } from "../lib/frame-fit.js";
 import {
   FrameHeaderRefContext,
+  FrameLayoutContext,
   FramePortalContext,
   SidebarHandleContext,
   SidebarModeContext,
@@ -22,16 +25,21 @@ export const FRAME_NARROW_NAV = "(max-width: 47.99rem)";
 export const FRAME_NARROW_INSPECTOR = "(max-width: 61.24rem)";
 
 /**
- * Which panes are sheets at the current width, using the frame's shared
- * breakpoints. For header controls: a menu button that opens the nav sheet
- * when `navIsSheet`, a rail toggle otherwise. Both are `false` on the server
- * and during hydration.
+ * Which panes are sheets. For header controls: a menu button that opens the
+ * nav sheet when `navIsSheet`, a rail toggle otherwise. Both are `false` on
+ * the server and during hydration.
+ *
+ * Inside an AppFrame (in its header, sidebar, main or inspector) this is the
+ * frame's own layout, including an inspector shown as a sheet because the
+ * frame is too narrow for it. Outside one it is the shared viewport
+ * breakpoints. The two agree on `navIsSheet` always, and on
+ * `inspectorIsSheet` whenever the frame fills the viewport.
  */
 export function useFrameLayout(): { navIsSheet: boolean; inspectorIsSheet: boolean } {
-  return {
-    navIsSheet: useMediaQueryState(FRAME_NARROW_NAV) ?? false,
-    inspectorIsSheet: useMediaQueryState(FRAME_NARROW_INSPECTOR) ?? false,
-  };
+  const frame = React.useContext(FrameLayoutContext);
+  const navIsSheet = useMediaQueryState(FRAME_NARROW_NAV) ?? false;
+  const inspectorIsSheet = useMediaQueryState(FRAME_NARROW_INSPECTOR) ?? false;
+  return frame ?? { navIsSheet, inspectorIsSheet };
 }
 
 type Sheet = "nav" | "inspector";
@@ -51,44 +59,6 @@ function nextSheetAsks(prev: SheetAsks, nav: boolean, inspector: boolean): Sheet
     owner = navNew && !inspectorNew ? "nav" : inspectorNew && !navNew ? "inspector" : (prev.owner ?? "inspector");
   }
   return { nav, inspector, owner };
-}
-
-/**
- * Pane widths that fit the frame. Each pane keeps its own min as a floor;
- * the main pane keeps `mainMin` whenever the minima allow it. The sidebar
- * may grow until the inspector is at its min; the inspector takes what is
- * left. Stored widths are not rewritten, so a pane squeezed by a narrow
- * frame returns to its width when the frame widens again.
- */
-function fitPanes(o: {
-  frame: number | null;
-  mainMin: number;
-  sidebar: number | null;
-  sidebarMin: number;
-  sidebarMax: number;
-  /** Rail: a fixed width the sidebar takes regardless. */
-  sidebarFixed: number | null;
-  inspector: number | null;
-  inspectorMin: number;
-  inspectorMax: number;
-}) {
-  const room = o.frame == null ? Infinity : o.frame - o.mainMin;
-  const fit = (v: number, min: number, max: number) =>
-    Math.round(Math.max(min, Math.min(max, v)));
-  const sidebarMax =
-    o.sidebar == null
-      ? o.sidebarMin
-      : Math.max(o.sidebarMin, Math.min(o.sidebarMax, room - (o.inspector == null ? 0 : o.inspectorMin)));
-  const sidebar = o.sidebar == null ? null : fit(o.sidebar, o.sidebarMin, sidebarMax);
-  const taken = o.sidebarFixed ?? sidebar ?? 0;
-  const inspectorMax = Math.max(o.inspectorMin, Math.min(o.inspectorMax, room - taken));
-  const inspector = o.inspector == null ? null : fit(o.inspector, o.inspectorMin, inspectorMax);
-  return {
-    sidebar,
-    sidebarMax: Math.round(sidebarMax),
-    inspector,
-    inspectorMax: Math.round(inspectorMax),
-  };
 }
 
 export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
@@ -139,6 +109,13 @@ export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
    * The main pane's minimum width in px (default 320). Pane widths are fitted
    * so the main pane keeps it, as far as the panes' own minimum widths allow:
    * those are floors.
+   *
+   * A frame narrower than its minima (embedded in a narrow container on a
+   * wide screen) first shows the inspector as a sheet, as below 980px. If
+   * the sidebar and main pane still do not fit, they share the frame in
+   * proportion to their minima, below both, rather than push anything past
+   * the frame's edge. The nav sheet follows the viewport only, because the
+   * app owns the button that opens it (see `useFrameLayout`).
    */
   mainMinWidth?: number | undefined;
   /** Id of the `<main>`; the skip link targets it. Generated when omitted. */
@@ -147,7 +124,8 @@ export type AppFrameProps = Omit<React.ComponentProps<"div">, "children"> & {
 
   /**
    * Usually an `<Inspector>`; shown while `inspectorOpen` — as an end pane,
-   * or below 980px as a modal end sheet over the main pane.
+   * or as a modal end sheet over the main pane below 980px or when the frame
+   * is too narrow for it (see `mainMinWidth`).
    */
   inspector?: React.ReactNode | undefined;
   inspectorOpen?: boolean | undefined;
@@ -207,7 +185,9 @@ type Region = "sidebar" | "inspector" | "other";
  * Narrow screens (shared defaults): below 768px the sidebar is a modal
  * start sheet, below 980px the inspector a modal end sheet. The sheets are
  * Base UI dialogs, which trap focus, make the rest inert and return focus to
- * whatever opened them. The app owns the content and routing.
+ * whatever opened them. The app owns the content and routing. A frame too
+ * narrow for its panes' minimum widths also shows the inspector as a sheet
+ * (see `mainMinWidth`).
  *
  * Inline panes: focus is never dropped by the frame's own changes. If the
  * focused element disappears because the sidebar collapses, hides or turns
@@ -246,6 +226,8 @@ export function AppFrame({
   density,
   className,
   style,
+  ref,
+  onFocusCapture: onFocusCaptureProp,
   ...props
 }: AppFrameProps) {
   const generatedId = React.useId();
@@ -268,13 +250,53 @@ export function AppFrame({
   const navQuery = useMediaQueryState(FRAME_NARROW_NAV);
   const inspectorQuery = useMediaQueryState(FRAME_NARROW_INSPECTOR);
   const navIsSheet = navQuery === true;
-  const inspectorIsSheet = inspectorQuery === true;
   const sidebarWanted = sidebar != null && sidebarMode !== "hidden";
   const hasSidebar = sidebarWanted && !navIsSheet;
   const navSheet = sidebarWanted && navIsSheet;
+  const isRail = hasSidebar && sidebarMode === "rail";
+
+  // —— the frame's own width ——
+  // The consumer's ref is composed with ours, never in place of it.
+  const frameRef = React.useRef<HTMLDivElement>(null);
+  const setFrameRef = useComposedRefs(frameRef, ref);
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const [frameWidth, setFrameWidth] = React.useState<number | null>(null);
+  const [railWidth, setRailWidth] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const sync = () => {
+      // 0 while hidden (display: none, a closed tab): keep the last width
+      // rather than treat the frame as too narrow for anything.
+      if (frame.clientWidth > 0) setFrameWidth(frame.clientWidth);
+      const pane = sidebarRef.current;
+      setRailWidth(pane ? pane.getBoundingClientRect().width : 0);
+    };
+    sync();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(sync);
+    ro.observe(frame);
+    if (isRail && sidebarRef.current) ro.observe(sidebarRef.current);
+    return () => ro.disconnect();
+  }, [isRail]);
+
+  // Below 980px, or in a frame too narrow for the inspector beside the
+  // sidebar and main pane at their minimum widths, the inspector is a sheet.
+  const inspectorIsSheet =
+    inspectorQuery === true ||
+    !inspectorFits({
+      frame: frameWidth,
+      sidebarFloor: !hasSidebar ? 0 : isRail ? railWidth : sidebarMinWidth,
+      mainMin: mainMinWidth,
+      inspectorMin: inspectorMinWidth,
+    });
   const inspectorWanted = inspector != null && inspectorOpen;
   const showInspector = inspectorWanted && !inspectorIsSheet;
   const inspectorSheet = inspector != null && inspectorIsSheet;
+  const layout = React.useMemo(
+    () => ({ navIsSheet, inspectorIsSheet }),
+    [navIsSheet, inspectorIsSheet],
+  );
 
   // —— sheet ownership ——
   const navAsk = navSheet && navSheetOpen;
@@ -316,28 +338,17 @@ export function AppFrame({
     if (was === true && navQuery === false && navSheetOpen) onNavSheetOpenChange?.(false);
   }, [navQuery, navSheetOpen, onNavSheetOpenChange]);
 
-  // —— pane widths fitted to the frame ——
-  const frameRef = React.useRef<HTMLDivElement>(null);
-  const sidebarRef = React.useRef<HTMLDivElement>(null);
-  const [frameWidth, setFrameWidth] = React.useState<number | null>(null);
-  const [railWidth, setRailWidth] = React.useState(0);
-  const isRail = hasSidebar && sidebarMode === "rail";
-  React.useLayoutEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const sync = () => {
-      setFrameWidth(frame.clientWidth);
-      const pane = sidebarRef.current;
-      setRailWidth(pane ? pane.getBoundingClientRect().width : 0);
-    };
-    sync();
-    if (typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(sync);
-    ro.observe(frame);
-    if (isRail && sidebarRef.current) ro.observe(sidebarRef.current);
-    return () => ro.disconnect();
-  }, [isRail]);
+  // Nav sheet open, then the sidebar goes away (no `sidebar`, or `hidden`)
+  // at the same width: the sheet is gone too, so say so — otherwise it
+  // would reopen when the sidebar comes back.
+  const prevNavSheet = React.useRef(navSheet);
+  React.useEffect(() => {
+    const was = prevNavSheet.current;
+    prevNavSheet.current = navSheet;
+    if (was && !navSheet && navIsSheet && navSheetOpen) onNavSheetOpenChange?.(false);
+  }, [navSheet, navIsSheet, navSheetOpen, onNavSheetOpenChange]);
 
+  // —— pane widths fitted to the frame ——
   const fitted = fitPanes({
     frame: frameWidth,
     mainMin: mainMinWidth,
@@ -388,6 +399,7 @@ export function AppFrame({
   const lastOutsideSheets = React.useRef<HTMLElement | null>(null);
 
   const onFocusCapture = (e: React.FocusEvent<HTMLDivElement>) => {
+    onFocusCaptureProp?.(e);
     const el = e.target as HTMLElement;
     // Noted now: once a sheet unmounts, its elements have no ancestors.
     const inSheet = el.closest(".i258-frame__layer") != null;
@@ -403,34 +415,47 @@ export function AppFrame({
 
   React.useLayoutEffect(() => {
     const last = lastFocus.current;
-    if (!last || last.region === "other") return;
+    if (!last || (last.region === "other" && !last.inSheet)) return;
     const active = document.activeElement;
     if (visible(last.el)) return;
     // Focus already went somewhere on purpose (e.g. the app moved it).
     if (active && active !== document.body && active !== last.el) return;
+    // A sheet on screen (say the inspector, once the nav sheet it was
+    // waiting behind is gone) places focus itself.
+    if (sheetOwner) return;
 
     const main = document.getElementById(mainId);
     let target: HTMLElement | null = null;
-    if (last.region === "sidebar") {
-      const pane = sidebarRef.current;
-      if (pane && visible(pane)) {
-        const current = pane.querySelector<HTMLElement>("[aria-current]");
-        target =
-          (current && visible(current) ? current : null) ??
-          [...pane.querySelectorAll<HTMLElement>(FOCUSABLE)].find(visible) ??
-          null;
-      }
-    } else {
-      // From an inspector sheet (whose content the app dropped, so the
-      // dialog is gone without returning focus): back to what had focus
-      // before any sheet, not to something inside another sheet.
-      const back = last.inSheet
-        ? lastOutsideSheets.current
-        : lastOutsideInspector.current;
+    const pane = sidebarRef.current;
+    if (last.region === "sidebar" && pane && visible(pane)) {
+      // Into the inline sidebar, from it or from the nav sheet it replaced.
+      const current = pane.querySelector<HTMLElement>("[aria-current]");
+      target =
+        (current && visible(current) ? current : null) ??
+        [...pane.querySelectorAll<HTMLElement>(FOCUSABLE)].find(visible) ??
+        null;
+    } else if (last.inSheet) {
+      // A sheet that vanished without closing — the app dropped its content
+      // (`sidebar` or `inspector` gone, or the sidebar hidden) — so it did
+      // not return focus: back to what had focus before any sheet, not to
+      // something inside another sheet.
+      const back = lastOutsideSheets.current;
+      if (back && visible(back) && !back.closest("[inert]")) target = back;
+    } else if (last.region === "inspector") {
+      const back = lastOutsideInspector.current;
       if (back && visible(back)) target = back;
     }
     (target ?? main)?.focus();
-  }, [sidebarMode, hasSidebar, showInspector, inspectorWanted, mainId]);
+  }, [
+    sidebarMode,
+    hasSidebar,
+    navSheet,
+    showInspector,
+    inspectorSheet,
+    inspectorWanted,
+    sheetOwner,
+    mainId,
+  ]);
 
   // A closing sheet returns focus to what had it before (the default), or
   // to the main pane if that is gone — but not when the other sheet has just
@@ -448,7 +473,7 @@ export function AppFrame({
         label="Resize sidebar"
         edge="end"
         value={drawnSidebarWidth}
-        min={sidebarMinWidth}
+        min={fitted.sidebarMin}
         max={fitted.sidebarMax}
         onValueChange={setSidebarWidth}
         onActivate={onSidebarHandleActivate}
@@ -458,7 +483,8 @@ export function AppFrame({
 
   return (
     <div
-      ref={frameRef}
+      {...props}
+      ref={setFrameRef}
       data-slot="app-frame"
       className={cn("i258-frame", className)}
       data-density={density}
@@ -476,7 +502,6 @@ export function AppFrame({
           ...style,
         } as React.CSSProperties
       }
-      {...props}
     >
       <a
         className="i258-skip-link"
@@ -490,6 +515,7 @@ export function AppFrame({
         {skipLinkLabel}
       </a>
 
+      <FrameLayoutContext.Provider value={layout}>
       <FramePortalContext.Provider value={portal}>
         {hasSidebar ? (
           <div
@@ -590,7 +616,7 @@ export function AppFrame({
                 label="Resize inspector"
                 edge="start"
                 value={drawnInspectorWidth}
-                min={inspectorMinWidth}
+                min={fitted.inspectorMin}
                 max={fitted.inspectorMax}
                 onValueChange={setInspectorWidth}
                 controls={inspectorId}
@@ -600,6 +626,7 @@ export function AppFrame({
           </aside>
         ) : null}
       </FramePortalContext.Provider>
+      </FrameLayoutContext.Provider>
 
       {/* Floating layers (sheets, rail names) portal here to inherit the
           frame's theme and density. */}
@@ -654,14 +681,7 @@ export function FrameHeader({
   ...props
 }: FrameHeaderProps) {
   const register = React.useContext(FrameHeaderRefContext);
-  const setRef = React.useCallback(
-    (el: HTMLElement | null) => {
-      register?.(el);
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    },
-    [register, ref],
-  );
+  const setRef = useComposedRefs<HTMLElement>(register ?? undefined, ref);
   return (
     <header
       ref={setRef}

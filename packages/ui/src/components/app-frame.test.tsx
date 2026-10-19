@@ -65,6 +65,20 @@ describe("AppFrame on the server", () => {
     expect(html).toContain('aria-valuemax="720"');
   });
 
+  it("accepts a consumer ref without touching it on the server", () => {
+    const objectRef = React.createRef<HTMLDivElement>();
+    const calls: unknown[] = [];
+    const html = renderToString(
+      <>
+        <AppFrame ref={objectRef} sidebar={<Sidebar />}>a</AppFrame>
+        <AppFrame ref={(el) => void calls.push(el)} sidebar={<Sidebar />}>b</AppFrame>
+      </>,
+    );
+    expect(html.match(/data-slot="app-frame"/g)).toHaveLength(2);
+    expect(objectRef.current).toBeNull();
+    expect(calls).toEqual([]);
+  });
+
   it("useMediaQuery returns its fallback", () => {
     function Probe() {
       return <>{String(useMediaQuery("(min-width: 1px)", true))}</>;

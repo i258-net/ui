@@ -28,11 +28,23 @@ export type FrameDemoProps = {
    * modal sheet makes the page inert.
    */
   testHooks?: boolean;
+  /**
+   * Pass the app's own ref to AppFrame, as an object or a callback ref (with
+   * a React 19 cleanup). What it saw is in `window.__frameDemo.refLog`.
+   */
+  consumerRef?: "object" | "callback";
 };
 
 export type FrameDemoHooks = {
   setNavOpen: (open: boolean) => void;
   setSelected: (id: string | null) => void;
+  /** Drop the `sidebar` prop entirely (as an app with no nav on a route). */
+  setSidebarPresent: (present: boolean) => void;
+  setMode: (mode: SidebarMode) => void;
+  /** Keep the record selected when the frame reports the inspector closed. */
+  setKeepInspector: (keep: boolean) => void;
+  /** What the consumer ref saw: `attach:<width>`, `detach`. */
+  refLog: string[];
   /** Every `on…OpenChange` / `on…WidthChange` call the frame made. */
   calls: string[];
 };
@@ -59,18 +71,45 @@ export function FrameDemo({
   controlledWidths,
   dir,
   testHooks = false,
+  consumerRef,
 }: FrameDemoProps) {
   const { navIsSheet } = useFrameLayout();
   const [mode, setMode] = React.useState<SidebarMode>(initialMode);
   const [navOpen, setNavOpen] = React.useState(initialNavOpen);
   const [selected, setSelected] = React.useState<string | null>(initialInspector);
   const [widths, setWidths] = React.useState(controlledWidths);
+  const [sidebarPresent, setSidebarPresent] = React.useState(true);
   const row = ROWS.find((r) => r.id === selected);
 
   const calls = React.useRef<string[]>([]);
+  const refLog = React.useRef<string[]>([]);
+  const keepInspector = React.useRef(false);
+  const objectRef = React.useRef<HTMLDivElement>(null);
+  const callbackRef = React.useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    refLog.current.push(`attach:${el.clientWidth}`);
+    return () => {
+      refLog.current.push("detach");
+    };
+  }, []);
+  React.useLayoutEffect(() => {
+    if (consumerRef === "object" && objectRef.current) {
+      refLog.current.push(`attach:${objectRef.current.clientWidth}`);
+    }
+  }, [consumerRef]);
   React.useEffect(() => {
     if (!testHooks) return;
-    window.__frameDemo = { setNavOpen, setSelected, calls: calls.current };
+    window.__frameDemo = {
+      setNavOpen,
+      setSelected,
+      setSidebarPresent,
+      setMode,
+      setKeepInspector: (keep) => {
+        keepInspector.current = keep;
+      },
+      calls: calls.current,
+      refLog: refLog.current,
+    };
     return () => {
       delete window.__frameDemo;
     };
@@ -104,19 +143,22 @@ export function FrameDemo({
 
   return (
     <AppFrame
+      ref={consumerRef === "object" ? objectRef : consumerRef === "callback" ? callbackRef : undefined}
       dir={dir}
       data-demo-nav-open={navOpen ? "" : undefined}
       data-demo-selected={selected ?? undefined}
       sidebar={
-        <DemoSidebar
-          footer={
-            testHooks ? (
-              <Button variant="secondary" size="sm" onClick={() => setSelected("item-5")}>
-                Open latest record
-              </Button>
-            ) : null
-          }
-        />
+        sidebarPresent ? (
+          <DemoSidebar
+            footer={
+              testHooks ? (
+                <Button variant="secondary" size="sm" onClick={() => setSelected("item-5")}>
+                  Open latest record
+                </Button>
+              ) : null
+            }
+          />
+        ) : null
       }
       sidebarMode={mode}
       onSidebarHandleActivate={() => setMode("rail")}
@@ -176,10 +218,11 @@ export function FrameDemo({
       inspectorOpen={row != null}
       onInspectorOpenChange={(open) => {
         log(`inspector:${open}`);
-        if (!open) setSelected(null);
+        if (!open && !keepInspector.current) setSelected(null);
       }}
       inspectorLabel="Item details"
     >
+      {testHooks ? <LayoutProbe /> : null}
       {widths ? (
         <p data-testid="stored-widths" style={{ marginTop: 0 }}>
           Stored widths: sidebar {widths.sidebar}, inspector {widths.inspector}
@@ -205,5 +248,20 @@ export function FrameDemo({
         </div>
       ) : null}
     </AppFrame>
+  );
+}
+
+/** What `useFrameLayout` reports from inside the frame. */
+function LayoutProbe() {
+  const { navIsSheet, inspectorIsSheet } = useFrameLayout();
+  return (
+    <p
+      data-testid="frame-layout"
+      data-nav-sheet={String(navIsSheet)}
+      data-inspector-sheet={String(inspectorIsSheet)}
+      style={{ marginTop: 0 }}
+    >
+      Layout: nav {navIsSheet ? "sheet" : "inline"}, inspector {inspectorIsSheet ? "sheet" : "inline"}
+    </p>
   );
 }

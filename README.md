@@ -102,7 +102,9 @@ That puts our primitives above preflight/`components` and below utilities (so ut
 - **App owns:** sidebar/inspector content, routing, the open/selected state (`sidebarMode`, `navSheetOpen`, `inspectorOpen`), closing the nav sheet on navigation, and persisting widths.
 - **One sheet at a time:** if both sheets are asked for, the newer one shows and the frame calls the other's `on…OpenChange(false)` (both at once: the inspector wins). A narrow page hydrated with `navSheetOpen` keeps it; only a real narrow → wide change closes it.
 - **Widths fit the frame:** drawn widths (and what the handles announce) are clamped so `main` keeps `mainMinWidth` (default 320px); pane minimums are floors, and stored/controlled widths are not rewritten.
-- **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`.
+- **Frames narrower than their minimums** (embedded in a narrow container on a wide screen): the inspector becomes the end sheet, as below 980px; if the sidebar and `main` still do not fit, they share the frame in proportion to their minimums rather than push anything past its edge. The nav sheet follows the viewport only, since the app owns its opener. `useFrameLayout()` called inside the frame reports the frame's actual layout; outside it, the viewport breakpoints.
+- **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`. A sheet whose content the app removes (no `sidebar`, `sidebarMode="hidden"`, no `inspector`) returns focus to what had it before the sheet, unless another sheet takes over; a nav sheet removed that way is reported closed.
+- **Refs:** a `ref` on `AppFrame` is composed with the frame's own (object or callback refs, including React 19 callback cleanups).
 
 ## Workspace
 

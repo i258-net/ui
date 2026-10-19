@@ -372,6 +372,244 @@ test.describe("pane widths fit the frame", () => {
   });
 });
 
+test.describe("a consumer ref does not replace the frame's own", () => {
+  for (const story of ["consumer-ref", "consumer-callback-ref"]) {
+    test(`${story}: 980px, controlled 400/720 still fit, the ref sees the frame once`, async ({ page }) => {
+      await page.setViewportSize({ width: 980, height: 700 });
+      await open(page, story);
+      await expect(page.getByTestId("stored-widths")).toHaveText("Stored widths: sidebar 400, inspector 720");
+      expect(await panes(page)).toMatchObject({
+        frame: 980,
+        sidebar: 340,
+        inspector: 320,
+        main: 320,
+        sidebarHandle: { now: 340, max: 340 },
+        inspectorHandle: { now: 320, max: 320 },
+      });
+      expect(await closeReachable(page)).toBe(true);
+
+      // Re-renders (a resize, then a handle step) neither re-attach nor
+      // detach the consumer's ref: it is not swapped out per render.
+      await page.setViewportSize({ width: 1280, height: 700 });
+      await expect.poll(async () => (await panes(page)).inspector).toBe(560);
+      await page.getByRole("separator", { name: "Resize inspector" }).focus();
+      await page.keyboard.press("ArrowRight");
+      expect(await page.evaluate(() => [...window.__frameDemo!.refLog])).toEqual(["attach:980"]);
+    });
+  }
+});
+
+/** Every pane's box inside the frame's, and the main pane not collapsed. */
+async function contained(page: Page) {
+  return page.evaluate(() => {
+    const frame = document.querySelector(".i258-frame")!.getBoundingClientRect();
+    const boxes = [...document.querySelectorAll(".i258-frame__sidebar, .i258-frame__main, .i258-frame__inspector")].map(
+      (el) => el.getBoundingClientRect(),
+    );
+    const main = document.querySelector(".i258-frame__main")!.getBoundingClientRect();
+    return {
+      inside: boxes.every((b) => b.left >= frame.left - 0.5 && b.right <= frame.right + 0.5),
+      main: Math.round(main.width),
+      sum: Math.round(boxes.reduce((n, b) => n + b.width, 0)),
+      frame: Math.round(frame.width),
+    };
+  });
+}
+
+const layout = (page: Page) =>
+  page.getByTestId("frame-layout").evaluate((el) => ({
+    nav: el.getAttribute("data-nav-sheet"),
+    inspector: el.getAttribute("data-inspector-sheet"),
+  }));
+
+test.describe("a frame narrower than its panes' minima (1280px window)", () => {
+  test.use({ viewport: { width: 1280, height: 700 } });
+
+  const embed = (page: Page, width: number) =>
+    page.locator("#storybook-root").evaluate((el, w) => (el.style.width = `${w}px`), width);
+
+  test("450px: the inspector is a sheet, reachable and closable; sidebar and main share the frame", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await embed(page, 450);
+    expect(await layout(page)).toEqual({ nav: "false", inspector: "true" });
+
+    const opener = page.getByRole("button", { name: "Open Example record 2" });
+    await opener.click();
+    const sheet = page.getByRole("dialog", { name: "Item details" });
+    await expect(sheet).toBeVisible();
+    await expect(page.getByRole("complementary", { name: "Item details" })).toHaveCount(0);
+    await settled(page);
+    expect(await exposedDialogs(page)).toEqual(["Item details"]);
+    expect(await closeReachable(page)).toBe(true);
+    await expect.poll(() => focusIn(sheet)).toBe(true);
+
+    await sheet.getByRole("button", { name: "Close inspector" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    expect(await calls(page)).toEqual([]);
+
+    // Sidebar (min 200) and main (min 320) do not fit either: they share
+    // 450 in proportion, and the handle reports a fixed width.
+    const c = await contained(page);
+    expect(c).toMatchObject({ inside: true, frame: 450 });
+    expect(c.sum).toBeLessThanOrEqual(450);
+    expect(c.main).toBeGreaterThan(200);
+    const p = await panes(page);
+    expect(p.sidebar).toBe(Math.floor((450 * 200) / 520));
+    expect(p.sidebarHandle).toEqual({ now: p.sidebar, min: p.sidebar, max: p.sidebar });
+  });
+
+  for (const width of [320, 240]) {
+    test(`${width}px: nothing past the frame's edge, main still usable, handle values coherent`, async ({ page }) => {
+      await open(page, "sheet-harness");
+      await embed(page, width);
+      const c = await contained(page);
+      expect(c.inside).toBe(true);
+      expect(c.sum).toBeLessThanOrEqual(width);
+      expect(c.main).toBeGreaterThan(0);
+      const h = (await panes(page)).sidebarHandle!;
+      expect(h.min).toBeLessThanOrEqual(h.now);
+      expect(h.now).toBeLessThanOrEqual(h.max);
+      expect([h.min, h.now, h.max].every((v) => Number.isFinite(v) && v >= 0)).toBe(true);
+      // The main pane's own controls are inside the frame.
+      const box = (await page.getByRole("button", { name: "Open Example record 1" }).boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+    });
+  }
+
+  test("rail and hidden sidebar: the inspector is inline only when it fits", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await page.evaluate(() => window.__frameDemo!.setMode("hidden"));
+    await page.getByRole("button", { name: "Open Example record 1" }).click();
+    // 640 = main 320 + inspector 320: inline at 640, a sheet at 639.
+    await embed(page, 640);
+    await expect(page.getByRole("complementary", { name: "Item details" })).toBeVisible();
+    expect(await panes(page)).toMatchObject({ main: 320, inspector: 320, inspectorHandle: { now: 320, min: 320, max: 320 } });
+    await embed(page, 639);
+    await expect(page.getByRole("dialog", { name: "Item details" })).toBeVisible();
+    expect(await layout(page)).toEqual({ nav: "false", inspector: "true" });
+    // The record stays the app's across the switch.
+    expect(await calls(page)).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    expect(await calls(page)).toEqual(["inspector:false"]);
+  });
+
+  test("widening the container brings the inspector back inline, and the full-window defaults are unchanged", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await page.getByRole("button", { name: "Open Example record 3" }).click();
+    await expect(page.getByRole("complementary", { name: "Item details" })).toBeVisible();
+    expect(await layout(page)).toEqual({ nav: "false", inspector: "false" });
+
+    await embed(page, 450);
+    await expect(page.getByRole("dialog", { name: "Item details" })).toBeVisible();
+    await page.evaluate(() => window.__frameDemo!.setSelected("item-3"));
+    await embed(page, 1280);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("complementary", { name: "Item details" })).toBeVisible();
+    expect(await layout(page)).toEqual({ nav: "false", inspector: "false" });
+    expect(await calls(page)).toEqual([]);
+  });
+
+  test("a hidden frame (0px) keeps its last layout instead of opening a sheet", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await page.getByRole("button", { name: "Open Example record 1" }).click();
+    await page.locator("#storybook-root").evaluate((el) => (el.style.display = "none"));
+    await page.waitForFunction(() => document.querySelector(".i258-frame")!.clientWidth === 0);
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page.locator("#storybook-root").evaluate((el) => (el.style.display = ""));
+    await expect(page.getByRole("complementary", { name: "Item details" })).toBeVisible();
+  });
+});
+
+test.describe("the nav sheet's sidebar goes away while it is open (390px)", () => {
+  test.use({ viewport: { width: 390, height: 700 } });
+
+  for (const how of ["sidebar removed", "sidebar hidden"] as const) {
+    test(`${how}: focus back to the opener, the app is told, it does not come back`, async ({ page }) => {
+      await open(page, "sheet-harness");
+      const opener = page.getByRole("button", { name: "Open navigation" });
+      await opener.click();
+      const nav = page.getByRole("dialog", { name: "Navigation" });
+      await expect(nav).toBeVisible();
+      await settled(page);
+      await expect.poll(() => focusIn(nav)).toBe(true);
+
+      await page.evaluate(
+        (h) =>
+          h === "sidebar removed"
+            ? window.__frameDemo!.setSidebarPresent(false)
+            : window.__frameDemo!.setMode("hidden"),
+        how,
+      );
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      expect(await calls(page)).toEqual(["nav:false"]);
+      await expect(page.locator(".i258-frame")).not.toHaveAttribute("data-demo-nav-open");
+
+      // Back again: no sheet pops open by itself.
+      await page.evaluate(
+        (h) =>
+          h === "sidebar removed"
+            ? window.__frameDemo!.setSidebarPresent(true)
+            : window.__frameDemo!.setMode("expanded"),
+        how,
+      );
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      await opener.click();
+      await expect(nav).toBeVisible();
+    });
+  }
+
+  test("an inspector waiting behind nav takes over when nav goes, and keeps focus", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await page.getByRole("button", { name: "Open Example record 2" }).click();
+    await expect(page.getByRole("dialog", { name: "Item details" })).toBeVisible();
+    await settled(page);
+    // The app keeps its record when told the inspector was displaced.
+    await page.evaluate(() => {
+      window.__frameDemo!.setKeepInspector(true);
+      window.__frameDemo!.setNavOpen(true);
+    });
+    const nav = page.getByRole("dialog", { name: "Navigation" });
+    await expect(nav).toBeVisible();
+    await settled(page);
+    await expect.poll(() => focusIn(nav)).toBe(true);
+    expect(await calls(page)).toEqual(["inspector:false"]);
+
+    await page.evaluate(() => window.__frameDemo!.setSidebarPresent(false));
+    const inspector = page.getByRole("dialog", { name: "Item details" });
+    await expect(inspector).toBeVisible();
+    await expect(nav).toHaveCount(0);
+    await settled(page);
+    expect(await exposedDialogs(page)).toEqual(["Item details"]);
+    await expect.poll(() => focusIn(inspector)).toBe(true);
+    expect(await calls(page)).toEqual(["inspector:false", "nav:false"]);
+
+    // Closing it returns focus to what had it before any sheet.
+    await page.evaluate(() => window.__frameDemo!.setKeepInspector(false));
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Open Example record 2" })).toBeFocused();
+  });
+
+  test("removing the sidebar while the inspector sheet is shown leaves its focus alone", async ({ page }) => {
+    await open(page, "sheet-harness");
+    await page.getByRole("button", { name: "Open Example record 4" }).click();
+    const inspector = page.getByRole("dialog", { name: "Item details" });
+    await expect(inspector).toBeVisible();
+    await settled(page);
+    const close = inspector.getByRole("button", { name: "Close inspector" });
+    await close.focus();
+    await page.evaluate(() => window.__frameDemo!.setSidebarPresent(false));
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    await expect(close).toBeFocused();
+    expect(await calls(page)).toEqual([]);
+  });
+});
+
 /** WCAG contrast ratio between two computed rgb() colours. */
 function contrastScript() {
   const parse = (c: string) => (c.match(/[\d.]+/g) ?? []).map(Number);

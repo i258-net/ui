@@ -242,6 +242,47 @@ export const ControlledWidths: Story = {
   ),
 };
 
+/**
+ * The app passes its own ref (an object ref) alongside controlled widths:
+ * the frame still measures itself. vrt/frame-panes.spec.ts drives it.
+ */
+export const ConsumerRef: Story = {
+  name: "Consumer ref",
+  render: () => (
+    <FrameDemo
+      testHooks
+      consumerRef="object"
+      controlledWidths={{ sidebar: 400, inspector: 720 }}
+      initialInspector="item-1"
+    />
+  ),
+};
+
+/** As above with a callback ref that returns a cleanup (React 19). */
+export const ConsumerCallbackRef: Story = {
+  name: "Consumer callback ref",
+  render: () => (
+    <FrameDemo
+      testHooks
+      consumerRef="callback"
+      controlledWidths={{ sidebar: 400, inspector: 720 }}
+      initialInspector="item-1"
+    />
+  ),
+};
+
+/** Inspector open on load. Screenshot at 1280×800 by vrt/frame-screens.spec.ts. */
+export const InspectorOpen: Story = {
+  name: "Inspector open",
+  render: () => <FrameDemo initialInspector="item-3" />,
+};
+
+/** Nav sheet open on load. Screenshot at 390×700 by vrt/frame-screens.spec.ts. */
+export const NavSheetOpen: Story = {
+  name: "Nav sheet open",
+  render: () => <FrameDemo initialNavOpen />,
+};
+
 /** No sidebar on wide screens (and no nav sheet below 768px). */
 export const SidebarHidden: Story = {
   name: "Sidebar hidden",
