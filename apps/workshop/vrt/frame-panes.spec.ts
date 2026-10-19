@@ -761,12 +761,16 @@ for (const boxSizing of ["content-box", "border-box"] as const) {
         const header = (await page.getByRole("banner").boundingBox())!;
         expect(box.y).toBeGreaterThanOrEqual(header.y);
         expect(box.y + box.height).toBeLessThanOrEqual(header.y + header.height + 0.5);
-        // What a tap at the link's corners hits.
+        // What a tap 1px inside each edge hits. Edge midpoints, not corners:
+        // hit testing follows the link's border-radius, so a point 1px in from
+        // a corner is outside it (on Linux, where the box is whole pixels).
         const hits = await page.evaluate(
           (b) =>
             [
-              [b.x + 1, b.y + 1],
-              [b.x + b.width - 1, b.y + b.height - 1],
+              [b.x + b.width / 2, b.y + 1],
+              [b.x + b.width - 1, b.y + b.height / 2],
+              [b.x + b.width / 2, b.y + b.height - 1],
+              [b.x + 1, b.y + b.height / 2],
             ].every(([x, y]) => document.elementFromPoint(x!, y!)?.closest("a")?.textContent === "Workspace"),
           box,
         );
