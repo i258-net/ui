@@ -431,7 +431,7 @@ test.describe("a frame narrower than its panes' minima (1280px window)", () => {
   test("450px: the inspector is a sheet, reachable and closable; sidebar and main share the frame", async ({ page }) => {
     await open(page, "sheet-harness");
     await embed(page, 450);
-    expect(await layout(page)).toEqual({ nav: "false", inspector: "true" });
+    await expect.poll(() => layout(page)).toEqual({ nav: "false", inspector: "true" });
 
     const opener = page.getByRole("button", { name: "Open Example record 2" });
     await opener.click();
@@ -463,8 +463,8 @@ test.describe("a frame narrower than its panes' minima (1280px window)", () => {
     test(`${width}px: nothing past the frame's edge, main still usable, handle values coherent`, async ({ page }) => {
       await open(page, "sheet-harness");
       await embed(page, width);
+      await expect.poll(async () => (await contained(page)).inside).toBe(true);
       const c = await contained(page);
-      expect(c.inside).toBe(true);
       expect(c.sum).toBeLessThanOrEqual(width);
       expect(c.main).toBeGreaterThan(0);
       const h = (await panes(page)).sidebarHandle!;
@@ -484,7 +484,10 @@ test.describe("a frame narrower than its panes' minima (1280px window)", () => {
     // 640 = main 320 + inspector 320: inline at 640, a sheet at 639.
     await embed(page, 640);
     await expect(page.getByRole("complementary", { name: "Item details" })).toBeVisible();
-    expect(await panes(page)).toMatchObject({ main: 320, inspector: 320, inspectorHandle: { now: 320, min: 320, max: 320 } });
+    // Already inline at 1280: visible does not mean the narrower fit has landed.
+    await expect
+      .poll(() => panes(page))
+      .toMatchObject({ main: 320, inspector: 320, inspectorHandle: { now: 320, min: 320, max: 320 } });
     await embed(page, 639);
     await expect(page.getByRole("dialog", { name: "Item details" })).toBeVisible();
     expect(await layout(page)).toEqual({ nav: "false", inspector: "true" });
