@@ -1,7 +1,7 @@
 {
   "name": "@i258/ui",
   "version": "0.7.3",
-  "description": "i258 Design System — shared UI primitives for i258 apps",
+  "description": "i258 Design System \u2014 shared UI primitives for i258 apps",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -91,6 +91,22 @@
     "./choice": {
       "types": "./dist/components/choice.d.ts",
       "import": "./dist/components/choice.js"
+    },
+    "./app-frame": {
+      "types": "./dist/components/app-frame.d.ts",
+      "import": "./dist/components/app-frame.js"
+    },
+    "./sidebar": {
+      "types": "./dist/components/sidebar.d.ts",
+      "import": "./dist/components/sidebar.js"
+    },
+    "./pane-resize-handle": {
+      "types": "./dist/components/pane-resize-handle.d.ts",
+      "import": "./dist/components/pane-resize-handle.js"
+    },
+    "./use-media-query": {
+      "types": "./dist/lib/use-media-query.d.ts",
+      "import": "./dist/lib/use-media-query.js"
     },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css"

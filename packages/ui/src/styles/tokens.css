@@ -45,6 +45,13 @@
   --i258-control-xs: 1.5rem;
   --i258-target-coarse: 2.75rem;
 
+  /* Frame. The header's minimum height (it grows when it wraps), the icon
+     rail's width, and the hit strip of a pane resize handle — the 24px
+     target floor, 44px on coarse pointers (components.css). */
+  --i258-header-height: 3.25rem;
+  --i258-sidebar-rail: 3.25rem;
+  --i258-resize-target: var(--i258-control-xs);
+
   --i258-duration-fast: 120ms;
   --i258-duration-normal: 200ms;
   --i258-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -95,5 +102,12 @@
   :root,
   [data-density] {
     --i258-row-height: var(--i258-target-coarse);
+  }
+
+  /* Frame: 44px resize strips, and a rail wide enough for 44px items
+     (plus the sidebar's 1px edge). */
+  :root {
+    --i258-resize-target: var(--i258-target-coarse);
+    --i258-sidebar-rail: calc(var(--i258-target-coarse) + 1rem + 1px);
   }
 }

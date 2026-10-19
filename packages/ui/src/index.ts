@@ -73,4 +73,40 @@ export {
 } from "./components/choice.js";
 export type { ChoiceGroupProps, ChoiceProps } from "./components/choice.js";
 
+export {
+  AppFrame,
+  FrameHeader,
+  Inspector,
+  useFrameLayout,
+  FRAME_NARROW_NAV,
+  FRAME_NARROW_INSPECTOR,
+} from "./components/app-frame.js";
+export type {
+  AppFrameProps,
+  FrameHeaderProps,
+  FrameBreadcrumb,
+  InspectorProps,
+  SidebarMode,
+} from "./components/app-frame.js";
+
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarSection,
+  SidebarItem,
+  useSidebarCollapsed,
+} from "./components/sidebar.js";
+export type {
+  SidebarProps,
+  SidebarSectionProps,
+  SidebarItemProps,
+} from "./components/sidebar.js";
+
+export { PaneResizeHandle } from "./components/pane-resize-handle.js";
+export type { PaneResizeHandleProps } from "./components/pane-resize-handle.js";
+
+export { useMediaQuery } from "./lib/use-media-query.js";
+
 export { cn } from "./lib/utils.js";
