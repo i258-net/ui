@@ -112,14 +112,19 @@ function pointer(el: Element, type: string, x: number) {
   );
 }
 
+/** Press, move by `dx`, wait for the value to change from where it started, release. */
 async function drag(el: Element, dx: number) {
   const rect = el.getBoundingClientRect();
   const x = rect.left + rect.width / 2;
+  const start = el.getAttribute("aria-valuenow");
   pointer(el, "pointerdown", x);
-  pointer(el, "pointermove", x + dx);
-  await waitFor(() => expect(el).not.toHaveAttribute("aria-valuenow", "240"));
-  pointer(el, "pointerup", x + dx);
-  if (el.hasPointerCapture(1)) el.releasePointerCapture(1);
+  try {
+    pointer(el, "pointermove", x + dx);
+    await waitFor(() => expect(el.getAttribute("aria-valuenow")).not.toBe(start));
+  } finally {
+    pointer(el, "pointerup", x + dx);
+    if (el.hasPointerCapture(1)) el.releasePointerCapture(1);
+  }
 }
 
 const resizing = () => document.documentElement.dataset.i258Resizing;
@@ -239,6 +244,19 @@ export const PreventedHandlers: Story = {
   },
 };
 
+/** The shared resizing state as A's subtree starts unmounting, before its effects clean up. */
+let resizingAsAUnmounts: string | undefined;
+
+function UnmountProbe({ children }: { children: React.ReactNode }) {
+  React.useLayoutEffect(
+    () => () => {
+      resizingAsAUnmounts = resizing();
+    },
+    [],
+  );
+  return children;
+}
+
 /**
  * The document-wide resizing state belongs to the drag that set it: an
  * idle handle unmounting mid-drag elsewhere leaves it alone, and a handle
@@ -261,9 +279,11 @@ export const SharedResizingState: Story = {
           Remove B
         </button>
         {a ? (
-          <div style={{ position: "relative", width: 40, height: 120 }}>
-            <PaneResizeHandle {...args} label="Resize A" value={wa} onValueChange={setWa} />
-          </div>
+          <UnmountProbe>
+            <div style={{ position: "relative", width: 40, height: 120 }}>
+              <PaneResizeHandle {...args} label="Resize A" value={wa} onValueChange={setWa} />
+            </div>
+          </UnmountProbe>
         ) : null}
         {b ? (
           <div style={{ position: "relative", width: 40, height: 120 }}>
@@ -277,22 +297,35 @@ export const SharedResizingState: Story = {
     const canvas = within(canvasElement);
     const handleA = canvas.getByRole("separator", { name: "Resize A" });
     const x = handleA.getBoundingClientRect().left;
+    const root = document.documentElement;
+    const original = root.dataset.i258Resizing;
+    resizingAsAUnmounts = undefined;
 
-    // Another frame (or another copy of the kit) is mid-drag too.
-    document.documentElement.dataset.i258Resizing = "elsewhere";
-    pointer(handleA, "pointerdown", x);
-    await expect(resizing()?.split(" ")).toHaveLength(2);
+    try {
+      // Another frame (or another copy of the kit) is mid-drag too.
+      root.dataset.i258Resizing = "elsewhere";
+      pointer(handleA, "pointerdown", x);
+      const claims = resizing()?.split(" ") ?? [];
+      await expect(claims).toHaveLength(2);
+      const tokenA = claims.find((t) => t !== "elsewhere");
 
-    // Idle B goes away: A's drag and the other one are untouched.
-    await userEvent.click(canvas.getByRole("button", { name: "Remove B" }));
-    await expect(canvas.queryByRole("separator", { name: "Resize B" })).toBeNull();
-    await expect(resizing()?.split(" ")).toHaveLength(2);
+      // Idle B goes away: A's drag and the other one are untouched.
+      await userEvent.click(canvas.getByRole("button", { name: "Remove B" }));
+      await expect(canvas.queryByRole("separator", { name: "Resize B" })).toBeNull();
+      await expect(resizing()).toBe(`elsewhere ${tokenA}`);
 
-    // A goes away mid-drag: only its own claim is released.
-    if (handleA.hasPointerCapture(1)) handleA.releasePointerCapture(1);
-    await userEvent.click(canvas.getByRole("button", { name: "Remove A" }));
-    await expect(canvas.queryByRole("separator", { name: "Resize A" })).toBeNull();
-    await expect(resizing()).toBe("elsewhere");
-    delete document.documentElement.dataset.i258Resizing;
+      // A goes away mid-drag: only its own claim is released. Removed from
+      // the keyboard so no pointer event can end A's drag first; the probe
+      // shows A still held its claim as it unmounted.
+      canvas.getByRole("button", { name: "Remove A" }).focus();
+      await userEvent.keyboard("{Enter}");
+      await expect(canvas.queryByRole("separator", { name: "Resize A" })).toBeNull();
+      await expect(resizingAsAUnmounts).toBe(`elsewhere ${tokenA}`);
+      await expect(resizing()).toBe("elsewhere");
+    } finally {
+      if (handleA.isConnected && handleA.hasPointerCapture(1)) handleA.releasePointerCapture(1);
+      if (original === undefined) delete root.dataset.i258Resizing;
+      else root.dataset.i258Resizing = original;
+    }
   },
 };
