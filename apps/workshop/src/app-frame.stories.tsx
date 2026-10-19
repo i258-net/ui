@@ -216,3 +216,74 @@ export const Hydration: Story = {
     await expect(errors).toEqual([]);
   },
 };
+
+/**
+ * Test harness, no play function: a sidebar action that opens a record
+ * while the nav sheet is open, and `window.__frameDemo` to drive app state
+ * behind a modal sheet. vrt/frame.spec.ts checks the one-sheet-at-a-time
+ * rule with it.
+ */
+export const SheetHarness: Story = {
+  name: "Sheet ownership harness",
+  render: () => <FrameDemo testHooks />,
+};
+
+/** Nav sheet and inspector both open on the first render (a deep link). */
+export const BothSheetsRequested: Story = {
+  name: "Both sheets requested",
+  render: () => <FrameDemo testHooks initialNavOpen initialInspector="item-3" />,
+};
+
+/** Widths held in app state; the frame fits them without rewriting them. */
+export const ControlledWidths: Story = {
+  name: "Controlled widths",
+  render: () => (
+    <FrameDemo testHooks controlledWidths={{ sidebar: 400, inspector: 720 }} initialInspector="item-1" />
+  ),
+};
+
+/** No sidebar on wide screens (and no nav sheet below 768px). */
+export const SidebarHidden: Story = {
+  name: "Sidebar hidden",
+  render: () => <FrameDemo initialMode="hidden" initialInspector="item-1" />,
+};
+
+export const RightToLeft: Story = {
+  name: "Right to left",
+  render: () => <FrameDemo dir="rtl" initialInspector="item-1" />,
+};
+
+function HydratedNarrow() {
+  const host = React.useRef<HTMLDivElement>(null);
+  const [errors, setErrors] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const el = host.current!;
+    const demo = <FrameDemo testHooks initialNavOpen />;
+    el.innerHTML = renderToString(demo);
+    const found: string[] = [];
+    const root = hydrateRoot(el, demo, {
+      onRecoverableError: (e) => found.push(String(e)),
+    });
+    const t = setTimeout(() => setErrors(found.join("\n")), 100);
+    return () => {
+      clearTimeout(t);
+      root.unmount();
+    };
+  }, []);
+  return (
+    <>
+      <div ref={host} />
+      {errors != null ? <output data-testid="hydration-errors">{errors}</output> : null}
+    </>
+  );
+}
+
+/**
+ * Server markup with the nav sheet open in app state, hydrated in the
+ * browser. Driven at 390px by vrt/frame.spec.ts: the sheet must open once
+ * the viewport is known, not be closed by the server's wide fallback.
+ */
+export const HydrateNavOpen: Story = {
+  name: "SSR hydration, nav sheet open",
+  render: () => <HydratedNarrow />,
+};

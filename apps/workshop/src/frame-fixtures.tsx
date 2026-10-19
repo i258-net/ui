@@ -50,7 +50,14 @@ export const NAV = [
   },
 ];
 
-export function DemoSidebar({ current = "inbox" }: { current?: string }) {
+export function DemoSidebar({
+  current = "inbox",
+  footer,
+}: {
+  current?: string;
+  /** Extra footer content (e.g. an action that opens a record). */
+  footer?: React.ReactNode;
+}) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -82,6 +89,7 @@ export function DemoSidebar({ current = "inbox" }: { current?: string }) {
         <span data-sidebar-text style={{ padding: "0 0.5rem", color: "var(--i258-muted)" }}>
           Synced 2 min ago
         </span>
+        {footer}
       </SidebarFooter>
     </Sidebar>
   );
