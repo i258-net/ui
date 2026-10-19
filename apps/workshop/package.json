@@ -9,8 +9,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo 'workshop lint: deferred'",
     "test": "playwright install chromium && vitest run",
-    "vrt": "playwright test",
-    "vrt:update": "playwright test --update-snapshots"
+    "vrt": "pnpm --filter @i258/ui build:css && playwright test",
+    "vrt:update": "pnpm --filter @i258/ui build:css && playwright test --update-snapshots"
   },
   "dependencies": {
     "@i258/ui": "workspace:*",
