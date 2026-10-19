@@ -29,6 +29,43 @@ export type PaneResizeHandleProps = Omit<
 
 const RESIZING = "i258Resizing";
 
+/*
+  `data-i258-resizing` on the root holds a token per active drag, so a
+  handle that ends (or unmounts) only removes its own: another handle — in
+  this frame, another frame, or another copy of the kit — mid-drag keeps the
+  document in col-resize / no-select until it ends too.
+*/
+function claimResizing(doc: Document): string {
+  const token = Math.random().toString(36).slice(2);
+  const held = doc.documentElement.dataset[RESIZING];
+  doc.documentElement.dataset[RESIZING] = held ? `${held} ${token}` : token;
+  return token;
+}
+
+function releaseResizing(doc: Document, token: string) {
+  const root = doc.documentElement;
+  const rest = (root.dataset[RESIZING] ?? "").split(" ").filter((t) => t && t !== token);
+  if (rest.length) root.dataset[RESIZING] = rest.join(" ");
+  else delete root.dataset[RESIZING];
+}
+
+/**
+ * The caller's handler runs first. `prevents` handlers then skip the
+ * handle's own behaviour if the caller called `preventDefault()`; the
+ * others (ending a drag) always run, so a drag can't be left stuck.
+ */
+function compose<E extends React.SyntheticEvent>(
+  theirs: ((event: E) => void) | undefined,
+  ours: (event: E) => void,
+  prevents = true,
+): (event: E) => void {
+  return (event) => {
+    theirs?.(event);
+    if (prevents && event.defaultPrevented) return;
+    ours(event);
+  };
+}
+
 /**
  * Window-splitter pattern: a focusable `role="separator"` with a value.
  * Drag with a pointer, or focus it and use ←/→ (Shift for bigger steps),
@@ -37,6 +74,12 @@ const RESIZING = "i258Resizing";
  * Its hit area is a reserved strip beside the pane edge (24px, 44px on
  * coarse pointers); AppFrame pads the neighbouring content so no other
  * target sits under it.
+ *
+ * Your `onPointerDown`, `onPointerMove`, `onKeyDown` and `onDoubleClick`
+ * run before the handle's own; call `event.preventDefault()` in one to opt
+ * that event out of starting a drag, resizing, or `onActivate`. Your
+ * `onPointerUp`, `onPointerCancel` and `onLostPointerCapture` run too, but
+ * can't stop a drag from ending.
  */
 export function PaneResizeHandle({
   label,
@@ -49,10 +92,23 @@ export function PaneResizeHandle({
   controls,
   step = 16,
   className,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerCancel,
+  onLostPointerCapture,
+  onDoubleClick,
+  onKeyDown,
   ...props
 }: PaneResizeHandleProps) {
   const clamp = (n: number) => Math.round(Math.min(max, Math.max(min, n)));
-  const drag = React.useRef<{ x: number; w: number; dir: number } | null>(null);
+  const drag = React.useRef<{
+    x: number;
+    w: number;
+    dir: number;
+    doc: Document;
+    token: string;
+  } | null>(null);
 
   // Physical direction a growing pane moves its edge: +1 is rightward.
   const growDir = (el: HTMLElement) => {
@@ -61,12 +117,14 @@ export function PaneResizeHandle({
   };
 
   const endDrag = React.useCallback(() => {
+    const d = drag.current;
+    if (!d) return;
     drag.current = null;
-    delete document.documentElement.dataset[RESIZING];
+    releaseResizing(d.doc, d.token);
   }, []);
 
   // Unmounted mid-drag (e.g. the app collapsed the pane): don't leave the
-  // document stuck in col-resize / no-select.
+  // document stuck in col-resize / no-select. Idle, this touches nothing.
   React.useEffect(() => endDrag, [endDrag]);
 
   return (
@@ -82,22 +140,29 @@ export function PaneResizeHandle({
       data-slot="pane-resize-handle"
       data-edge={edge}
       className={cn("i258-resize-handle", className)}
-      onPointerDown={(e) => {
+      onPointerDown={compose(onPointerDown, (e) => {
         if (e.button !== 0) return;
-        e.currentTarget.setPointerCapture(e.pointerId);
-        drag.current = { x: e.clientX, w: value, dir: growDir(e.currentTarget) };
-        document.documentElement.dataset[RESIZING] = "";
-      }}
-      onPointerMove={(e) => {
+        endDrag();
+        const el = e.currentTarget;
+        el.setPointerCapture(e.pointerId);
+        drag.current = {
+          x: e.clientX,
+          w: value,
+          dir: growDir(el),
+          doc: el.ownerDocument,
+          token: claimResizing(el.ownerDocument),
+        };
+      })}
+      onPointerMove={compose(onPointerMove, (e) => {
         const d = drag.current;
         if (!d) return;
         onValueChange(clamp(d.w + (e.clientX - d.x) * d.dir));
-      }}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onLostPointerCapture={endDrag}
-      onDoubleClick={onActivate}
-      onKeyDown={(e) => {
+      })}
+      onPointerUp={compose(onPointerUp, endDrag, false)}
+      onPointerCancel={compose(onPointerCancel, endDrag, false)}
+      onLostPointerCapture={compose(onLostPointerCapture, endDrag, false)}
+      onDoubleClick={compose(onDoubleClick, () => onActivate?.())}
+      onKeyDown={compose(onKeyDown, (e) => {
         const by = e.shiftKey ? step * 4 : step;
         const dir = growDir(e.currentTarget);
         let next: number | null = null;
@@ -113,7 +178,7 @@ export function PaneResizeHandle({
         if (next === null) return;
         e.preventDefault();
         onValueChange(clamp(next));
-      }}
+      })}
       {...props}
     />
   );
