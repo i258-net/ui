@@ -43,7 +43,15 @@ for (const theme of THEMES) {
           ]);
           await document.fonts.ready;
         });
-        await expect(root).toHaveScreenshot(`${story.name}-${theme}.png`);
+        // TEMPORARY (I25-106 baseline harvest): the palette change repaints
+        // badge-status within the default per-pixel threshold, so it passes
+        // against its stale baseline and CI emits no actual. threshold: 0 on
+        // this story alone makes it fail and upload one. Revert once the two
+        // actuals are committed; per-pixel sensitivity in general is I25-120.
+        await expect(root).toHaveScreenshot(
+          `${story.name}-${theme}.png`,
+          story.name === "badge-status" ? { threshold: 0 } : {},
+        );
       });
     }
   });
