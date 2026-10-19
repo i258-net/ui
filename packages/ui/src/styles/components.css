@@ -1,4 +1,11 @@
-/* Component styles — class names are package-owned (i258-*), not Tailwind utilities. */
+/* Component styles — class names are package-owned (i258-*), not Tailwind utilities.
+
+   Two border weights on purpose: --i258-border is a decorative hairline
+   (panels, cards, separators, text-labelled buttons whose label already
+   identifies them). Anything whose edge identifies a control or a state —
+   inputs, textareas, checkboxes, toggle chips, choices — uses
+   --i258-border-strong, or --i258-indicator when pressed/current; both clear
+   3:1 on every surface, hovered and selected rows included (I25-100). */
 
 @layer i258-components {
   /* —— shared focus —— */
@@ -6,7 +13,6 @@
   .i258-input:focus-visible,
   .i258-textarea:focus-visible,
   .i258-link:focus-visible,
-  .i258-checkbox:focus-visible,
   .i258-toggle-chip:focus-visible,
   .i258-disclosure__trigger:focus-visible,
   .i258-choice:focus-visible {
@@ -42,20 +48,20 @@
   }
 
   .i258-btn--sm {
-    height: 2rem;
-    padding: 0 var(--i258-space-3);
+    height: var(--i258-control-sm);
+    padding: 0 var(--i258-space-2);
     font-size: var(--i258-text-sm);
   }
 
   .i258-btn--md {
-    height: 2.25rem;
-    padding: 0 var(--i258-space-4);
+    height: var(--i258-control-md);
+    padding: 0 var(--i258-space-3);
     font-size: var(--i258-text-sm);
   }
 
   .i258-btn--lg {
-    height: 2.75rem;
-    padding: 0 var(--i258-space-6);
+    height: var(--i258-control-lg);
+    padding: 0 var(--i258-space-4);
     font-size: var(--i258-text-md);
   }
 
@@ -72,14 +78,17 @@
     background: var(--i258-accent-hover);
   }
 
+  /* Text-labelled: the label identifies the control, so the edge can stay a
+     hairline. */
   .i258-btn--secondary {
-    background: var(--i258-surface);
+    background: var(--i258-background);
     color: var(--i258-foreground);
     border-color: var(--i258-border);
+    box-shadow: var(--i258-shadow-sm);
   }
 
   .i258-btn--secondary:hover:not(:disabled) {
-    background: var(--i258-background);
+    background: var(--i258-hover);
   }
 
   .i258-btn--ghost {
@@ -88,7 +97,7 @@
   }
 
   .i258-btn--ghost:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--i258-foreground) 8%, transparent);
+    background: var(--i258-hover);
   }
 
   .i258-btn--danger {
@@ -105,9 +114,9 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    border: 1px solid var(--i258-border);
+    border: 1px solid var(--i258-border-strong);
     border-radius: var(--i258-radius-md);
-    background: var(--i258-surface);
+    background: var(--i258-background);
     color: var(--i258-foreground);
     font-family: var(--i258-font-sans);
     line-height: var(--i258-leading-normal);
@@ -137,20 +146,20 @@
   }
 
   .i258-input--sm {
-    height: 2rem;
-    padding: 0 var(--i258-space-3);
+    height: var(--i258-control-sm);
+    padding: 0 var(--i258-space-2);
     font-size: var(--i258-text-sm);
   }
 
   .i258-input--md {
-    height: 2.25rem;
+    height: var(--i258-input-height);
     padding: 0 var(--i258-space-3);
     font-size: var(--i258-text-sm);
   }
 
   .i258-input--lg {
-    height: 2.75rem;
-    padding: 0 var(--i258-space-4);
+    height: var(--i258-control-lg);
+    padding: 0 var(--i258-space-3);
     font-size: var(--i258-text-md);
   }
 
@@ -191,11 +200,18 @@
     min-width: 0;
   }
 
+  /* Top-aligned beside a checkbox, so the label's first line is centred on
+     the checkbox's target (24px, 44px on coarse pointers) rather than
+     sitting at its top edge. */
+  .i258-form-field--horizontal:has(> .i258-checkbox) > .i258-form-field__copy > .i258-label {
+    margin-top: max(0px, calc((var(--i258-control-xs) - 1lh) / 2));
+  }
+
   .i258-form-field__description,
   .i258-form-field__error {
     font-family: var(--i258-font-sans);
-    font-size: var(--i258-text-sm);
-    line-height: var(--i258-leading-tight);
+    font-size: var(--i258-text-xs);
+    line-height: var(--i258-leading-snug);
   }
 
   .i258-form-field__description {
@@ -226,7 +242,7 @@
     flex: 0 0 auto;
     min-width: 7.5rem;
     font-family: var(--i258-font-sans);
-    font-size: 0.8rem;
+    font-size: var(--i258-text-xs);
     font-weight: 600;
     line-height: var(--i258-leading-tight);
   }
@@ -289,36 +305,79 @@
     text-decoration: underline;
   }
 
-  /* —— Checkbox —— */
+  /* —— Checkbox ——
+     The element is the target and the 16px box is drawn inside it. A hit
+     area that reached past the element (a larger ::after) took no layout
+     space, so two checkboxes closer than the target overlapped and the later
+     one won clicks on the earlier one's visible edge. Sized as the element,
+     each target is space the layout reserves: 24px on fine pointers, 44×44
+     on coarse, under either box-sizing (the element has no border or
+     padding to count). The root may be a <button> (`render={<button />}
+     nativeButton`), so its UA chrome is cleared here rather than left to a
+     consumer reset: a border or padding would grow a content-box target and
+     paint round the drawn box. */
   .i258-checkbox {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
+    position: relative;
+    width: var(--i258-control-xs);
+    height: var(--i258-control-xs);
+    min-width: 0;
+    min-height: 0;
     flex-shrink: 0;
-    border: 1px solid var(--i258-border);
-    border-radius: var(--i258-radius-sm);
-    background: var(--i258-surface);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    appearance: none;
+    font: inherit;
     color: var(--i258-accent-foreground);
     cursor: pointer;
+  }
+
+  /* The visible box. Its edge is 1rem under border-box and 1rem plus the
+     border under content-box, as it always has been. */
+  .i258-checkbox::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1rem;
+    height: 1rem;
+    translate: -50% -50%;
+    border: 1px solid var(--i258-border-strong);
+    border-radius: var(--i258-radius-sm);
+    background: var(--i258-background);
     transition:
       background-color var(--i258-duration-fast) var(--i258-ease-standard),
       border-color var(--i258-duration-fast) var(--i258-ease-standard);
   }
 
-  /* Base UI emits data-checked / data-indeterminate (not Radix data-state). */
-  .i258-checkbox[data-checked],
-  .i258-checkbox[data-indeterminate] {
-    background: var(--i258-accent);
-    border-color: var(--i258-accent);
+  /* The ring goes round the box, not the target. */
+  .i258-checkbox:focus-visible {
+    outline: none;
   }
 
-  .i258-checkbox[data-invalid]:not([data-checked]):not([data-indeterminate]) {
+  .i258-checkbox:focus-visible::before {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  /* Base UI emits data-checked / data-indeterminate (not Radix data-state). */
+  /* Edge in --i258-indicator, not the fill: Night's accent fill is under
+     3:1 on a selected row, and the box's outline is what says "checkbox". */
+  .i258-checkbox[data-checked]::before,
+  .i258-checkbox[data-indeterminate]::before {
+    background: var(--i258-accent);
+    border-color: var(--i258-indicator);
+  }
+
+  .i258-checkbox[data-invalid]:not([data-checked]):not([data-indeterminate])::before {
     border-color: var(--i258-danger);
   }
 
-  .i258-checkbox[data-invalid]:focus-visible {
+  .i258-checkbox[data-invalid]:focus-visible::before {
     outline-color: var(--i258-danger);
   }
 
@@ -327,7 +386,9 @@
     cursor: not-allowed;
   }
 
+  /* Positioned so the tick paints over the box. */
   .i258-checkbox__indicator {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -353,7 +414,7 @@
   }
 
   .i258-badge--neutral {
-    background: color-mix(in srgb, var(--i258-foreground) 8%, transparent);
+    background: var(--i258-surface-raised);
     border-color: var(--i258-border);
     color: var(--i258-foreground);
   }
@@ -363,29 +424,29 @@
      The earlier note here said wash+tint failed axe at 12px — it did, because
      the *tone* was used as the label colour. These use the `-text` tokens,
      which are the tone darkened (Day) or the tone as-is (Night); every
-     combination clears 4.5:1 on background, surface and surface-raised.
+     combination clears 4.5:1 on its wash (src/lib/contrast.test.ts).
      Border mixes the `-text` token rather than the tone so the Day hairline
      is actually visible against a light wash. */
   .i258-badge--accent {
-    background: color-mix(in srgb, var(--i258-accent) 12%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-accent) var(--i258-tint-mix), var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-accent-text) 50%, var(--i258-border));
     color: var(--i258-accent-text);
   }
 
   .i258-badge--success {
-    background: color-mix(in srgb, var(--i258-success) 12%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-success) var(--i258-tint-mix), var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-success-text) 50%, var(--i258-border));
     color: var(--i258-success-text);
   }
 
   .i258-badge--warning {
-    background: color-mix(in srgb, var(--i258-warning) 12%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-warning) var(--i258-tint-mix), var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-warning-text) 50%, var(--i258-border));
     color: var(--i258-warning-text);
   }
 
   .i258-badge--danger {
-    background: color-mix(in srgb, var(--i258-danger) 12%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-danger) var(--i258-tint-mix), var(--i258-surface));
     border-color: color-mix(in srgb, var(--i258-danger-text) 50%, var(--i258-border));
     color: var(--i258-danger-text);
   }
@@ -457,22 +518,22 @@
 
   .i258-alert--info {
     border-color: color-mix(in srgb, var(--i258-accent) 45%, var(--i258-border));
-    background: color-mix(in srgb, var(--i258-accent) 10%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-accent) var(--i258-tint-mix), var(--i258-surface));
   }
 
   .i258-alert--success {
     border-color: color-mix(in srgb, var(--i258-success) 45%, var(--i258-border));
-    background: color-mix(in srgb, var(--i258-success) 10%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-success) var(--i258-tint-mix), var(--i258-surface));
   }
 
   .i258-alert--warning {
     border-color: color-mix(in srgb, var(--i258-warning) 45%, var(--i258-border));
-    background: color-mix(in srgb, var(--i258-warning) 10%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-warning) var(--i258-tint-mix), var(--i258-surface));
   }
 
   .i258-alert--danger {
     border-color: color-mix(in srgb, var(--i258-danger) 45%, var(--i258-border));
-    background: color-mix(in srgb, var(--i258-danger) 10%, var(--i258-surface));
+    background: color-mix(in srgb, var(--i258-danger) var(--i258-tint-mix), var(--i258-surface));
   }
 
   /* —— ToggleChip —— */
@@ -481,10 +542,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--i258-space-1);
-    border: 1px solid var(--i258-border);
+    border: 1px solid var(--i258-border-strong);
     border-radius: var(--i258-radius-full);
-    background: color-mix(in srgb, var(--i258-foreground) 6%, var(--i258-surface));
-    color: var(--i258-muted);
+    background: var(--i258-background);
+    color: var(--i258-foreground);
     font-family: var(--i258-font-sans);
     font-weight: 500;
     text-box: trim-both cap alphabetic;
@@ -497,17 +558,19 @@
   }
 
   .i258-toggle-chip:hover:not(:disabled) {
-    color: var(--i258-foreground);
-    background: color-mix(in srgb, var(--i258-foreground) 10%, var(--i258-surface));
+    background: var(--i258-hover);
   }
 
+  /* Pressed: wash + a 2px indicator edge (inset shadow on the border), so
+     the state reads by weight as well as by hue. */
   .i258-toggle-chip[data-state="on"] {
     background: color-mix(
       in srgb,
       var(--i258-accent) var(--i258-chip-selected-mix),
       var(--i258-surface)
     );
-    border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
+    border-color: var(--i258-indicator);
+    box-shadow: inset 0 0 0 1px var(--i258-indicator);
     color: var(--i258-accent-text);
   }
 
@@ -517,13 +580,13 @@
   }
 
   .i258-toggle-chip--sm {
-    height: 1.5rem;
+    height: var(--i258-control-xs);
     padding: 0 var(--i258-space-2);
     font-size: var(--i258-text-xs);
   }
 
   .i258-toggle-chip--md {
-    height: 1.75rem;
+    height: var(--i258-control-sm);
     padding: 0 var(--i258-space-3);
     font-size: var(--i258-text-sm);
   }
@@ -540,9 +603,9 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    border: 1px solid var(--i258-border);
+    border: 1px solid var(--i258-border-strong);
     border-radius: var(--i258-radius-md);
-    background: var(--i258-surface);
+    background: var(--i258-background);
     color: var(--i258-foreground);
     font-family: var(--i258-font-sans);
     line-height: var(--i258-leading-normal);
@@ -617,7 +680,7 @@
 
   .i258-disclosure__trigger:hover:not(:disabled) {
     color: var(--i258-foreground);
-    background: color-mix(in srgb, var(--i258-foreground) 6%, transparent);
+    background: var(--i258-hover);
   }
 
   .i258-disclosure__trigger:disabled {
@@ -674,9 +737,9 @@
     display: inline-flex;
     align-items: center;
     gap: var(--i258-space-1);
-    border: 1px solid var(--i258-border);
-    background: color-mix(in srgb, var(--i258-foreground) 6%, var(--i258-surface));
-    color: var(--i258-muted);
+    border: 1px solid var(--i258-border-strong);
+    background: var(--i258-background);
+    color: var(--i258-foreground);
     font-family: var(--i258-font-sans);
     font-weight: 500;
     cursor: pointer;
@@ -688,17 +751,18 @@
   }
 
   .i258-choice:hover:not(:disabled) {
-    color: var(--i258-foreground);
-    background: color-mix(in srgb, var(--i258-foreground) 10%, var(--i258-surface));
+    background: var(--i258-hover);
   }
 
+  /* Same pressed grammar as ToggleChip: wash + 2px indicator edge. */
   .i258-choice[data-pressed] {
     background: color-mix(
       in srgb,
       var(--i258-accent) var(--i258-chip-selected-mix),
       var(--i258-surface)
     );
-    border-color: color-mix(in srgb, var(--i258-accent) 55%, var(--i258-border));
+    border-color: var(--i258-indicator);
+    box-shadow: inset 0 0 0 1px var(--i258-indicator);
     color: var(--i258-accent-text);
   }
 
@@ -713,13 +777,13 @@
   }
 
   .i258-choice--chip.i258-choice--sm {
-    height: 1.5rem;
+    height: var(--i258-control-xs);
     padding: 0 var(--i258-space-2);
     font-size: var(--i258-text-xs);
   }
 
   .i258-choice--chip.i258-choice--md {
-    height: 1.75rem;
+    height: var(--i258-control-sm);
     padding: 0 var(--i258-space-3);
     font-size: var(--i258-text-sm);
   }
@@ -757,15 +821,15 @@
   }
 
   .i258-btn--sm.i258-theme-toggle {
-    width: 2rem;
+    width: var(--i258-control-sm);
   }
 
   .i258-btn--md.i258-theme-toggle {
-    width: 2.25rem;
+    width: var(--i258-control-md);
   }
 
   .i258-btn--lg.i258-theme-toggle {
-    width: 2.75rem;
+    width: var(--i258-control-lg);
     font-size: 1.25rem;
   }
 
@@ -883,12 +947,54 @@
     display: none;
   }
 
+  /* —— Coarse pointers: 44px targets ——
+     Fine-pointer heights follow the density set; touch never goes under
+     44×44 whatever the density. Width too: a one-character chip or an
+     icon button is 44px tall but well under 44px wide otherwise. */
+  @media (pointer: coarse) {
+    .i258-btn,
+    .i258-input,
+    .i258-toggle-chip,
+    .i258-choice,
+    .i258-disclosure__trigger {
+      min-height: var(--i258-target-coarse);
+      min-width: var(--i258-target-coarse);
+    }
+
+    /* Chips are start-aligned flex; keep a short label centred once the
+       min-width widens the pill. Option rows are full-width and stay left. */
+    .i258-toggle-chip,
+    .i258-choice--chip {
+      justify-content: center;
+    }
+
+    .i258-checkbox {
+      width: var(--i258-target-coarse);
+      height: var(--i258-target-coarse);
+    }
+
+    .i258-form-field--horizontal:has(> .i258-checkbox) > .i258-form-field__copy > .i258-label {
+      margin-top: max(0px, calc((var(--i258-target-coarse) - 1lh) / 2));
+    }
+  }
+
+  /* —— Forced colors ——
+     The UA drops backgrounds and shadows, so a pressed state drawn as a wash
+     plus an inset edge is redrawn as a system-colour outline. */
+  @media (forced-colors: active) {
+    .i258-toggle-chip[data-state="on"],
+    .i258-choice[data-pressed] {
+      border-color: Highlight;
+      outline: 1px solid Highlight;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .i258-btn,
     .i258-input,
     .i258-textarea,
     .i258-link,
-    .i258-checkbox,
+    .i258-checkbox::before,
     .i258-toggle-chip,
     .i258-disclosure__trigger,
     .i258-choice,

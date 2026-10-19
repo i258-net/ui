@@ -13,11 +13,18 @@ const surfaceColors = [
   "background",
   "surface",
   "surface-raised",
+  "hover",
+  "selected",
   "foreground",
   "muted",
-  "border",
-  "focus-ring",
 ] as const;
+
+/*
+  Two border weights: `border` is a decorative hairline (below 3:1 on
+  purpose); `border-strong` is a control's identifying edge and `indicator`
+  marks pressed/current state — both 3:1 on every surface above.
+*/
+const edgeColors = ["border", "border-strong", "indicator", "focus-ring"] as const;
 
 const toneColors = [
   "accent",
@@ -36,9 +43,22 @@ const toneColors = [
   "success-text",
 ] as const;
 
-const typeScale = ["xs", "sm", "md", "lg", "xl"] as const;
-const spaceScale = ["1", "2", "3", "4", "6", "8"] as const;
-const radiusScale = ["sm", "md", "lg", "full"] as const;
+const typeScale = ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"] as const;
+const spaceScale = ["1", "2", "3", "4", "5", "6", "8", "10"] as const;
+const radiusScale = ["sm", "md", "lg", "xl", "full"] as const;
+const controlScale = ["control-xs", "control-sm", "control-md", "control-lg", "input-height"] as const;
+const densityScale = [
+  "control-sm",
+  "control-md",
+  "control-lg",
+  "input-height",
+  "row-height",
+  "row-pad-y",
+  "cell-pad-y",
+  "pane-pad-x",
+  "pane-pad-y",
+  "pane-gap",
+] as const;
 
 function Swatch({ name }: { name: string }) {
   const varName = `--i258-${name}`;
@@ -103,8 +123,10 @@ function GroupHeading({ children }: { children: ReactNode }) {
 export const SemanticColor: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 24 }}>
-      <GroupHeading>Surfaces and type</GroupHeading>
+      <GroupHeading>Surfaces, row states and type</GroupHeading>
       <SwatchGrid names={surfaceColors} />
+      <GroupHeading>Edges — decorative hairline, control border, indicator</GroupHeading>
+      <SwatchGrid names={edgeColors} />
       <GroupHeading>Tones — fill, its foreground, text, hover</GroupHeading>
       <SwatchGrid names={toneColors} />
     </div>
@@ -192,6 +214,73 @@ export const Radius: Story = {
           </div>
         </div>
       ))}
+    </div>
+  ),
+};
+
+function ControlBars({ density }: { density: "comfortable" | "compact" }) {
+  return (
+    <div data-density={density} style={{ display: "grid", gap: 8 }}>
+      <GroupHeading>data-density=&quot;{density}&quot;</GroupHeading>
+      {controlScale.map((step) => (
+        <div key={step} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <code style={{ width: 160, fontSize: 12 }}>--i258-{step}</code>
+          <div
+            style={{
+              width: 48,
+              height: `var(--i258-${step})`,
+              background: "var(--i258-surface-raised)",
+              border: "1px solid var(--i258-border-strong)",
+              borderRadius: "var(--i258-radius-md)",
+            }}
+          />
+        </div>
+      ))}
+      <div
+        style={{
+          border: "1px solid var(--i258-border)",
+          borderRadius: "var(--i258-radius-lg)",
+          overflow: "hidden",
+        }}
+      >
+        {["First row", "Second row", "Third row"].map((label, i) => (
+          <div
+            key={label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              boxSizing: "border-box",
+            minHeight: "var(--i258-row-height)",
+              padding: "var(--i258-row-pad-y) var(--i258-pane-pad-x)",
+              borderTop: i === 0 ? undefined : "1px solid var(--i258-border)",
+              background: i === 1 ? "var(--i258-selected)" : undefined,
+              boxShadow: i === 1 ? "inset 2px 0 0 var(--i258-indicator)" : undefined,
+              fontFamily: "var(--i258-font-sans)",
+              fontSize: "var(--i258-text-sm)",
+            }}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/*
+  Density is a token switch, not a component prop: `data-density="compact"`
+  on any ancestor swaps the whole set at once. These are the tokens it moves.
+*/
+export const Density: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 24 }}>
+      <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
+        <ControlBars density="comfortable" />
+        <ControlBars density="compact" />
+      </div>
+      <code style={{ fontSize: 12, color: "var(--i258-muted)" }}>
+        Moves together: {densityScale.map((t) => `--i258-${t}`).join(", ")}
+      </code>
     </div>
   ),
 };

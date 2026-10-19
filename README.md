@@ -17,7 +17,7 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
 | Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) |
-| Themes | Tokyo Day (light) + Tokyo Night (dark) — one family, two exposures |
+| Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
 
@@ -40,6 +40,38 @@ makes it unreadable as type on a light background. Use `-text` there. Day
 Status tags are a soft wash of the tone plus a hairline plus `-text` — not a
 solid pill. `Badge` already does this; app-level tags should bridge to it
 rather than restate their own hexes, which do not survive a theme flip.
+`--i258-tint-mix` is the share of a tone in that wash.
+
+### Surfaces, edges and density
+
+| Token | Use it for |
+| --- | --- |
+| `--i258-background` → `--i258-surface` → `--i258-surface-raised` | the page ladder (page, cards/sidebars, wells) |
+| `--i258-hover`, `--i258-selected` | a hovered and a selected row or item |
+| `--i258-border` | a **decorative** hairline — separators, panel and card edges. Deliberately under 3:1 |
+| `--i258-border-strong` | the edge that **identifies a control** — inputs, checkboxes, toggle chips. ≥3:1 on every surface above, hover and selected included |
+| `--i258-indicator` | a pressed/current state — a pressed chip's edge, a selected row's bar, an active tab |
+
+Contrast for every pairing the kit relies on is asserted by
+`packages/ui/src/lib/contrast.test.ts`, which reads `themes.css` directly.
+
+Type: `--i258-text-sm` (13px) is the UI default; `2xs`/`xs` are meta, `md`–`2xl` step
+up from 14px. Control heights are `--i258-control-xs|sm|md|lg` and `--i258-input-height`.
+
+Density is a token switch: put `data-density="compact"` on any ancestor and control
+heights, `--i258-row-height`, `--i258-row-pad-y`, `--i258-cell-pad-y` and the
+`--i258-pane-*` rhythm move together (`data-density="comfortable"` restores them in a
+subtree). `--i258-control-xs` stays 24px (the WCAG 2.2 target floor) and coarse
+pointers keep 44×44 targets in either density — width as well as height, under
+either `box-sizing` (`apps/workshop/vrt/target-size.spec.ts`).
+
+The checkbox element is its target and draws its 16px box inside: it takes 24×24 of
+layout on fine pointers and 44×44 on coarse ones, so checkboxes placed side by side or
+stacked never overlap each other's hit areas (`vrt/checkbox-activation.spec.ts` clicks
+real checkboxes 12px apart and stacked flush). If you spaced a 16px checkbox by hand,
+expect it to sit 4px (fine) or 14px (coarse) further from its neighbours than before.
+The same holds with `render={<button />} nativeButton`: the kit clears the button's
+UA border, padding, background and appearance itself, so no consumer reset is needed.
 
 Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 
