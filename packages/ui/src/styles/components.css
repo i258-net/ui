@@ -947,6 +947,707 @@
     display: none;
   }
 
+  /* —— Shared helpers —— */
+  .i258-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Frame geometry holds under either box-sizing: a consumer's unlayered
+     reset beats this layer, so nothing here pairs a fixed size with the
+     padding or border that would change it. */
+
+  /* —— AppFrame —— */
+  .i258-frame {
+    --i258-gutter: var(--i258-pane-pad-x);
+    position: relative;
+    display: grid;
+    grid-template-columns:
+      var(--i258-frame-sidebar) minmax(0, 1fr) var(--i258-frame-inspector);
+    grid-template-rows: minmax(0, 1fr);
+    height: var(--i258-frame-height, 100dvh);
+    overflow: hidden;
+    background: var(--i258-background);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-normal);
+  }
+
+  .i258-skip-link {
+    position: absolute;
+    z-index: 100;
+    top: var(--i258-space-2);
+    inset-inline-start: var(--i258-space-2);
+    padding: var(--i258-space-2) var(--i258-space-3);
+    border-radius: var(--i258-radius-md);
+    background: var(--i258-accent);
+    color: var(--i258-accent-foreground);
+    font-size: var(--i258-text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    translate: 0 -200%;
+  }
+
+  .i258-skip-link:focus {
+    translate: 0 0;
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-frame__sidebar {
+    grid-column: 1;
+    position: relative;
+    z-index: 3;
+    min-width: 0;
+    border-inline-end: 1px solid var(--i258-border);
+    outline: 0;
+  }
+
+  /* Its own stacking context under the sidebar, so the sidebar's handle
+     (which reaches over this pane's start edge) is above the sticky
+     header. */
+  .i258-frame__main {
+    grid-column: 2;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* The header is sticky inside this scroller with a 1.25rem fade under it.
+     Anything scrolled into view lands below both, never behind them (WCAG
+     2.4.11). AppFrame measures the header, which can wrap. */
+  .i258-frame__main:has(> .i258-frame-header) {
+    scroll-padding-top: calc(
+      var(--i258-frame-header-h, var(--i258-header-height)) + 1.25rem
+    );
+  }
+
+  /* A sidebar resize handle sits over this pane's start edge: keep the
+     header's and content's own targets clear of its strip. */
+  .i258-frame:has(> .i258-frame__sidebar .i258-resize-handle) .i258-frame__main {
+    --i258-frame-reserve-start: var(--i258-resize-target);
+  }
+
+  .i258-frame__content {
+    flex: 1;
+    min-width: 0;
+    padding-block: 0 var(--i258-space-10);
+    padding-inline: max(var(--i258-gutter), var(--i258-frame-reserve-start, 0px))
+      var(--i258-gutter);
+    outline: 0;
+  }
+
+  .i258-frame__inspector {
+    grid-column: 3;
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    overflow: hidden;
+    border-inline-start: 1px solid var(--i258-border);
+    background: var(--i258-background);
+  }
+
+  .i258-frame__layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* —— Frame sheets (nav below 768px, inspector below 980px) —— */
+  .i258-frame__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgb(0 0 0 / 0.4);
+    transition: opacity var(--i258-duration-normal) var(--i258-ease-standard);
+  }
+
+  .i258-frame__backdrop[data-starting-style],
+  .i258-frame__backdrop[data-ending-style] {
+    opacity: 0;
+  }
+
+  .i258-frame__sheet {
+    --i258-sheet-close: var(--i258-control-sm);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 61;
+    display: flex;
+    flex-direction: column;
+    width: min(20rem, calc(100vw - 3rem));
+    max-width: 100vw;
+    overflow: hidden;
+    background: var(--i258-background);
+    color: var(--i258-foreground);
+    box-shadow: var(--i258-shadow-md);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-normal);
+    outline: 0;
+    transition: translate var(--i258-duration-normal) var(--i258-ease-standard);
+  }
+
+  .i258-frame__sheet[data-placement="start"] {
+    inset-inline-start: 0;
+    border-inline-end: 1px solid var(--i258-border);
+  }
+
+  .i258-frame__sheet[data-placement="end"] {
+    inset-inline-end: 0;
+    width: min(32rem, calc(100vw - 3rem));
+    border-inline-start: 1px solid var(--i258-border);
+  }
+
+  .i258-frame__sheet[data-placement="start"]:is([data-starting-style], [data-ending-style]) {
+    translate: -100% 0;
+  }
+
+  .i258-frame__sheet[data-placement="end"]:is([data-starting-style], [data-ending-style]) {
+    translate: 100% 0;
+  }
+
+  .i258-frame__sheet:dir(rtl)[data-placement="start"]:is([data-starting-style], [data-ending-style]) {
+    translate: 100% 0;
+  }
+
+  .i258-frame__sheet:dir(rtl)[data-placement="end"]:is([data-starting-style], [data-ending-style]) {
+    translate: -100% 0;
+  }
+
+  .i258-frame__sheet > .i258-sidebar {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Sits over the sidebar header's end; the header reserves the room. */
+  .i258-btn.i258-frame__sheet-close {
+    position: absolute;
+    top: var(--i258-space-2);
+    inset-inline-end: var(--i258-space-2);
+    z-index: 1;
+    width: var(--i258-sheet-close);
+    padding: 0;
+  }
+
+  .i258-frame__sheet[data-placement="start"] .i258-sidebar__header {
+    min-height: calc(var(--i258-sheet-close) + var(--i258-space-4));
+    padding-inline-end: calc(var(--i258-sheet-close) + var(--i258-space-4));
+  }
+
+  /* No sidebar header to sit in: give the close button its own room. */
+  .i258-frame__sheet[data-placement="start"]:not(:has(.i258-sidebar__header)) {
+    padding-top: calc(var(--i258-sheet-close) + var(--i258-space-4));
+  }
+
+  @media (max-width: 39.99rem) {
+    .i258-frame {
+      --i258-gutter: var(--i258-space-3);
+    }
+  }
+
+  /* —— Pane resize handle ——
+     A hit strip beside the pane edge, on the side with no scrollbar: just
+     past a start pane's end edge, just inside an end pane's start edge.
+     At rest a short grip on the edge, in --i258-border-strong (3:1), marks
+     the control — the pane's hairline is decorative. Hover, focus and
+     dragging draw a 2px --i258-indicator line (3:1) the full height. */
+  .i258-resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 4;
+    width: var(--i258-resize-target);
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  .i258-resize-handle[data-edge="end"] {
+    inset-inline-start: 100%;
+  }
+
+  .i258-resize-handle[data-edge="start"] {
+    inset-inline-start: 0;
+  }
+
+  .i258-resize-handle::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    inset-inline-start: -2px;
+    width: 4px;
+    height: 1.5rem;
+    margin-top: -0.75rem;
+    border-radius: 2px;
+    background: var(--i258-border-strong);
+    transition: background-color var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  /* An end pane clips its overflow: keep the grip inside its edge. */
+  .i258-resize-handle[data-edge="start"]::before {
+    inset-inline-start: 0;
+  }
+
+  .i258-resize-handle:hover::before,
+  .i258-resize-handle:focus-visible::before,
+  :root[data-i258-resizing] .i258-resize-handle::before {
+    background: var(--i258-indicator);
+  }
+
+  .i258-resize-handle::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: -1px;
+    width: 2px;
+    background: transparent;
+    transition: background-color var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-resize-handle:hover::after,
+  .i258-resize-handle:focus-visible::after,
+  :root[data-i258-resizing] .i258-resize-handle::after {
+    background: var(--i258-indicator);
+  }
+
+  .i258-resize-handle:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: calc(var(--i258-focus-ring-width) * -1);
+  }
+
+  :root[data-i258-resizing] {
+    cursor: col-resize;
+    user-select: none;
+  }
+
+  /* —— Sidebar —— */
+  .i258-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    background: var(--i258-surface);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+  }
+
+  .i258-sidebar__header,
+  .i258-sidebar__footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--i258-space-1);
+    padding: var(--i258-space-2);
+  }
+
+  .i258-sidebar__footer {
+    border-top: 1px solid var(--i258-border);
+  }
+
+  .i258-sidebar__content {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: var(--i258-space-1) var(--i258-space-2) var(--i258-space-3);
+    scrollbar-width: thin;
+  }
+
+  .i258-sidebar__section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .i258-sidebar__section + .i258-sidebar__section {
+    margin-top: var(--i258-space-2);
+    padding-top: var(--i258-space-2);
+    border-top: 1px solid var(--i258-border);
+  }
+
+  .i258-sidebar__section-trigger {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: var(--i258-space-1);
+    min-height: var(--i258-control-xs);
+    margin: 0;
+    padding: 0 var(--i258-space-2);
+    border: 0;
+    border-radius: calc(var(--i258-radius-md) - 2px);
+    background: transparent;
+    color: var(--i258-muted);
+    font: inherit;
+    font-size: var(--i258-text-xs);
+    font-weight: 500;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .i258-sidebar__section-trigger:hover {
+    color: var(--i258-foreground);
+  }
+
+  .i258-sidebar__chevron {
+    flex-shrink: 0;
+    transition: rotate var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-sidebar__section-trigger[data-panel-open] .i258-sidebar__chevron {
+    rotate: 90deg;
+  }
+
+  .i258-sidebar__chevron:dir(rtl) {
+    scale: -1 1;
+  }
+
+  .i258-sidebar__section-panel[hidden] {
+    display: none;
+  }
+
+  .i258-sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 2px 0 0;
+    list-style: none;
+  }
+
+  .i258-sidebar__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--i258-space-2);
+    min-height: var(--i258-control-md);
+    padding-block: 0;
+    padding-inline: 0.625rem var(--i258-space-2);
+    border-radius: var(--i258-radius-md);
+    color: var(--i258-foreground);
+    text-decoration: none;
+  }
+
+  .i258-sidebar__item:hover {
+    background: var(--i258-hover);
+  }
+
+  .i258-sidebar__item[data-current] {
+    background: var(--i258-selected);
+    font-weight: 500;
+  }
+
+  /* The current-item bar is the 3:1 state signal; the fill is just calm. */
+  .i258-sidebar__item[data-current]::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--i258-indicator);
+  }
+
+  /* Rows inside a pane get an inset ring so the pane's overflow never
+     clips it. */
+  .i258-sidebar__item:focus-visible,
+  .i258-sidebar__section-trigger:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: calc(var(--i258-focus-ring-width) * -1);
+  }
+
+  .i258-sidebar__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--i258-muted);
+  }
+
+  .i258-sidebar__icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .i258-sidebar__item[data-current] .i258-sidebar__icon {
+    color: var(--i258-foreground);
+  }
+
+  .i258-sidebar__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .i258-sidebar__count {
+    flex-shrink: 0;
+    color: var(--i258-muted);
+    font-size: var(--i258-text-xs);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .i258-sidebar__count[data-tone="danger"] {
+    color: var(--i258-danger-text);
+    font-weight: 500;
+  }
+
+  .i258-sidebar__count[data-tone="warning"] {
+    color: var(--i258-warning-text);
+    font-weight: 500;
+  }
+
+  /* Rail: icons only. Labels and counts are visually hidden, not removed;
+     section headers give way to their hairlines. Names show on hover and
+     keyboard focus in a popup portaled to the frame's layer. */
+  .i258-sidebar[data-collapsed] .i258-sidebar__section-trigger {
+    display: none;
+  }
+
+  .i258-sidebar[data-collapsed] .i258-sidebar__item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .i258-sidebar[data-collapsed] .i258-sidebar__label,
+  .i258-sidebar[data-collapsed] .i258-sidebar__count,
+  .i258-sidebar[data-collapsed] [data-sidebar-text] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .i258-sidebar__tip-positioner {
+    z-index: 50;
+  }
+
+  .i258-sidebar__tip {
+    display: inline-flex;
+    gap: var(--i258-space-2);
+    padding: var(--i258-space-1) var(--i258-space-2);
+    border: 1px solid var(--i258-border);
+    border-radius: var(--i258-radius-md);
+    background: var(--i258-surface-raised);
+    box-shadow: var(--i258-shadow-md);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-xs);
+    line-height: var(--i258-leading-snug);
+    white-space: nowrap;
+  }
+
+  .i258-sidebar__tip-count {
+    color: var(--i258-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* —— FrameHeader —— */
+  /* No block padding: min-height means the same under either box-sizing,
+     and the children's margins give the edges (and the space between
+     wrapped lines). It must not shrink, or wrapped rows spill under it. */
+  .i258-frame-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--i258-space-2);
+    min-height: var(--i258-header-height);
+    padding-block: 0;
+    padding-inline: max(var(--i258-gutter), var(--i258-frame-reserve-start, 0px))
+      var(--i258-gutter);
+    background: var(--i258-background);
+  }
+
+  .i258-frame-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 1.25rem;
+    background: linear-gradient(var(--i258-background), transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--i258-duration-normal) var(--i258-ease-standard);
+  }
+
+  .i258-frame-header > * {
+    margin-block: var(--i258-space-2);
+  }
+
+  [data-scrolled] > .i258-frame-header::after {
+    opacity: 1;
+  }
+
+  .i258-frame-header__leading,
+  .i258-frame-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--i258-space-1);
+  }
+
+  .i258-frame-header__actions {
+    margin-inline-start: auto;
+  }
+
+  .i258-frame-header__title-row {
+    display: flex;
+    flex: 1 1 12rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--i258-space-2);
+    min-width: 0;
+  }
+
+  .i258-frame-header__title {
+    margin: 0;
+    min-width: 0;
+    font-size: var(--i258-text-md);
+    font-weight: 600;
+    line-height: var(--i258-leading-tight);
+    overflow-wrap: anywhere;
+    outline: 0;
+  }
+
+  .i258-frame-header__meta {
+    color: var(--i258-muted);
+    font-size: var(--i258-text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .i258-breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .i258-breadcrumb li {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .i258-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--i258-control-xs);
+    border-radius: var(--i258-radius-sm);
+    color: var(--i258-muted);
+    font-size: var(--i258-text-md);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+  }
+
+  .i258-breadcrumb a:hover {
+    color: var(--i258-foreground);
+    text-decoration-color: currentColor;
+  }
+
+  .i258-breadcrumb a:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-breadcrumb__sep {
+    margin-inline: var(--i258-space-2);
+    color: var(--i258-muted);
+  }
+
+  /* The title row's gap supplies the space after the last separator. */
+  .i258-breadcrumb li:last-child .i258-breadcrumb__sep {
+    margin-inline-end: 0;
+  }
+
+  /* —— Inspector —— */
+  .i258-inspector {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .i258-inspector__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--i258-space-3);
+    padding: var(--i258-space-3);
+    padding-inline-start: var(--i258-space-5);
+    border-bottom: 1px solid var(--i258-border);
+  }
+
+  .i258-inspector__heading {
+    flex: 1;
+    min-width: 0;
+    padding-top: 0.125rem;
+  }
+
+  .i258-inspector__eyebrow {
+    margin-bottom: 0.125rem;
+    color: var(--i258-muted);
+    font-size: var(--i258-text-xs);
+  }
+
+  .i258-inspector__title {
+    margin: 0;
+    font-size: var(--i258-text-md);
+    font-weight: 600;
+    line-height: var(--i258-leading-snug);
+    overflow-wrap: anywhere;
+  }
+
+  .i258-inspector__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--i258-space-1);
+  }
+
+  .i258-btn.i258-inspector__close {
+    width: var(--i258-control-sm);
+    padding: 0;
+  }
+
+  .i258-inspector__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--i258-pane-pad-y) var(--i258-pane-pad-x) var(--i258-space-8);
+  }
+
+  /* The inspector's handle is a strip inside its start edge. */
+  .i258-frame__inspector:has(> .i258-resize-handle) .i258-inspector__header {
+    padding-inline-start: max(var(--i258-space-5), var(--i258-resize-target));
+  }
+
+  .i258-frame__inspector:has(> .i258-resize-handle) .i258-inspector__body {
+    padding-inline-start: max(var(--i258-pane-pad-x), var(--i258-resize-target));
+  }
+
   /* —— Coarse pointers: 44px targets ——
      Fine-pointer heights follow the density set; touch never goes under
      44×44 whatever the density. Width too: a one-character chip or an
@@ -959,6 +1660,24 @@
     .i258-disclosure__trigger {
       min-height: var(--i258-target-coarse);
       min-width: var(--i258-target-coarse);
+    }
+
+    .i258-frame__sheet {
+      --i258-sheet-close: var(--i258-target-coarse);
+    }
+
+    /* Rows: 44px tall; the rail widens so its icon items are 44px wide. */
+    .i258-sidebar__item,
+    .i258-sidebar__section-trigger {
+      min-height: var(--i258-target-coarse);
+    }
+
+    /* No padding or border on the link, so the box is the same under either
+       box-sizing; a short label stays centred in the wider box. */
+    .i258-breadcrumb a {
+      justify-content: center;
+      min-width: var(--i258-target-coarse);
+      min-height: var(--i258-target-coarse);
     }
 
     /* Chips are start-aligned flex; keep a short label centred once the
@@ -987,6 +1706,32 @@
       border-color: Highlight;
       outline: 1px solid Highlight;
     }
+
+    .i258-sidebar__item[data-current] {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+
+    .i258-resize-handle::before {
+      background: CanvasText;
+      forced-color-adjust: none;
+    }
+
+    .i258-sidebar__item[data-current]::before,
+    .i258-resize-handle:hover::before,
+    .i258-resize-handle:focus-visible::before,
+    :root[data-i258-resizing] .i258-resize-handle::before,
+    .i258-resize-handle:hover::after,
+    .i258-resize-handle:focus-visible::after,
+    :root[data-i258-resizing] .i258-resize-handle::after {
+      background: Highlight;
+      forced-color-adjust: none;
+    }
+
+    .i258-sidebar__tip,
+    .i258-frame__sheet {
+      border-color: CanvasText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -998,6 +1743,12 @@
     .i258-toggle-chip,
     .i258-disclosure__trigger,
     .i258-choice,
+    .i258-sidebar__chevron,
+    .i258-resize-handle::before,
+    .i258-resize-handle::after,
+    .i258-frame-header::after,
+    .i258-frame__backdrop,
+    .i258-frame__sheet,
     .i258-theme-toggle__core,
     .i258-theme-toggle__clip,
     .i258-theme-toggle__ray {

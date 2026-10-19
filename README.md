@@ -16,7 +16,7 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
-| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) |
+| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
@@ -92,6 +92,19 @@ Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailw
 That puts our primitives above preflight/`components` and below utilities (so utility overrides still work).
 
 **Import order caveat:** the order statement must reach the browser **before** the package CSS. Under webpack/css-loader (Next.js), `@import`s are emitted ahead of the importing file's own rules — so putting the `@layer …` line in the *same* file as `@import "@i258/ui/styles.css"` lands it *after* `i258-components` and is a no-op. Use an earlier import (e.g. `./layers.css`) as above. Honeycomb's consumer PR is the reference.
+
+### Application frame
+
+`AppFrame` is the workbench layout: `[ sidebar | header / main | inspector ]`, each pane scrolling on its own. `AppShell` stays supported for single-bar apps.
+
+- **Kit owns:** layout, resize handles (window-splitter `role="separator"`), the icon rail, landmarks (sidebar `aside` + primary `nav`, header banner, `main`, inspector `aside`), the skip link, scroll padding under the sticky header, and the narrow-screen sheets.
+- **Shared breakpoints:** below **768px** (`FRAME_NARROW_NAV`) the sidebar is a modal start sheet; below **980px** (`FRAME_NARROW_INSPECTOR`) the inspector is a modal end sheet. `useFrameLayout()` tells header controls which applies (a menu button opening `navSheetOpen`, or a rail toggle).
+- **App owns:** sidebar/inspector content, routing, the open/selected state (`sidebarMode`, `navSheetOpen`, `inspectorOpen`), closing the nav sheet on navigation, and persisting widths.
+- **One sheet at a time:** if both sheets are asked for, the newer one shows and the frame calls the other's `on…OpenChange(false)` (both at once: the inspector wins). A narrow page hydrated with `navSheetOpen` keeps it; only a real narrow → wide change closes it.
+- **Widths fit the frame:** drawn widths (and what the handles announce) are clamped so `main` keeps `mainMinWidth` (default 320px); pane minimums are floors, and stored/controlled widths are not rewritten.
+- **Frames narrower than their minimums** (embedded in a narrow container on a wide screen): the inspector becomes the end sheet, as below 980px; if the sidebar and `main` still do not fit, they share the frame in proportion to their minimums rather than push anything past its edge. The nav sheet follows the viewport only, since the app owns its opener. `useFrameLayout()` called inside the frame reports the frame's actual layout; outside it, the viewport breakpoints.
+- **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`. A sheet whose content the app removes (no `sidebar`, `sidebarMode="hidden"`, no `inspector`) returns focus to what had it before the sheet, unless another sheet takes over; a nav sheet removed that way is reported closed.
+- **Refs:** a `ref` on `AppFrame` is composed with the frame's own (object or callback refs, including React 19 callback cleanups).
 
 ## Workspace
 

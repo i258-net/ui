@@ -24,6 +24,10 @@ export default defineConfig({
             provider: playwright(),
             headless: true,
             instances: [{ browser: "chromium" }],
+            // Desktop width: AppFrame turns its panes into sheets below
+            // 768px / 980px, and the default viewport is phone-sized.
+            // Narrow-screen behaviour is covered in vrt/frame.spec.ts.
+            viewport: { width: 1280, height: 800 },
           },
           setupFiles: ["./.storybook/vitest.setup.ts"],
         },
