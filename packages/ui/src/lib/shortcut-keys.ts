@@ -53,10 +53,15 @@ export type KeyLike = {
 };
 
 /** The binding a keydown spells, in `normaliseBinding` form. */
-export function bindingFromEvent(event: KeyLike): string {
+export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): string {
   let key = event.key;
-  // ⌥ on a Mac types a different character (⌥1 is "¡"); bind the key cap.
-  if (event.altKey && event.code) {
+  // With a modifier held the key can type something that isn't on the
+  // binding: ⌥1 on a Mac is "¡", Ctrl+K on a Cyrillic layout is "л". Then,
+  // and only then, bind the physical key (`code`, US positions). A plain
+  // letter or digit is what the user pressed on their own layout (QWERTZ's Z
+  // is code KeyY), and Ctrl+Alt elsewhere is AltGr typing a character.
+  const altGr = event.ctrlKey && event.altKey && !event.metaKey && !apple;
+  if ((event.ctrlKey || event.altKey || event.metaKey) && !altGr && event.code && !/^[a-z0-9]$/i.test(key)) {
     const cap = /^(?:Key([A-Z])|Digit([0-9]))$/.exec(event.code);
     if (cap) key = cap[1] ?? cap[2] ?? key;
   }

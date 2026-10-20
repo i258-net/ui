@@ -1649,14 +1649,14 @@
   }
 
   /* —— Kbd —— */
-  /* A key cap: hairline box with a 1px bottom lip. Height from line-height
-     and no block padding, so it is the same under either box-sizing. */
+  /* A key cap: hairline box with a 1px bottom lip. Sized by its text,
+     line-height and inline padding only (no min or fixed size), so it is
+     the same under either box-sizing. */
   .i258-kbd {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.25em;
-    padding: 0 0.3em;
+    padding: 0 0.45em;
     border: 1px solid var(--i258-border-strong);
     border-radius: var(--i258-radius-sm);
     background: var(--i258-surface);
@@ -1690,28 +1690,24 @@
     opacity: 0;
   }
 
-  /* Centred by inline insets and auto margins rather than a computed
-     width, so its padding can never push it past the viewport edge under
-     either box-sizing (border-box here unless a consumer reset says
-     otherwise; then the cap grows by the padding, nothing overflows). */
+  /* The popup has no padding or border, so its caps are its whole box
+     under either box-sizing; the edge is a 1px ring (box-shadow) and the
+     padding and scrolling live on the inner wrapper. Centred by inline
+     insets and auto margins, so it never runs past the viewport edge. */
   .i258-dialog {
     position: fixed;
     top: 50%;
     inset-inline: var(--i258-space-4);
     z-index: 71;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: var(--i258-space-3);
     max-width: var(--i258-dialog-width);
     max-height: calc(100dvh - 2 * var(--i258-space-4));
     margin-inline: auto;
-    overflow-y: auto;
-    padding: var(--i258-space-5);
-    border: 1px solid var(--i258-border);
+    overflow: hidden;
     border-radius: var(--i258-radius-xl);
     background: var(--i258-background);
-    box-shadow: var(--i258-shadow-lg);
+    box-shadow: 0 0 0 1px var(--i258-border), var(--i258-shadow-lg);
     color: var(--i258-foreground);
     font-family: var(--i258-font-sans);
     font-size: var(--i258-text-sm);
@@ -1740,6 +1736,15 @@
     --i258-dialog-width: 36rem;
   }
 
+  .i258-dialog__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--i258-space-3);
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--i258-space-5);
+  }
+
   /* The corner close button; the title reserves room for it. */
   .i258-btn.i258-dialog__close {
     position: absolute;
@@ -1749,7 +1754,7 @@
     padding: 0;
   }
 
-  .i258-dialog:has(> .i258-dialog__close) > .i258-dialog__title {
+  .i258-dialog:has(> .i258-dialog__close) .i258-dialog__title {
     padding-inline-end: calc(var(--i258-control-sm) + var(--i258-space-2));
   }
 
@@ -1786,7 +1791,9 @@
   .i258-menu {
     min-width: 12rem;
     max-width: min(22rem, calc(100vw - 1rem));
-    max-height: var(--available-height);
+    /* Less its padding and border: never taller than the room Base UI
+       measured, under either box-sizing. */
+    max-height: calc(var(--available-height) - 2 * var(--i258-space-1) - 2px);
     overflow-y: auto;
     padding: var(--i258-space-1);
     border: 1px solid var(--i258-border);
@@ -1928,11 +1935,14 @@
      filter. No padding of its own: search row, list and footer each pad. */
   .i258-dialog.i258-palette {
     top: min(12vh, 5rem);
-    gap: 0;
     max-height: calc(100dvh - min(12vh, 5rem) - var(--i258-space-4));
+    translate: none;
+  }
+
+  .i258-palette > .i258-dialog__inner {
+    gap: 0;
     overflow: hidden;
     padding: 0;
-    translate: none;
   }
 
   .i258-palette__search {
@@ -1974,13 +1984,22 @@
     opacity: 1;
   }
 
+  /* No block padding: the cap is its whole box under either box-sizing.
+     The top and bottom spacing are the spacers below. */
   .i258-palette__list {
     flex: 1;
     min-height: 0;
     max-height: 22rem;
     overflow-y: auto;
-    padding: var(--i258-space-2);
+    padding-inline: var(--i258-space-2);
     scroll-padding-block: var(--i258-space-2);
+  }
+
+  .i258-palette__list::before,
+  .i258-palette__list::after {
+    content: "";
+    display: block;
+    height: var(--i258-space-2);
   }
 
   .i258-palette__list:empty {
@@ -2079,7 +2098,8 @@
     align-items: center;
     gap: var(--i258-space-1);
     min-height: var(--i258-control-xs);
-    margin: 0 0 0 auto;
+    margin: 0;
+    margin-inline-start: auto;
     padding: 0 var(--i258-space-1);
     border: 0;
     border-radius: var(--i258-radius-sm);
@@ -2129,7 +2149,7 @@
       width: var(--i258-target-coarse);
     }
 
-    .i258-dialog:has(> .i258-dialog__close) > .i258-dialog__title {
+    .i258-dialog:has(> .i258-dialog__close) .i258-dialog__title {
       padding-inline-end: calc(var(--i258-target-coarse) + var(--i258-space-2));
     }
 
@@ -2191,10 +2211,15 @@
 
     .i258-sidebar__tip,
     .i258-frame__sheet,
-    .i258-dialog,
     .i258-menu,
     .i258-kbd {
       border-color: CanvasText;
+    }
+
+    /* Its ring is a box-shadow, which forced colours drop. An outline takes
+       no layout, so the dialog keeps its size. */
+    .i258-dialog {
+      outline: 1px solid CanvasText;
     }
 
     /* Highlighted and active rows were a fill plus an inset bar, both

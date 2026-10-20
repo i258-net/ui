@@ -58,8 +58,25 @@ describe("bindingFromEvent", () => {
   });
 
   it("binds the key cap under ⌥, not the character it types on a Mac", () => {
-    expect(bindingFromEvent(ev("¡", { altKey: true, code: "Digit1" }))).toBe("alt+1");
-    expect(bindingFromEvent(ev("π", { altKey: true, code: "KeyP" }))).toBe("alt+p");
+    expect(bindingFromEvent(ev("¡", { altKey: true, code: "Digit1" }), true)).toBe("alt+1");
+    expect(bindingFromEvent(ev("π", { altKey: true, code: "KeyP" }), true)).toBe("alt+p");
+  });
+
+  it("binds the physical key when the layout types a non-Latin character", () => {
+    expect(bindingFromEvent(ev("л", { ctrlKey: true, code: "KeyK" }), false)).toBe("ctrl+k");
+    expect(bindingFromEvent(ev("л", { metaKey: true, code: "KeyK" }), true)).toBe("meta+k");
+  });
+
+  it("keeps the letter the layout typed, and leaves AltGr alone", () => {
+    // QWERTZ: the key labelled Z sits where US QWERTY has Y.
+    expect(bindingFromEvent(ev("z", { altKey: true, code: "KeyY" }), false)).toBe("alt+z");
+    expect(bindingFromEvent(ev("z", { ctrlKey: true, code: "KeyY" }), false)).toBe("ctrl+z");
+    // Windows AltGr (Ctrl+Alt) + Q types "@" on a German layout.
+    expect(bindingFromEvent(ev("@", { ctrlKey: true, altKey: true, code: "KeyQ" }), false)).toBe(
+      "ctrl+alt+@",
+    );
+    // No modifier: never remapped.
+    expect(bindingFromEvent(ev("л", { code: "KeyK" }), false)).toBe("л");
   });
 });
 

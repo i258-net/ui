@@ -102,7 +102,7 @@ export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps
           className={cn(dialogContentVariants({ size }), className)}
           {...props}
         >
-          {children}
+          <div className="i258-dialog__inner">{children}</div>
           {closeButton ? (
             <DialogPrimitive.Close
               render={

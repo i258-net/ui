@@ -24,7 +24,9 @@ import { bindingFromEvent, isCharacterBinding, normaliseBinding } from "./shortc
     pressing the same key again runs the same handler again. Confirm with
     Enter; a repeated digit is never a confirmation.
 
-  Latest registration wins, so a view can override a frame-level binding.
+  Two live bindings for the same key: the one registered last runs. Mount
+  order decides that (React runs a child's effects before its parent's),
+  so don't rely on it to override a key; hand it over with `enabled`.
 */
 
 export type ShortcutOptions = {
@@ -86,9 +88,10 @@ export function isTypingTarget(target: EventTarget | null): boolean {
 // an open popup (below): a list on the page can be a listbox too.
 const LAYER = '[role="dialog"], [role="alertdialog"], [role="menu"], dialog';
 // Base UI marks its open popups `data-open`; `:modal` is a native modal
-// <dialog>; other libraries' modals carry aria-modal.
+// <dialog>; other libraries' modals carry aria-modal. A Base UI toast is an
+// alertdialog with aria-modal="false": it doesn't take the keyboard.
 const OPEN_LAYER =
-  '[role="dialog"][data-open], [role="alertdialog"], [role="menu"][data-open], [role="listbox"][data-open], [aria-modal="true"]';
+  '[role="dialog"][data-open], [role="alertdialog"][data-open]:not([aria-modal="false"]), [role="menu"][data-open], [role="listbox"][data-open], [aria-modal="true"]';
 
 /**
  * True while a dialog, menu or listbox popup is open, or focus is in a
@@ -107,7 +110,7 @@ export function isLayerOpen(target: EventTarget | null, doc: Document): boolean 
 const ACTIVATES =
   'button, a[href], summary, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="option"], [role^="menuitem"], [role="treeitem"], [role="gridcell"]';
 const COMPOSITE =
-  '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="grid"], [role="slider"], [role="separator"][tabindex]';
+  '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="grid"], [role="slider"], [role="separator"][tabindex], input[type="range"], input[type="radio"]';
 const ARROWS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]);
 
 /** True when the focused element handles this key itself. */
