@@ -199,6 +199,9 @@ Update baselines with `pnpm vrt:update`. Snapshots live under
 `apps/workshop/vrt/*-snapshots/`. Linux CI is the source of truth — take baselines from the
 CI `vrt-results` `*-actual.png` artifacts; Darwin renders differ in text widths by ~2px and
 fail CI. CI job for `pnpm vrt` is a separate PR (CODEOWNERS on `.github/workflows/`).
+Comparisons run at `maxDiffPixels: 0` and `threshold: 0`: any changed pixel fails, so a
+palette change cannot pass against a stale baseline. Pixels that pixelmatch judges
+anti-aliased are still skipped (`apps/workshop/playwright.config.ts`).
 ## Using `@i258/ui`
 
 ```ts

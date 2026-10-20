@@ -49,6 +49,25 @@ export default defineConfig({
       // diff fails, and baselines are re-shot deliberately from the CI Linux
       // actuals, never regenerated on a Mac.
       maxDiffPixels: 0,
+      // maxDiffPixels counts only pixels pixelmatch calls different, and by
+      // default that means a YIQ distance above threshold 0.2 — about 52
+      // levels on a grey ramp. The zinc/indigo palette (I25-106) repainted
+      // all 5,304 pixels of Primitives/Badge/Status and both themes passed
+      // against the stale Tokyo baselines, so CI uploaded no actual to
+      // re-shoot from (I25-120). Nor was the badge special: in a linux/amd64
+      // render, each of six token nudges — tint-mix 8→12% / 16→22%, surface,
+      // hairline border, muted, accent, success-text — repainted 2 to 24
+      // snapshots, 84 in all, and every one passed at 0.2 and at 0.1; at
+      // 0.05 only the success-text badge failed.
+      //
+      // 0 is the floor for the same reason maxDiffPixels is: the Linux render
+      // is byte-identical run to run and to the CI baselines, so there is no
+      // noise for a threshold to absorb. At 0 every one of those 84 fails.
+      // pixelmatch still skips pixels it judges anti-aliased (Playwright
+      // gives no includeAA option): a muted-text change that moves 2,920
+      // pixels of the inspector frame reports 1,655. A change confined to
+      // glyph edges can still pass.
+      threshold: 0,
       animations: "disabled",
     },
   },
