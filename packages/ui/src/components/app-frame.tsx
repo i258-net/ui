@@ -5,6 +5,7 @@ import { useRender } from "@base-ui/react/use-render";
 import { Button } from "./button.js";
 import { PaneResizeHandle } from "./pane-resize-handle.js";
 import { useComposedRefs } from "../lib/compose-refs.js";
+import { CloseIcon } from "../lib/icons.js";
 import { fitPanes, inspectorFits } from "../lib/frame-fit.js";
 import {
   FrameHeaderRefContext,
@@ -774,18 +775,5 @@ export function Inspector({
       </div>
       <div className="i258-inspector__body">{children}</div>
     </div>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path
-        d="M4 4l8 8M12 4l-8 8"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

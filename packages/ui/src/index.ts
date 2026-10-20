@@ -109,4 +109,73 @@ export type { PaneResizeHandleProps } from "./components/pane-resize-handle.js";
 
 export { useMediaQuery } from "./lib/use-media-query.js";
 
+export { Kbd } from "./components/kbd.js";
+export type { KbdProps } from "./components/kbd.js";
+
+export {
+  ShortcutsProvider,
+  useShortcut,
+  useSingleKeyShortcuts,
+  isTypingTarget,
+} from "./lib/use-shortcut.js";
+export type { ShortcutOptions, ShortcutsProviderProps } from "./lib/use-shortcut.js";
+export {
+  ariaKeyShortcuts,
+  formatShortcut,
+  isApplePlatform,
+  isCharacterBinding,
+  normaliseBinding,
+} from "./lib/shortcut-keys.js";
+
+export {
+  Dialog,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  dialogContentVariants,
+} from "./components/dialog.js";
+export type {
+  DialogProps,
+  DialogTriggerProps,
+  DialogCloseProps,
+  DialogContentProps,
+  DialogTitleProps,
+  DialogDescriptionProps,
+  DialogBodyProps,
+  DialogFooterProps,
+} from "./components/dialog.js";
+
+export {
+  Menu,
+  MenuTrigger,
+  MenuContent,
+  MenuItem,
+  MenuLinkItem,
+  MenuCheckboxItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  MenuGroup,
+  MenuGroupLabel,
+} from "./components/menu.js";
+export type {
+  MenuProps,
+  MenuTriggerProps,
+  MenuContentProps,
+  MenuItemProps,
+  MenuLinkItemProps,
+  MenuCheckboxItemProps,
+  MenuRadioGroupProps,
+  MenuRadioItemProps,
+  MenuGroupProps,
+  MenuGroupLabelProps,
+} from "./components/menu.js";
+
+export { CommandPalette, defaultCommandFilter } from "./components/command-palette.js";
+export type { CommandItem, CommandPaletteProps } from "./components/command-palette.js";
+
 export { cn } from "./lib/utils.js";

@@ -62,6 +62,10 @@
   /* Hairlines carry structure; shadows are a barely-there lift. */
   --i258-shadow-sm: 0 1px 1px rgb(0 0 0 / 0.04);
   --i258-shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.1);
+  /* Floating layers: dialogs, menus, the command palette. */
+  --i258-shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.28), 0 2px 6px -2px rgb(0 0 0 / 0.08);
+  /* Behind modal sheets and dialogs. */
+  --i258-scrim: rgb(0 0 0 / 0.4);
 }
 
 /* Density. `data-density="compact"` on any ancestor swaps this set together
