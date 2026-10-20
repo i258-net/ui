@@ -97,6 +97,8 @@ function Workbench() {
   useShortcut("u", () => log("Undo"));
   useShortcut("mod+b", () => log("Toggle sidebar"));
   useShortcut("mod+k", () => log("Search"), { allowInInput: true });
+  // A page-level Enter (open the selected row): a focused button keeps it.
+  useShortcut("Enter", () => log("Open selected"));
   return (
     <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -203,11 +205,15 @@ export const Guards: Story = {
     await press(`{${mod}>}k{/${mod}}`);
     await expect(last).toHaveTextContent("Search");
 
-    // Enter on a focused button presses that button, nothing else.
+    // Enter with nothing focused is the page's; on a focused button it
+    // presses that button, and the page's Enter doesn't also run.
+    blur();
+    await press("{Enter}");
+    await expect(last).toHaveTextContent("Open selected");
     c.getByRole("button", { name: "Undo" }).focus();
     await press("{Enter}");
     await expect(last).toHaveTextContent("Undo");
-    await expect(last).toHaveAttribute("data-count", "2");
+    await expect(last).toHaveAttribute("data-count", "3");
 
     // An open menu owns the keyboard: `u` and ⌘B do nothing.
     await userEvent.click(c.getByRole("button", { name: "More" }));
@@ -215,14 +221,14 @@ export const Guards: Story = {
     await waitFor(() => expect(menu).toContainElement(document.activeElement as HTMLElement));
     await press("u");
     await press(`{${mod}>}b{/${mod}}`);
-    await expect(last).toHaveAttribute("data-count", "2");
+    await expect(last).toHaveAttribute("data-count", "3");
     await press("{Escape}");
     await waitFor(() => expect(within(document.body).queryByRole("menu")).toBeNull());
 
     // Closed again: keys are back.
     blur();
     await press("u");
-    await expect(last).toHaveAttribute("data-count", "3");
+    await expect(last).toHaveAttribute("data-count", "4");
   },
 };
 
@@ -241,6 +247,15 @@ function Triage() {
   const singleKeys = useSingleKeyShortcuts();
   const [pending, setPending] = React.useState<string | null>(null);
   const [confirmed, setConfirmed] = React.useState<string[]>([]);
+  // A stance picked by click hands focus to Confirm, so the next Enter
+  // confirms rather than pressing the stance button again.
+  const confirmRef = React.useRef<HTMLButtonElement>(null);
+  const [focusConfirm, setFocusConfirm] = React.useState(false);
+  React.useEffect(() => {
+    if (!focusConfirm) return;
+    confirmRef.current?.focus();
+    setFocusConfirm(false);
+  }, [focusConfirm]);
   const confirm = () => {
     if (!pending) return;
     setConfirmed((c) => [...c, pending]);
@@ -261,7 +276,10 @@ function Triage() {
             variant={pending === s.label ? "primary" : "secondary"}
             aria-pressed={pending === s.label}
             aria-keyshortcuts={singleKeys ? s.key : undefined}
-            onClick={() => setPending(s.label)}
+            onClick={() => {
+              setPending(s.label);
+              setFocusConfirm(true);
+            }}
           >
             {s.label}
             {singleKeys ? <Kbd aria-hidden="true">{s.key}</Kbd> : null}
@@ -272,7 +290,7 @@ function Triage() {
         {pending ? `${pending} — press Enter to confirm, Escape to back out.` : "Pick a stance."}
       </p>
       <div style={{ display: "flex", gap: 8 }}>
-        <Button disabled={!pending} onClick={confirm} aria-keyshortcuts="Enter">
+        <Button ref={confirmRef} disabled={!pending} onClick={confirm} aria-keyshortcuts="Enter">
           Confirm
         </Button>
       </div>
@@ -321,6 +339,12 @@ export const EnterConfirms: Story = {
     await userEvent.click(c.getByRole("button", { name: "Approve" }));
     await userEvent.click(c.getByRole("button", { name: "Confirm" }));
     await expect(confirmed).toHaveTextContent("Modify, Approve");
+
+    // Click a stance, then Enter: focus moved to Confirm, so Enter confirms.
+    await userEvent.click(c.getByRole("button", { name: "Reject" }));
+    await waitFor(() => expect(c.getByRole("button", { name: "Confirm" })).toHaveFocus());
+    await press("{Enter}");
+    await expect(confirmed).toHaveTextContent("Modify, Approve, Reject");
   },
 };
 
@@ -338,10 +362,9 @@ function QueueList() {
         aria-label="Queue"
         tabIndex={0}
         aria-activedescendant={`q-${active}`}
+        // No preventDefault: the hook has to see ↓ belongs to the list.
         onKeyDown={(e) => {
-          if (e.key !== "ArrowDown") return;
-          e.preventDefault();
-          setActive((i) => Math.min(rows.length - 1, i + 1));
+          if (e.key === "ArrowDown") setActive((i) => Math.min(rows.length - 1, i + 1));
         }}
         style={{ border: "1px solid var(--i258-border-strong)", borderRadius: 8, padding: 4 }}
       >
@@ -376,5 +399,9 @@ export const StaticList: Story = {
     await expect(c.getByTestId("last")).toHaveTextContent("Nothing yet");
     await press("u");
     await expect(c.getByTestId("last")).toHaveTextContent("Undo");
+    // Off the list, the page's ↓ runs.
+    blur();
+    await press("{ArrowDown}");
+    await expect(c.getByTestId("last")).toHaveTextContent("Next view");
   },
 };

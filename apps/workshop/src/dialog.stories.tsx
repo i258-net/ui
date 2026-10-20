@@ -72,13 +72,15 @@ export const Confirm: Story = {
     await expect(dialog).toHaveAccessibleDescription(/needs a confirm/);
     await waitFor(() => expect(body().getByRole("button", { name: "Cancel" })).toHaveFocus());
 
-    // Focus is trapped: Cancel → Resolve → Close → back to Cancel.
+    // Focus is trapped: Cancel → Resolve → Close → back to Cancel. At the
+    // ends Tab lands on Base UI's focus guard, which hands focus on a tick
+    // later, so wait for where it settles.
     await userEvent.tab();
-    await expect(body().getByRole("button", { name: "Resolve" })).toHaveFocus();
+    await waitFor(() => expect(body().getByRole("button", { name: "Resolve" })).toHaveFocus());
     await userEvent.tab();
-    await expect(body().getByRole("button", { name: "Close" })).toHaveFocus();
+    await waitFor(() => expect(body().getByRole("button", { name: "Close" })).toHaveFocus());
     await userEvent.tab();
-    await expect(body().getByRole("button", { name: "Cancel" })).toHaveFocus();
+    await waitFor(() => expect(body().getByRole("button", { name: "Cancel" })).toHaveFocus());
 
     await userEvent.keyboard("{Escape}");
     await waitFor(() => expect(body().queryByRole("dialog")).toBeNull());
@@ -164,6 +166,9 @@ export const PageIsInert: Story = {
     await expect(c.queryByRole("button", { name: "Behind" })).toBeNull();
     for (let i = 0; i < 4; i++) {
       await userEvent.tab();
+      await waitFor(() =>
+        expect(document.activeElement?.matches("button")).toBe(true),
+      );
       await expect(body().getByRole("dialog")).toContainElement(document.activeElement as HTMLElement);
     }
     await userEvent.click(body().getByRole("button", { name: "Close" }));
@@ -230,5 +235,35 @@ export const InsideAppFrame: Story = {
       darkBackground,
     );
     await expect(dialog.closest("[data-density]")).toHaveAttribute("data-density", "compact");
+  },
+};
+
+/** More content than fits: the body scrolls inside, the dialog stays on screen. */
+export const LongContent: Story = {
+  name: "Long content",
+  tags: ["!autodocs"],
+  render: () => (
+    <Dialog defaultOpen>
+      <DialogContent>
+        <DialogTitle>Session notes</DialogTitle>
+        <DialogBody>
+          {Array.from({ length: 60 }, (_, i) => (
+            <p key={i} style={{ margin: "0 0 12px" }}>
+              Note {i + 1}: decision recorded, follow-up scheduled for the next review.
+            </p>
+          ))}
+        </DialogBody>
+        <DialogFooter>
+          <DialogClose render={<Button />}>Done</DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async () => {
+    const dialog = await body().findByRole("dialog", { name: "Session notes" });
+    const inner = dialog.querySelector<HTMLElement>(".i258-dialog__inner")!;
+    await expect(inner.scrollHeight).toBeGreaterThan(inner.clientHeight);
+    const r = dialog.getBoundingClientRect();
+    await expect(r.bottom).toBeLessThanOrEqual(window.innerHeight);
   },
 };

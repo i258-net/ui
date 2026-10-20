@@ -67,15 +67,20 @@ test.describe("reflow", () => {
       await page.keyboard.press("Control+End");
       await expect(page.getByRole("option").last()).toBeInViewport();
 
-      await open(page, "primitives-dialog--open");
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await settled(page);
-      const dialog = await box(page, ".i258-dialog");
-      expect(dialog.left).toBeGreaterThanOrEqual(0);
-      expect(dialog.right).toBeLessThanOrEqual(width);
-      expect(dialog.top).toBeGreaterThanOrEqual(0);
-      expect(dialog.bottom).toBeLessThanOrEqual(height);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      // A short dialog and one taller than the viewport.
+      for (const id of ["primitives-dialog--open", "primitives-dialog--long-content"]) {
+        await open(page, id);
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await settled(page);
+        const dialog = await box(page, ".i258-dialog");
+        expect(dialog.left, id).toBeGreaterThanOrEqual(0);
+        expect(dialog.right, id).toBeLessThanOrEqual(width);
+        expect(dialog.top, id).toBeGreaterThanOrEqual(0);
+        expect(dialog.bottom, id).toBeLessThanOrEqual(height);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      }
+      // The long one's footer is reachable on screen.
+      await expect(page.getByRole("button", { name: "Done" })).toBeInViewport();
     });
   }
 });
@@ -111,20 +116,30 @@ test.describe("coarse pointer", () => {
   });
 });
 
-for (const boxSizing of ["content-box", "border-box"] as const) {
-  test(`${boxSizing}: palette Close keeps its 24px floor, key caps keep their height`, async ({ page }) => {
+test("either box-sizing: same palette and dialog size, Close keeps its 24px floor, same key caps", async ({ page }) => {
+  const measure = async (boxSizing: "content-box" | "border-box") => {
     await openPalette(page);
     // Unlayered, as a consumer reset would be, so it beats @layer i258-components.
     await page.addStyleTag({ content: `*, *::before, *::after { box-sizing: ${boxSizing}; }` });
+    const palette = await box(page, ".i258-palette");
     const close = (await page.getByRole("button", { name: "Close" }).boundingBox())!;
-    expect(close.height).toBeGreaterThanOrEqual(24);
     const caps = await page
       .locator(".i258-palette__footer .i258-kbd")
-      .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
-    expect(new Set(caps).size).toBe(1);
-    expect(caps[0]).toBeGreaterThanOrEqual(16);
-  });
-}
+      .evaluateAll((els) => els.map((el) => [el.getBoundingClientRect().width, el.getBoundingClientRect().height]));
+    await open(page, "primitives-dialog--long-content");
+    await settled(page);
+    await page.addStyleTag({ content: `*, *::before, *::after { box-sizing: ${boxSizing}; }` });
+    const dialog = await box(page, ".i258-dialog");
+    return { palette: [palette.width, palette.height], dialog: [dialog.width, dialog.height], closeHeight: close.height, caps };
+  };
+  const content = await measure("content-box");
+  const border = await measure("border-box");
+  expect(content.closeHeight).toBeGreaterThanOrEqual(24);
+  expect(border.closeHeight).toBeGreaterThanOrEqual(24);
+  expect(content.palette).toEqual(border.palette);
+  expect(content.dialog).toEqual(border.dialog);
+  expect(content.caps).toEqual(border.caps);
+});
 
 test.describe("forced colours and reduced motion", () => {
   test("forced colours: the highlighted item and the active option are outlined", async ({ page }) => {
@@ -140,9 +155,19 @@ test.describe("forced colours and reduced motion", () => {
     await openPalette(page);
     const active = page.locator('[role="option"][aria-selected="true"]');
     expect(await active.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
-    expect(await page.locator(".i258-palette").evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe(
-      "solid",
-    );
+    // The palette's ring is a box-shadow, which forced colours drop; its
+    // edge is redrawn as a CanvasText outline.
+    const edge = await page.locator(".i258-palette").evaluate((el) => {
+      const probe = document.createElement("div");
+      probe.style.cssText = "color: CanvasText";
+      document.body.append(probe);
+      const canvasText = getComputedStyle(probe).color;
+      probe.remove();
+      const s = getComputedStyle(el);
+      return { style: s.outlineStyle, color: s.outlineColor, canvasText };
+    });
+    expect(edge.style).toBe("solid");
+    expect(edge.color).toBe(edge.canvasText);
   });
 
   test("reduced motion: popups and the backdrop don't animate", async ({ page }) => {
