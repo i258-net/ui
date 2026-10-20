@@ -15,8 +15,8 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.5.1` tagged broken for bundlers; this branch targets `0.5.2` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
-| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
-| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) |
+| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle, Kbd, Dialog, Menu |
+| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
@@ -105,6 +105,37 @@ That puts our primitives above preflight/`components` and below utilities (so ut
 - **Frames narrower than their minimums** (embedded in a narrow container on a wide screen): the inspector becomes the end sheet, as below 980px; if the sidebar and `main` still do not fit, they share the frame in proportion to their minimums rather than push anything past its edge. The nav sheet follows the viewport only, since the app owns its opener. `useFrameLayout()` called inside the frame reports the frame's actual layout; outside it, the viewport breakpoints.
 - **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`. A sheet whose content the app removes (no `sidebar`, `sidebarMode="hidden"`, no `inspector`) returns focus to what had it before the sheet, unless another sheet takes over; a nav sheet removed that way is reported closed.
 - **Refs:** a `ref` on `AppFrame` is composed with the frame's own (object or callback refs, including React 19 callback cleanups).
+
+### Shortcuts and popups
+
+`useShortcut(binding, handler, options?)` follows the shortcut rules
+accepted in I25-119. They are the same in every app:
+
+- **Single-character shortcuts are opt-in.** `1`, `u`, `?` fire only inside
+  `<ShortcutsProvider singleKeyShortcuts>`. Wire that prop to the app's
+  Settings on/off control (default off). Modifier chords (`mod+k` = ⌘K /
+  Ctrl+K) and named keys (Enter, Escape) work without it.
+- **Typing and popup guards.** Nothing fires from a text field, select,
+  combobox or contenteditable unless the binding passes `allowInInput`, and a
+  character key never does. Nothing fires while a dialog, menu or listbox
+  popup is open (or focus is in a dialog or menu) unless it passes
+  `allowInLayer`. A focused control keeps Enter / Space, and composite widgets
+  keep their arrow keys.
+- **Enter confirms.** Pressing the same number again never confirms: there are
+  no "press twice" bindings, and auto-repeat never fires a binding.
+- **Visible action buttons.** Every shortcut needs a visible control that does
+  the same thing. Show its `Kbd` cap (with `aria-hidden`) and
+  `aria-keyshortcuts` only while the shortcut is live
+  (`useSingleKeyShortcuts()`); `formatShortcut` / `ariaKeyShortcuts` spell a
+  binding for the current platform.
+
+`Dialog`, `Menu` and `CommandPalette` sit on Base UI (focus trap, inert page,
+Escape, focus return). Inside an `AppFrame` they portal into the frame's layer
+and inherit its `data-theme` / `data-density`; elsewhere they portal to
+`document.body`, so set the theme on `<html>` (as `themeScript()` does).
+`CommandPalette` binds ⌘K / Ctrl+K itself (`shortcut={null}` to opt out). A
+command with `navigates: true` leaves focus to the app, which should move it
+to the new view's heading.
 
 ## Workspace
 
