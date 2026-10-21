@@ -115,6 +115,12 @@ accepted in I25-119. They are the same in every app:
   `<ShortcutsProvider singleKeyShortcuts>`. Wire that prop to the app's
   Settings on/off control (default off). Modifier chords (`mod+k` = ⌘K /
   Ctrl+K) and named keys (Enter, Escape) work without it.
+- **Binding spelling.** `[mod+][ctrl+][alt+][shift+]key`, case-insensitive
+  for single characters; `Space` is the space bar. In a chord with Ctrl, Alt
+  or ⌘ a digit key binds by position, so write `mod+shift+1`: `mod+!` (any
+  US-shifted digit symbol `!@#$%^&*()`) is read as the same binding. A
+  character binding without a command modifier (`?`, `!`) is the character
+  typed.
 - **Typing and popup guards.** Nothing fires from a text field, select,
   combobox or contenteditable unless the binding passes `allowInInput`, and a
   character key never does. Nothing fires while a dialog, menu or listbox

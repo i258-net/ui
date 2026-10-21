@@ -32,6 +32,15 @@ describe("normaliseBinding", () => {
     expect(normaliseBinding("esc")).toBe("Escape");
   });
 
+  it("spells a shifted digit symbol in a command chord as shift+digit", () => {
+    expect(normaliseBinding("ctrl+!", false)).toBe("ctrl+shift+1");
+    expect(normaliseBinding("mod+shift+)", true)).toBe("meta+shift+0");
+    expect(normaliseBinding("alt+@", false)).toBe(normaliseBinding("alt+shift+2", false));
+    // No command modifier: the typed character.
+    expect(normaliseBinding("!")).toBe("!");
+    expect(normaliseBinding("shift+!")).toBe("shift+!");
+  });
+
   it("reads a trailing + as the plus key", () => {
     expect(normaliseBinding("+")).toBe("+");
     expect(normaliseBinding("mod++", true)).toBe("meta++");
@@ -87,6 +96,22 @@ describe("bindingFromEvent", () => {
     expect(bindingFromEvent(ev("&", { ctrlKey: true, code: "Digit1" }), false)).toBe("ctrl+1");
     expect(bindingFromEvent(ev("1", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false)).toBe(
       "ctrl+shift+1",
+    );
+  });
+
+  it("matches ctrl+! and ctrl+shift+1 to the same US keypress", () => {
+    const step = bindingFromEvent(ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false);
+    expect(step).toBe(normaliseBinding("ctrl+!", false));
+    expect(step).toBe(normaliseBinding("ctrl+shift+1", false));
+    const mac = bindingFromEvent(ev("!", { metaKey: true, shiftKey: true, code: "Digit1" }), true);
+    expect(mac).toBe(normaliseBinding("mod+!", true));
+  });
+
+  it("keeps Shift on the space bar", () => {
+    expect(bindingFromEvent(ev(" ", { shiftKey: true }))).toBe(normaliseBinding("shift+Space"));
+    expect(bindingFromEvent(ev(" ", { shiftKey: true }))).not.toBe(normaliseBinding("Space"));
+    expect(bindingFromEvent(ev(" ", { ctrlKey: true, shiftKey: true }), false)).toBe(
+      normaliseBinding("ctrl+shift+Space", false),
     );
   });
 

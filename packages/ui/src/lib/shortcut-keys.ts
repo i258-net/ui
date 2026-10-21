@@ -7,6 +7,10 @@
  * elsewhere. `key` is a `KeyboardEvent.key` value (`Escape`, `ArrowDown`),
  * any case for a single character; `Space` is the space bar. Single steps
  * only: no `g i`-style sequences, and no "press it twice" bindings.
+ *
+ * In a command chord (Ctrl / Alt / ⌘) a digit key binds by position, so a
+ * US-shifted digit symbol is spelled `shift+<digit>`: `mod+!` is
+ * `mod+shift+1`. Without a command modifier `!` stays the typed character.
  */
 
 /** Whether `mod` means ⌘. `false` on the server. */
@@ -22,6 +26,20 @@ export function isApplePlatform(): boolean {
 
 const MODIFIERS = ["ctrl", "alt", "meta", "shift"] as const;
 
+// The US key caps' shifted digits, for chords spelled with the symbol.
+const SHIFTED_DIGITS: Record<string, string> = {
+  "!": "1",
+  "@": "2",
+  "#": "3",
+  $: "4",
+  "%": "5",
+  "^": "6",
+  "&": "7",
+  "*": "8",
+  "(": "9",
+  ")": "0",
+};
+
 function normaliseKey(key: string): string {
   if (key === " " || key.toLowerCase() === "space") return "Space";
   if (key.toLowerCase() === "esc") return "Escape";
@@ -34,12 +52,19 @@ export function normaliseBinding(binding: string, apple = isApplePlatform()): st
   // A trailing `+` is the plus key itself (`mod++`, or just `+`).
   const plusKey = trimmed.endsWith("+");
   const parts = (plusKey ? trimmed.slice(0, -1) : trimmed).split("+").filter(Boolean);
-  const key = plusKey ? "+" : (parts.pop() ?? "");
+  let key = plusKey ? "+" : (parts.pop() ?? "");
   const mods = new Set(parts.map((p) => p.toLowerCase()));
   if (mods.delete("mod")) mods.add(apple ? "meta" : "ctrl");
   if (mods.delete("control")) mods.add("ctrl");
   if (mods.delete("option")) mods.add("alt");
   if (mods.delete("cmd")) mods.add("meta");
+  // bindingFromEvent reads Ctrl+Shift+1 as ctrl+shift+1 on every layout, so
+  // `ctrl+!` has to mean that too or it never fires.
+  const digit = SHIFTED_DIGITS[key];
+  if (digit && (mods.has("ctrl") || mods.has("alt") || mods.has("meta"))) {
+    key = digit;
+    mods.add("shift");
+  }
   return [...MODIFIERS.filter((m) => mods.has(m)), normaliseKey(key)].join("+");
 }
 
@@ -74,7 +99,11 @@ export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): str
   // keys carry it as a modifier. So does a digit in a command chord, however
   // the layout reports it: Ctrl+Shift+1 types "!" on US (bound by its key
   // cap above) and "1" on AZERTY, and both are ctrl+shift+1, never ctrl+1.
-  if (event.shiftKey && (key.length > 1 || /^[a-z]$/i.test(key) || (command && /^[0-9]$/.test(key))))
+  // The space bar is a named key, though its `key` is one character.
+  if (
+    event.shiftKey &&
+    (key.length > 1 || key === " " || /^[a-z]$/i.test(key) || (command && /^[0-9]$/.test(key)))
+  )
     out.push("shift");
   out.push(normaliseKey(key));
   return out.join("+");
