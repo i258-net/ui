@@ -107,8 +107,12 @@ export function isLayerOpen(target: EventTarget | null, doc: Document): boolean 
   }
 }
 
+// The last line is composites focused as a whole, their active item named by
+// aria-activedescendant: Space selects in a listbox, tree or grid, Enter
+// activates in a tree, grid or menubar (and many listboxes).
 const ACTIVATES =
-  'button, a[href], summary, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="option"], [role^="menuitem"], [role="treeitem"], [role="gridcell"]';
+  'button, a[href], summary, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="option"], [role^="menuitem"], [role="treeitem"], [role="gridcell"], ' +
+  '[role="listbox"], [role="tree"], [role="treegrid"], [role="grid"], [role="menubar"]';
 const COMPOSITE =
   '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="grid"], [role="slider"], [role="separator"][tabindex], input[type="range"], input[type="radio"]';
 const ARROWS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]);

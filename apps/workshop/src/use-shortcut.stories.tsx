@@ -379,6 +379,75 @@ function QueueList() {
   );
 }
 
+function TagList() {
+  const { log, output } = useLog();
+  const [active, setActive] = React.useState(0);
+  const [picked, setPicked] = React.useState<readonly number[]>([]);
+  const tags = ["Parser", "Ledger", "Freshness"];
+  // A page-level Space the focused list must keep for itself.
+  useShortcut("Space", () => log("Play/pause"));
+  return (
+    <div style={{ display: "grid", gap: 12, maxWidth: 320 }}>
+      <div
+        role="listbox"
+        aria-label="Tags"
+        aria-multiselectable="true"
+        tabIndex={0}
+        aria-activedescendant={`t-${active}`}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") setActive((i) => Math.min(tags.length - 1, i + 1));
+        }}
+        // Selects on keyup, so the hook has to see Space belongs to the list.
+        onKeyUp={(e) => {
+          if (e.key === " ")
+            setPicked((p) => (p.includes(active) ? p.filter((i) => i !== active) : [...p, active]));
+        }}
+        style={{ border: "1px solid var(--i258-border-strong)", borderRadius: 8, padding: 4 }}
+      >
+        {tags.map((t, i) => (
+          <div key={t} id={`t-${i}`} role="option" aria-selected={picked.includes(i)} style={{ padding: 4 }}>
+            {t}
+          </div>
+        ))}
+      </div>
+      {output}
+    </div>
+  );
+}
+
+/**
+ * A focused listbox that names its active option with
+ * aria-activedescendant keeps Space: it selects, and the page's Space
+ * doesn't run (or cancel the key).
+ */
+export const ListboxKeepsSpace: Story = {
+  name: "A focused listbox keeps Space",
+  render: () => <TagList />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const list = c.getByRole("listbox", { name: "Tags" });
+    list.focus();
+    await press("{ArrowDown}");
+    let spaceKept: boolean | undefined;
+    const spy = (e: KeyboardEvent) => {
+      if (e.key === " ") spaceKept = !e.defaultPrevented;
+    };
+    document.addEventListener("keydown", spy);
+    try {
+      await press(" ");
+    } finally {
+      document.removeEventListener("keydown", spy);
+    }
+    await expect(c.getByRole("option", { name: "Ledger" })).toHaveAttribute("aria-selected", "true");
+    await expect(c.getByTestId("last")).toHaveTextContent("Nothing yet");
+    await expect(spaceKept).toBe(true);
+    // Off the list, the page's Space runs.
+    blur();
+    await press(" ");
+    await expect(c.getByTestId("last")).toHaveTextContent("Play/pause");
+  },
+};
+
 /**
  * A list on the page that happens to be a listbox is not a popup: with
  * focus in it, `u` still works, while ↓ stays the list's own.
