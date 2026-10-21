@@ -15,8 +15,8 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.5.1` tagged broken for bundlers; this branch targets `0.5.2` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
 | Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono + i258 Symbols · Base UI/CVA · Storybook 10 |
-| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle, Kbd, Dialog, Menu |
-| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` |
+| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle, Kbd, Dialog, Menu, Tooltip, Tabs, Table, Select, StatusLabel, EmptyState |
+| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` · SummaryStrip / SummaryTile |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
@@ -37,8 +37,8 @@ which one you reach for is the whole grammar:
 makes it unreadable as type on a light background. Use `-text` there. Day
 `-text` values are the same hue darkened; Night `-text` equals the tone.
 
-Status tags are a soft wash of the tone plus a hairline plus `-text` — not a
-solid pill. `Badge` already does this; app-level tags should bridge to it
+Status tags are a soft wash of the tone plus a hairline plus `-text` — a
+4px-cornered tag, not a solid pill. `Badge` already does this; app-level tags should bridge to it
 rather than restate their own hexes, which do not survive a theme flip.
 `--i258-tint-mix` is the share of a tone in that wash.
 
@@ -144,6 +144,35 @@ and inherit its `data-theme` / `data-density`; elsewhere they portal to
 `CommandPalette` binds ⌘K / Ctrl+K itself (`shortcut={null}` to opt out). A
 command with `navigates: true` leaves focus to the app, which should move it
 to the new view's heading.
+
+### Status, tone and tips
+
+- **Amber means waiting on you.** `warning` is for a decision, an action or a
+  review that needs the user, and nothing else on a board: blocked, missing
+  priority, drift and stale rows are `neutral` / `muted` with their own glyph.
+  A global stale-data notice (an `EmptyState` or `Alert` about the whole view)
+  may stay amber, since it affects trust in everything shown. `danger` is
+  broken data or a failing check; `success` a passing one.
+- **`StatusLabel`** is a status as glyph + word, colour on the status only
+  (never the row); `tinted` adds the badge wash. The app maps its values to
+  tones. **`Badge`** is a quiet tag for anything else.
+- **`SummaryStrip` / `SummaryTile`:** counts above a view, shared by Honeycomb
+  and Abacus. A tile is a filter (`pressed` makes it a toggle button), a link
+  (`render={<a href=… />}`) or a readout (`render={<div />}`); the count leads
+  its name ("9 Decisions waiting on you"). Its tone shows only while the count
+  is non-zero (or `alert`); `"—"` means unknown, never a fake zero. Pressed is
+  an indicator edge plus a ✓ box.
+- **`Tooltip`** is a visual label for an icon-only control or a glyph, never
+  content: the tip is `aria-hidden`, so the trigger keeps its own name
+  (`aria-label`, or visually hidden words on a glyph). It meets WCAG 1.4.13
+  (hoverable, persistent, dismissible), opens on hover and keyboard focus but
+  never on touch, and **Escape closes only the tip** — an enclosing dialog,
+  sheet, menu or `useShortcut("Escape")` handler (closing an inline inspector)
+  waits for the next press. Wrap neighbouring tips in one `TooltipProvider`.
+- **`Select`** is a native `<select>`; `Tabs` are Base UI tabs (arrows move,
+  Enter/Space select); `Table` is a plain semantic table, and
+  `TableContainer` scrolls a wide one in place (a keyboard stop, and a region
+  when named, only while it overflows).
 
 ## Workspace
 
