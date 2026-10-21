@@ -199,10 +199,13 @@ Update baselines with `pnpm vrt:update`. Snapshots live under
 `apps/workshop/vrt/*-snapshots/`. Linux CI is the source of truth — take baselines from the
 CI `vrt-results` `*-actual.png` artifacts; Darwin renders differ in text widths by ~2px and
 fail CI. CI job for `pnpm vrt` is a separate PR (CODEOWNERS on `.github/workflows/`).
-Comparisons run at `maxDiffPixels: 0` and `threshold: 0`: any pixel difference that
-pixelmatch counts fails, so a palette repaint like I25-106's cannot pass against a stale
-baseline. Anti-aliased pixels remain excluded, so a change touching only glyph edges can
-still pass (`apps/workshop/playwright.config.ts`).
+Comparisons run at `maxDiffPixels: 0` and `threshold: 0.005`: one pixel whose YIQ distance
+exceeds 0.005 fails, just above the 0.0039 a one-level step per channel can reach. So one-level
+rounding passes: Playwright 1.64.1's Chromium
+moves up to 23,508 px of the overlay screens by exactly that much. Palette changes fail,
+including I25-106's repaint and a 10° hue turn of the Day success/danger badge washes, which
+moves pixels by up to 5 levels (it would pass at 0.01). Anti-aliased pixels remain excluded,
+so a change touching only glyph edges can still pass (`apps/workshop/playwright.config.ts`).
 ## Using `@i258/ui`
 
 ```ts
