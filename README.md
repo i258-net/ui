@@ -167,9 +167,19 @@ to the new view's heading.
   content: the tip is `aria-hidden`, so the trigger keeps its own name
   (`aria-label`, or visually hidden words on a glyph). It meets WCAG 1.4.13
   (hoverable, persistent, dismissible), opens on hover and keyboard focus but
-  never on touch, and **Escape closes only the tip** — an enclosing dialog,
+  never on a tap, and **Escape closes only the tip** — an enclosing dialog,
   sheet, menu or `useShortcut("Escape")` handler (closing an inline inspector)
-  waits for the next press. Wrap neighbouring tips in one `TooltipProvider`.
+  waits for the next press. Wrap neighbouring tips in one `TooltipProvider`,
+  where they live (a toolbar, a row of glyphs) or once at the app root; the
+  kit mounts none at the root and `AppFrame` adds none. A trigger with its
+  own touch gesture drives the tip through `open` / `onOpenChange`.
+- **Sidebar rail names** are `Tooltip`s, owned by `SidebarItem`: name and
+  count on hover, keyboard focus and a touch long-press (500ms; it shows the
+  name without following the link, opening the link menu or selecting text,
+  and stays until a tap elsewhere or Escape). The link keeps its own
+  accessible name. `Sidebar` brings its own `TooltipProvider` for them, so
+  apps mount nothing for the rail; an app-root provider does not change the
+  rail's timing.
 - **`Select`** is a native `<select>`; `Tabs` are Base UI tabs (arrows move,
   Enter/Space select); `Table` is a plain semantic table, and
   `TableContainer` scrolls a wide one in place (a keyboard stop, and a region
