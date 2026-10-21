@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# Repository settings for CodeRabbit. A repository file normally replaces the
+# organization settings made in the CodeRabbit UI; `inheritance: true` keeps
+# them for every key not set here.
+inheritance: true
+
+reviews:
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+  path_instructions:
+    - path: "**"
+      instructions: |
+        Severity. Mark a finding Major or Critical when the defect:
+        - breaks a documented behaviour of an exported component, hook or utility
+          (a caller's handler or prop silently replaced or ignored, a shortcut
+          that never fires);
+        - regresses keyboard use, focus, roles or accessible names;
+        - lets CSS escape @layer i258-components, or emits unprefixed custom
+          properties or Tailwind @theme output;
+        - makes emitted .d.ts unusable from TypeScript 5;
+        - makes the test suite, VRT or CI fail for unrelated later changes.
+        Mark other visible defects, Storybook or VRT tests that are flaky or
+        cannot fail, and README text that contradicts behaviour, Minor. Do not
+        comment on style, naming, formatting or docstring coverage.
+        On a later commit, do not raise new Minor findings on code you already
+        reviewed that has not changed.
+    - path: "**/package.json"
+      instructions: |
+        On a dependency bump, report only engine or peer incompatibilities and
+        breaking changes that affect this repo. Do not ask for a test run that
+        CI already performs.
