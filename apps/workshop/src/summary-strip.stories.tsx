@@ -231,6 +231,70 @@ export const CheckGoesUnknown: Story = {
   },
 };
 
+/**
+ * Tiles inside a form: neither the default tile nor one rendered as a
+ * custom `<button>` with `type="button"` submits it.
+ */
+export const InForm: Story = {
+  args: { label: "Filters" },
+  render: function InForm() {
+    const [submits, setSubmits] = React.useState(0);
+    const [pressed, setPressed] = React.useState<string | null>(null);
+    const toggle = (key: string) => () => setPressed((p) => (p === key ? null : key));
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSubmits((n) => n + 1);
+        }}
+        style={{ display: "grid", gap: 16, maxWidth: 960, justifyItems: "start" }}
+      >
+        <SummaryStrip label="Filters">
+          <SummaryTile
+            tone="warning"
+            icon={Icons.decision}
+            count={9}
+            label="Decisions"
+            pressed={pressed === "decision"}
+            onClick={toggle("decision")}
+          />
+          <SummaryTile
+            icon={Icons.stale}
+            count={5}
+            label="Stale"
+            render={<button className="custom" />}
+            type="button"
+            pressed={pressed === "stale"}
+            onClick={toggle("stale")}
+          />
+        </SummaryStrip>
+        <output aria-label="Submits">{submits}</output>
+      </form>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const submits = c.getByRole("status", { name: "Submits" });
+    const custom = c.getByRole("button", { name: "5 Stale" });
+    const plain = c.getByRole("button", { name: "9 Decisions" });
+    await expect(custom).toHaveClass("custom");
+
+    // Click, Enter and Space toggle the tile and never submit the form.
+    await userEvent.click(custom);
+    await expect(custom).toHaveAttribute("aria-pressed", "true");
+    await expect(submits).toHaveTextContent("0");
+    await userEvent.keyboard("{Enter}");
+    await expect(custom).toHaveAttribute("aria-pressed", "false");
+    await userEvent.keyboard(" ");
+    await expect(custom).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(plain);
+    await expect(plain).toHaveAttribute("aria-pressed", "true");
+    await expect(submits).toHaveTextContent("0");
+    await expect(custom).toHaveAttribute("type", "button");
+    await expect(plain).toHaveAttribute("type", "button");
+  },
+};
+
 /** Two columns at 320px; nothing scrolls sideways. */
 export const Narrow: Story = {
   args: { label: "Board summary" },

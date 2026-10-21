@@ -108,7 +108,9 @@ export const SummaryTile = React.forwardRef<HTMLElement, SummaryTileProps>(funct
     props: mergeProps<"button">(
       {
         className: cn(summaryTileVariants({ tone }), className),
-        type: render ? undefined : (type ?? "button"),
+        // Default to "button" only on our own <button>; with `render`, pass an
+        // explicit `type` through (a rendered <button> would otherwise submit).
+        type: render ? type : (type ?? "button"),
         "aria-pressed": pressed,
         "data-zero": quiet ? "" : undefined,
         "data-slot": "summary-tile",
