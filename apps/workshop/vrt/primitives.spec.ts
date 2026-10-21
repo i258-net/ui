@@ -20,6 +20,7 @@ const STORIES = [
   { id: "primitives-button--icon-only", name: "button-icon-only" },
   { id: "primitives-table--default", name: "table-default" },
   { id: "primitives-tabs--selected", name: "tabs-selected" },
+  { id: "primitives-tabs--vertical-selected", name: "tabs-vertical" },
   { id: "primitives-statuslabel--tones", name: "status-label-tones" },
   { id: "primitives-emptystate--states", name: "empty-state-states" },
   { id: "primitives-select--sizes", name: "select-sizes" },

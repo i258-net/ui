@@ -34,7 +34,10 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(function Tabs(
 
 export type TabsListProps = Omit<BaseListProps, "className"> & { className?: string | undefined };
 
-/** The underlined tab strip. Scrolls sideways when the tabs don't fit. */
+/**
+ * The underlined tab strip; a column beside the panel when the Tabs are
+ * vertical. Scrolls along its axis when the tabs don't fit.
+ */
 export const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(function TabsList(
   { className, ...props },
   ref,

@@ -100,6 +100,58 @@ export const Selected: Story = {
   render: () => <IssueTabs defaultValue="log" />,
 };
 
+/**
+ * Vertical: the strip is a column beside the panel, the bar on its
+ * inline-end edge; ↑/↓ move along it and ←/→ do nothing.
+ */
+export const Vertical: Story = {
+  render: () => <IssueTabs orientation="vertical" />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const list = c.getByRole("tablist", { name: "Issue X-19" });
+    const overview = c.getByRole("tab", { name: "Overview" });
+    const body = c.getByRole("tab", { name: "Body" });
+    await expect(list).toHaveAttribute("aria-orientation", "vertical");
+    await expect(getComputedStyle(list).flexDirection).toBe("column");
+
+    // Stacked, one above the next, all as wide as the strip.
+    const o = overview.getBoundingClientRect();
+    const b = body.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    await expect(b.top).toBeGreaterThanOrEqual(o.bottom);
+    await expect(b.left).toBe(o.left);
+    await expect(o.width).toBe(b.width);
+
+    // The bar: 2px wide along the selected tab's inline-end edge, at the hairline.
+    const bar = (tab: HTMLElement) => getComputedStyle(tab, "::after");
+    const clear = bar(body).backgroundColor;
+    await expect(bar(overview).width).toBe("2px");
+    await expect(bar(overview).height).toBe(`${o.height}px`);
+    await expect(bar(overview).backgroundColor).not.toBe(clear);
+    await expect(Math.round(o.right)).toBe(Math.round(l.right - 1));
+
+    await userEvent.click(overview);
+    await userEvent.keyboard("{ArrowRight}");
+    await expect(overview).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    await expect(body).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    await expect(body).toHaveAttribute("aria-selected", "true");
+    await expect(overview).toHaveAttribute("aria-selected", "false");
+    await waitFor(() => expect(bar(body).backgroundColor).not.toBe(clear));
+    await expect(bar(overview).backgroundColor).toBe(clear);
+    await waitFor(() => expect(c.getAllByRole("tabpanel")).toHaveLength(1));
+    await expect(c.getByRole("tabpanel")).toHaveTextContent("The issue's markdown.");
+    await userEvent.keyboard("{ArrowUp}");
+    await expect(overview).toHaveFocus();
+  },
+};
+
+/** Vertical, Log selected, nothing focused: for VRT. */
+export const VerticalSelected: Story = {
+  render: () => <IssueTabs orientation="vertical" defaultValue="log" />,
+};
+
 /** activateOnFocus: the panel follows focus. */
 export const FollowsFocus: Story = {
   render: () => (

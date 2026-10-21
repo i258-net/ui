@@ -2351,6 +2351,43 @@
     border-radius: var(--i258-radius-sm);
   }
 
+  /* Vertical: the strip stands beside the panel as a column, its hairline
+     and the indicator bar on the inline-end edge (so they mirror in RTL). */
+  .i258-tabs[data-orientation="vertical"] {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--i258-space-4);
+  }
+
+  .i258-tabs__list[data-orientation="vertical"] {
+    flex-direction: column;
+    flex-shrink: 0;
+    border-bottom: 0;
+    border-inline-end: 1px solid var(--i258-border);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .i258-tabs__tab[data-orientation="vertical"] {
+    justify-content: flex-start;
+    border-start-start-radius: var(--i258-radius-md);
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--i258-radius-md);
+    border-end-end-radius: 0;
+  }
+
+  .i258-tabs__tab[data-orientation="vertical"]::after {
+    inset-inline: auto 0;
+    inset-block: 0;
+    width: 2px;
+    height: auto;
+  }
+
+  .i258-tabs__panel[data-orientation="vertical"] {
+    flex: 1;
+    min-width: 0;
+  }
+
   /* —— Tooltip ——
      A small label in the menus' clothing (same background, hairline and
      shadow, so the same contrast pairs apply). Above every other layer: a
