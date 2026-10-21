@@ -104,8 +104,12 @@ export const RailNames: Story = {
     projects.focus();
     await userEvent.tab();
     await expect(reports).toHaveFocus();
-    await waitFor(() => expect(tip()).toBeVisible());
-    await expect(tip()).toHaveTextContent("Reports2");
+    // Wait for Reports' own tip: Projects' may still be closing.
+    await waitFor(() => {
+      expect(document.querySelectorAll("[data-slot='tooltip']")).toHaveLength(1);
+      expect(tip()).toHaveTextContent("Reports2");
+    });
+    await expect(tip()).toBeVisible();
     await expect(tip()).toHaveAttribute("aria-hidden", "true");
     await expect(tip()!.closest(".i258-frame__layer")).not.toBeNull();
     // The link's own name, not described by the tip.

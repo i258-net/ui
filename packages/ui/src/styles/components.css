@@ -1500,10 +1500,12 @@
     white-space: nowrap;
   }
 
-  /* The tip is the kit Tooltip; this lays out its name and count. */
+  /* The tip is the kit Tooltip; this lays out its name and count, on one
+     line as before. */
   .i258-sidebar__tip {
     display: flex;
     gap: var(--i258-space-2);
+    white-space: nowrap;
   }
 
   .i258-sidebar__tip-count {

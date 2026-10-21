@@ -245,6 +245,8 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
 const LONG_PRESS_MS = 500;
 /** Finger travel that turns a press into a scroll, px. */
 const LONG_PRESS_SLOP = 10;
+/** How long after the lift a long-press's click is still swallowed, ms. */
+const LONG_PRESS_RELEASE_MS = 400;
 
 /*
   Rail names on touch. The kit Tooltip never opens on a tap (a tap
@@ -257,7 +259,10 @@ function useLongPress(enabled: boolean) {
   const [open, setOpen] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const origin = React.useRef<{ x: number; y: number } | null>(null);
+  // Set by a long-press, for the click (if any) its lift sends; cleared
+  // shortly after the lift so no later click is lost.
   const suppressClick = React.useRef(false);
+  const release = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const cancel = React.useCallback(() => {
     clearTimeout(timer.current);
@@ -266,22 +271,45 @@ function useLongPress(enabled: boolean) {
   }, []);
   const show = React.useCallback(() => {
     cancel();
+    clearTimeout(release.current);
     suppressClick.current = true;
     setOpen(true);
+  }, [cancel]);
+  const lift = React.useCallback(() => {
+    cancel();
+    if (!suppressClick.current) return;
+    clearTimeout(release.current);
+    release.current = setTimeout(() => {
+      suppressClick.current = false;
+    }, LONG_PRESS_RELEASE_MS);
   }, [cancel]);
 
   React.useEffect(() => {
     if (enabled) return;
     cancel();
+    clearTimeout(release.current);
+    suppressClick.current = false;
     setOpen(false);
   }, [enabled, cancel]);
-  React.useEffect(() => cancel, [cancel]);
+  React.useEffect(
+    () => () => {
+      cancel();
+      clearTimeout(release.current);
+    },
+    [cancel],
+  );
 
   const triggerProps: React.ComponentProps<"a"> = enabled
     ? {
         onPointerDown(event) {
+          // A second finger: a gesture, not a press.
+          if (!event.isPrimary) {
+            cancel();
+            return;
+          }
+          clearTimeout(release.current);
           suppressClick.current = false;
-          if (event.pointerType !== "touch" || !event.isPrimary) return;
+          if (event.pointerType !== "touch") return;
           cancel();
           origin.current = { x: event.clientX, y: event.clientY };
           timer.current = setTimeout(show, LONG_PRESS_MS);
@@ -291,11 +319,8 @@ function useLongPress(enabled: boolean) {
           if (!o || event.pointerType !== "touch") return;
           if (Math.hypot(event.clientX - o.x, event.clientY - o.y) > LONG_PRESS_SLOP) cancel();
         },
-        onKeyDown() {
-          suppressClick.current = false;
-        },
-        onPointerUp: cancel,
-        onPointerCancel: cancel,
+        onPointerUp: lift,
+        onPointerCancel: lift,
         // Android raises the link menu on a long-press, at about the same
         // moment as the timer: take it as the long-press.
         onContextMenu(event) {
@@ -304,7 +329,8 @@ function useLongPress(enabled: boolean) {
           if (!suppressClick.current) show();
         },
         // Some browsers still send a click when the finger lifts. It must
-        // neither follow the link nor close the tip it just opened.
+        // neither follow the link nor close the tip it just opened, and
+        // the item's own onClick does not run.
         onClick(event) {
           if (!suppressClick.current) return;
           suppressClick.current = false;

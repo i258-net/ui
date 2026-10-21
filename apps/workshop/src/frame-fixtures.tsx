@@ -85,8 +85,8 @@ export function DemoSidebar({
                 countLabel={"countLabel" in item ? item.countLabel : undefined}
                 countTone={"tone" in item ? item.tone : undefined}
                 onClick={(e) => {
-                  // Stay on the story; log a click the item did not cancel
-                  // itself (a rail long-press does) as followed.
+                  // Stay on the story, and log the click as followed. A rail
+                  // long-press's click never reaches this handler.
                   if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
                   e.preventDefault();
                 }}
