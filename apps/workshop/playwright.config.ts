@@ -49,6 +49,36 @@ export default defineConfig({
       // diff fails, and baselines are re-shot deliberately from the CI Linux
       // actuals, never regenerated on a Mac.
       maxDiffPixels: 0,
+      // maxDiffPixels counts only pixels pixelmatch calls different, and by
+      // default that means a YIQ distance above threshold 0.2 — about 52
+      // levels on a grey ramp. The zinc/indigo palette (I25-106) repainted
+      // all 5,304 pixels of Primitives/Badge/Status and both themes passed
+      // against the stale Tokyo baselines, so CI uploaded no actual to
+      // re-shoot from (I25-120): no pixel of that repaint scores above 0.15.
+      //
+      // 0.005 sits between two measured distributions (I25-120). Below it is
+      // 8-bit rounding: a step of one level on each channel scores at most
+      // 0.0039. Playwright 1.64.1's Chromium draws eight overlay and Docs
+      // snapshots shot under 1.63 up to 23,508 px differently, every pixel
+      // by exactly one level — box-shadow halos, text under the dialog
+      // scrim — so they fail at 0 and pass here. Above it are palette
+      // changes, and the faintest sets the ceiling: a 10° oklch hue turn of
+      // the success and danger badge washes peaks at 0.0073 in Day (1,493 px
+      // fail here, none at 0.01) and 0.034 in Night. Tokyo→zinc peaks at
+      // 0.15. Six token nudges — tint-mix 8→12% / 16→22%, surface, hairline
+      // border, muted, accent, success-text — repaint 84 snapshots and 80
+      // fail here; the 4 that pass are Day accent snapshots that moved a
+      // single level, which no threshold can tell from rounding. Looser
+      // loses coverage fast: 76 fail at 0.01, 56 at 0.02 (none of the
+      // surface nudge's 18), 2 at 0.05. The margin is one level on purpose:
+      // a Chromium that moves pixels by two fails, and is re-shot from CI
+      // actuals like any other drift.
+      //
+      // pixelmatch still skips pixels it judges anti-aliased (Playwright
+      // gives no includeAA option): a muted-text change that moves 2,920
+      // pixels of the inspector frame reports 1,655. A change confined to
+      // glyph edges can still pass.
+      threshold: 0.005,
       animations: "disabled",
     },
   },
