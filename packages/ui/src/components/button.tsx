@@ -14,14 +14,21 @@ const buttonVariants = cva("i258-btn", {
       danger: "i258-btn--danger",
     },
     size: {
+      xs: "i258-btn--xs",
       sm: "i258-btn--sm",
       md: "i258-btn--md",
       lg: "i258-btn--lg",
+    },
+    /** `icon`: square, for an icon-only button. Give it an `aria-label`. */
+    shape: {
+      default: "",
+      icon: "i258-btn--icon",
     },
   },
   defaultVariants: {
     variant: "primary",
     size: "md",
+    shape: "default",
   },
 });
 
@@ -40,6 +47,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(
       className,
       variant,
       size,
+      shape,
       render,
       asChild = false,
       type,
@@ -60,7 +68,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(
       render: resolvedRender,
       props: mergeProps<"button">(
         {
-          className: cn(buttonVariants({ variant, size }), className),
+          className: cn(buttonVariants({ variant, size, shape }), className),
           type: resolvedRender ? undefined : (type ?? "button"),
           children: asChild ? undefined : children,
           "data-slot": "button",

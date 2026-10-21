@@ -178,4 +178,43 @@ export type {
 export { CommandPalette, defaultCommandFilter } from "./components/command-palette.js";
 export type { CommandItem, CommandPaletteProps } from "./components/command-palette.js";
 
+export {
+  Table,
+  TableContainer,
+  TableCaption,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "./components/table.js";
+export type {
+  TableProps,
+  TableContainerProps,
+  TableCaptionProps,
+  TableHeaderProps,
+  TableBodyProps,
+  TableRowProps,
+  TableHeadProps,
+  TableCellProps,
+} from "./components/table.js";
+
+export { Tabs, TabsList, Tab, TabsPanel } from "./components/tabs.js";
+export type { TabsProps, TabsListProps, TabProps, TabsPanelProps } from "./components/tabs.js";
+
+export { StatusLabel, statusLabelVariants } from "./components/status-label.js";
+export type { StatusLabelProps } from "./components/status-label.js";
+
+export { EmptyState, emptyStateVariants } from "./components/empty-state.js";
+export type { EmptyStateProps } from "./components/empty-state.js";
+
+export { SummaryStrip, SummaryTile, summaryTileVariants } from "./components/summary-strip.js";
+export type { SummaryStripProps, SummaryTileProps } from "./components/summary-strip.js";
+
+export { Tooltip, TooltipProvider } from "./components/tooltip.js";
+export type { TooltipProps, TooltipProviderProps } from "./components/tooltip.js";
+
+export { Select, selectVariants } from "./components/select.js";
+export type { SelectProps } from "./components/select.js";
+
 export { cn } from "./lib/utils.js";
