@@ -122,12 +122,15 @@ export const Vertical: Story = {
     await expect(b.left).toBe(o.left);
     await expect(o.width).toBe(b.width);
 
-    // The bar: 2px wide along the selected tab's inline-end edge, at the hairline.
+    // The bar: 2px on the selected tab's inline-end, flush with the list hairline.
     const bar = (tab: HTMLElement) => getComputedStyle(tab, "::after");
     const clear = bar(body).backgroundColor;
-    await expect(bar(overview).width).toBe("2px");
-    await expect(bar(overview).height).toBe(`${o.height}px`);
-    await expect(bar(overview).backgroundColor).not.toBe(clear);
+    const selectedBar = bar(overview);
+    await expect(selectedBar.width).toBe("2px");
+    await expect(selectedBar.height).toBe(`${o.height}px`);
+    await expect(selectedBar.right).toBe("0px");
+    await expect(parseFloat(selectedBar.left)).toBeGreaterThan(0);
+    await expect(selectedBar.backgroundColor).not.toBe(clear);
     await expect(Math.round(o.right)).toBe(Math.round(l.right - 1));
 
     await userEvent.click(overview);
@@ -150,6 +153,29 @@ export const Vertical: Story = {
 /** Vertical, Log selected, nothing focused: for VRT. */
 export const VerticalSelected: Story = {
   render: () => <IssueTabs orientation="vertical" defaultValue="log" />,
+};
+
+/** Vertical in RTL: the indicator bar mirrors to the inline-start (left) hairline. */
+export const VerticalRtl: Story = {
+  name: "Vertical RTL",
+  render: () => (
+    <div dir="rtl">
+      <IssueTabs orientation="vertical" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const list = c.getByRole("tablist", { name: "Issue X-19" });
+    const overview = c.getByRole("tab", { name: "Overview" });
+    const o = overview.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    const selectedBar = getComputedStyle(overview, "::after");
+    await expect(selectedBar.width).toBe("2px");
+    await expect(selectedBar.height).toBe(`${o.height}px`);
+    await expect(selectedBar.left).toBe("0px");
+    await expect(parseFloat(selectedBar.right)).toBeGreaterThan(0);
+    await expect(Math.round(o.left)).toBe(Math.round(l.left + 1));
+  },
 };
 
 /** activateOnFocus: the panel follows focus. */
