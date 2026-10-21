@@ -21,10 +21,18 @@ export const SidebarHandleContext = React.createContext<React.ReactNode>(null);
 /**
  * Where floating layers inside the frame portal to. A layer inside the
  * frame root inherits its `data-theme` / `data-density` ancestors, which a
- * portal to `document.body` would not. `null` outside a frame (Base UI then
- * portals to the body).
+ * portal to `document.body` would not. `undefined` outside a frame; `null`
+ * inside one until its layer element mounts (Base UI waits for a `null`
+ * container and portals to the body for `undefined`).
  */
-export const FramePortalContext = React.createContext<HTMLElement | null>(null);
+export const FramePortalContext = React.createContext<HTMLElement | null | undefined>(
+  undefined,
+);
+
+/** The `container` for a kit popup: the frame's layer, or the body outside a frame. */
+export function useFrameLayer(): HTMLElement | null | undefined {
+  return React.useContext(FramePortalContext);
+}
 
 /**
  * FrameHeader hands its element to AppFrame, which measures it for the main

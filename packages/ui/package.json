@@ -108,6 +108,26 @@
       "types": "./dist/lib/use-media-query.d.ts",
       "import": "./dist/lib/use-media-query.js"
     },
+    "./kbd": {
+      "types": "./dist/components/kbd.d.ts",
+      "import": "./dist/components/kbd.js"
+    },
+    "./use-shortcut": {
+      "types": "./dist/lib/use-shortcut.d.ts",
+      "import": "./dist/lib/use-shortcut.js"
+    },
+    "./dialog": {
+      "types": "./dist/components/dialog.d.ts",
+      "import": "./dist/components/dialog.js"
+    },
+    "./menu": {
+      "types": "./dist/components/menu.d.ts",
+      "import": "./dist/components/menu.js"
+    },
+    "./command-palette": {
+      "types": "./dist/components/command-palette.d.ts",
+      "import": "./dist/components/command-palette.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css"
   },

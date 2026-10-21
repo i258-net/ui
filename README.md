@@ -14,9 +14,9 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.5.1` tagged broken for bundlers; this branch targets `0.5.2` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
-| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle |
-| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono + i258 Symbols · Base UI/CVA · Storybook 10 |
+| Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle, Kbd, Dialog, Menu |
+| Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
 | Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
@@ -73,7 +73,7 @@ expect it to sit 4px (fine) or 14px (coarse) further from its neighbours than be
 The same holds with `render={<button />} nativeButton`: the kit clears the button's
 UA border, padding, background and appearance itself, so no consumer reset is needed.
 
-Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL), followed by **i258 Symbols** (Noto Sans Symbols / Symbols 2 subsets for ⌃ ⌘ ⌥, SIL OFL), which Geist lacks, so `Kbd` glyphs render the same on every platform; `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 
 **Cascade layers:** component rules ship in `@layer i258-components`, not Tailwind's shared `components` name. Layer order is first-declaration-wins, so a Tailwind consumer's preflight (`base`) can beat or lose to us depending on import order if we share `components`. Declare order **before** any `@import`:
 
@@ -105,6 +105,45 @@ That puts our primitives above preflight/`components` and below utilities (so ut
 - **Frames narrower than their minimums** (embedded in a narrow container on a wide screen): the inspector becomes the end sheet, as below 980px; if the sidebar and `main` still do not fit, they share the frame in proportion to their minimums rather than push anything past its edge. The nav sheet follows the viewport only, since the app owns its opener. `useFrameLayout()` called inside the frame reports the frame's actual layout; outside it, the viewport breakpoints.
 - **Focus:** sheets trap focus and return it to their opener. Inline, if the focused element disappears because the sidebar collapses or the inspector closes, focus moves to the current sidebar item, the inspector's opener, or `main` — never `<body>`. A sheet whose content the app removes (no `sidebar`, `sidebarMode="hidden"`, no `inspector`) returns focus to what had it before the sheet, unless another sheet takes over; a nav sheet removed that way is reported closed.
 - **Refs:** a `ref` on `AppFrame` is composed with the frame's own (object or callback refs, including React 19 callback cleanups).
+
+### Shortcuts and popups
+
+`useShortcut(binding, handler, options?)` follows the shortcut rules
+accepted in I25-119. They are the same in every app:
+
+- **Single-character shortcuts are opt-in.** `1`, `u`, `?` fire only inside
+  `<ShortcutsProvider singleKeyShortcuts>`. Wire that prop to the app's
+  Settings on/off control (default off). Modifier chords (`mod+k` = ⌘K /
+  Ctrl+K) and named keys (Enter, Escape) work without it.
+- **Binding spelling.** `[mod+][ctrl+][alt+][shift+]key`, case-insensitive
+  for single characters; `Space` is the space bar. In a chord with Ctrl, Alt
+  or ⌘ a digit key binds by position, so write `mod+shift+1`: `mod+!` (any
+  US-shifted digit symbol `!@#$%^&*()`) is read as the same binding. A
+  character binding without a command modifier (`?`, `!`) is the character
+  typed.
+- **Typing and popup guards.** Nothing fires from a text field, select,
+  combobox or contenteditable unless the binding passes `allowInInput`, and a
+  character key never does. Nothing fires while a dialog, menu or listbox
+  popup is open (or focus is in a dialog or menu) unless it passes
+  `allowInLayer`. A focused control keeps Enter / Space, and composite widgets
+  keep their arrow keys.
+- **Enter confirms.** Pressing the same number again never confirms: there are
+  no "press twice" bindings, and auto-repeat never fires a binding.
+- **Visible action buttons.** Every shortcut needs a visible control that does
+  the same thing, with its `Kbd` cap (`aria-hidden`) and `aria-keyshortcuts`
+  shown while the shortcut is registered. Only single-character bindings are
+  gated: show their cap and `aria-keyshortcuts` only when
+  `useSingleKeyShortcuts()` is true. Modifier chords and named keys (`mod+k`,
+  Escape) keep both whenever they're registered. `formatShortcut` /
+  `ariaKeyShortcuts` spell a binding for the current platform.
+
+`Dialog`, `Menu` and `CommandPalette` sit on Base UI (focus trap, inert page,
+Escape, focus return). Inside an `AppFrame` they portal into the frame's layer
+and inherit its `data-theme` / `data-density`; elsewhere they portal to
+`document.body`, so set the theme on `<html>` (as `themeScript()` does).
+`CommandPalette` binds ⌘K / Ctrl+K itself (`shortcut={null}` to opt out). A
+command with `navigates: true` leaves focus to the app, which should move it
+to the new view's heading.
 
 ## Workspace
 
