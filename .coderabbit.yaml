@@ -10,8 +10,10 @@ reviews:
     docstrings:
       mode: "off"
   path_instructions:
+    # Paths are minimatch globs, and `**` skips dot-directories (.github,
+    # .storybook), so they get their own entry with the same text.
     - path: "**"
-      instructions: |
+      instructions: &repo_wide |
         Severity. Mark a finding Major or Critical when the defect:
         - breaks a documented behaviour of an exported component, hook or utility
           (a caller's handler or prop silently replaced or ignored, a shortcut
@@ -26,6 +28,8 @@ reviews:
         comment on style, naming, formatting or docstring coverage.
         On a later commit, do not raise new Minor findings on code you already
         reviewed that has not changed.
+    - path: "**/.*/**"
+      instructions: *repo_wide
     - path: "**/package.json"
       instructions: |
         On a dependency bump, report only engine or peer incompatibilities and
