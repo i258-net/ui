@@ -75,6 +75,7 @@ export type KeyLike = {
   altKey: boolean;
   metaKey: boolean;
   shiftKey: boolean;
+  getModifierState?: (key: string) => boolean;
 };
 
 /** The binding a keydown spells, in `normaliseBinding` form. */
@@ -84,8 +85,13 @@ export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): str
   // binding: ⌥1 on a Mac is "¡", Ctrl+K on a Cyrillic layout is "л". Then,
   // and only then, bind the physical key (`code`, US positions). A plain
   // letter or digit is what the user pressed on their own layout (QWERTZ's Z
-  // is code KeyY), and Ctrl+Alt elsewhere is AltGr typing a character.
-  const altGr = event.ctrlKey && event.altKey && !event.metaKey && !apple;
+  // is code KeyY). AltGr is the AltGraph modifier, not every Ctrl+Alt chord.
+  const altGr =
+    event.ctrlKey &&
+    event.altKey &&
+    !event.metaKey &&
+    !apple &&
+    event.getModifierState?.("AltGraph") === true;
   const command = (event.ctrlKey || event.altKey || event.metaKey) && !altGr;
   if (command && event.code && !/^[a-z0-9]$/i.test(key)) {
     const cap = /^(?:Key([A-Z])|Digit([0-9]))$/.exec(event.code);

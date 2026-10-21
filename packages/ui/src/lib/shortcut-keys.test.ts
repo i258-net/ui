@@ -125,10 +125,18 @@ describe("bindingFromEvent", () => {
     // QWERTZ: the key labelled Z sits where US QWERTY has Y.
     expect(bindingFromEvent(ev("z", { altKey: true, code: "KeyY" }), false)).toBe("alt+z");
     expect(bindingFromEvent(ev("z", { ctrlKey: true, code: "KeyY" }), false)).toBe("ctrl+z");
-    // Windows AltGr (Ctrl+Alt) + Q types "@" on a German layout.
-    expect(bindingFromEvent(ev("@", { ctrlKey: true, altKey: true, code: "KeyQ" }), false)).toBe(
-      "ctrl+alt+@",
-    );
+    // Windows AltGr (AltGraph) + Q types "@" on a German layout.
+    const altGr = (key: string) => key === "AltGraph";
+    expect(
+      bindingFromEvent(
+        ev("@", { ctrlKey: true, altKey: true, code: "KeyQ", getModifierState: altGr }),
+        false,
+      ),
+    ).toBe("ctrl+alt+@");
+    // Deliberate Ctrl+Alt chord (no AltGraph): bind the physical key.
+    expect(
+      bindingFromEvent(ev("л", { ctrlKey: true, altKey: true, code: "KeyK" }), false),
+    ).toBe("ctrl+alt+k");
     // No modifier: never remapped.
     expect(bindingFromEvent(ev("л", { code: "KeyK" }), false)).toBe("л");
   });
