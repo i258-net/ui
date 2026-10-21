@@ -45,6 +45,9 @@ async function mount(page: Page, boxSizing: BoxSizing, density: Density) {
         <button id="chip" class="i258-toggle-chip i258-toggle-chip--sm" data-state="off">x</button>
         <button id="choice" class="i258-choice i258-choice--chip i258-choice--sm">x</button>
         <div style="width: 320px"><button id="option" class="i258-choice i258-choice--option i258-choice--sm">Option</button></div>
+        <button id="icon-xs" class="i258-btn i258-btn--xs i258-btn--icon i258-btn--ghost" aria-label="Add"></button>
+        <span class="i258-select i258-select--sm"><select id="select" class="i258-select__control"><option>x</option></select></span>
+        <div class="i258-tabs__list" role="tablist"><button id="tab" class="i258-tabs__tab" role="tab">x</button></div>
       </div>`;
   }, density);
 }
@@ -114,6 +117,17 @@ for (const boxSizing of ["content-box", "border-box"] as const) {
         }
       });
 
+      // 24px under border-box, 24px plus its border under content-box, as
+      // every button's height is.
+      test("fine pointer: an xs icon button is a square of at least 24px", async ({ page }) => {
+        await mount(page, boxSizing, density);
+        const { visible, hit } = await hitTest(page, "icon-xs");
+        expect(visible.w).toBe(visible.h);
+        expect(visible.h).toBe(boxSizing === "border-box" ? 24 : 26);
+        expect(hit.w).toBeGreaterThanOrEqual(23.5);
+        expect(hit.h).toBeGreaterThanOrEqual(23.5);
+      });
+
       test.describe("coarse pointer", () => {
         test.use({ hasTouch: true, isMobile: true });
 
@@ -140,7 +154,7 @@ for (const boxSizing of ["content-box", "border-box"] as const) {
 
         test("short controls are at least 44×44", async ({ page }) => {
           await mount(page, boxSizing, density);
-          for (const id of ["btn-sm", "toggle", "chip", "choice", "option"]) {
+          for (const id of ["btn-sm", "toggle", "chip", "choice", "option", "icon-xs", "select", "tab"]) {
             const { visible, hit } = await hitTest(page, id);
             expect.soft(visible.w, `${id} width`).toBeGreaterThanOrEqual(44);
             expect.soft(visible.h, `${id} height`).toBeGreaterThanOrEqual(44);
