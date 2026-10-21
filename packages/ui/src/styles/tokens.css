@@ -2,9 +2,9 @@
    Colour lives in themes.css. */
 
 :root {
-  --i258-font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
-  --i258-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, monospace;
+  --i258-font-sans: "Geist Sans", "i258 Symbols", ui-sans-serif, system-ui, sans-serif;
+  --i258-font-mono: "Geist Mono", "i258 Symbols", ui-monospace, SFMono-Regular,
+    Menlo, Monaco, Consolas, monospace;
 
   /* Type scale. `sm` (13px) is the UI default; `xs` / `2xs` are meta, badges
      and counts. Rem-based so browser zoom and the user's font size scale it. */
