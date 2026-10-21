@@ -348,7 +348,7 @@ export const EnterConfirms: Story = {
   },
 };
 
-function QueueList() {
+function QueueList({ role = "listbox" }: { role?: "listbox" | "treegrid" }) {
   const { log, output } = useLog();
   const [active, setActive] = React.useState(0);
   const rows = ["X-19", "X-41", "X-66"];
@@ -358,7 +358,7 @@ function QueueList() {
   return (
     <div style={{ display: "grid", gap: 12, maxWidth: 320 }}>
       <div
-        role="listbox"
+        role={role}
         aria-label="Queue"
         tabIndex={0}
         aria-activedescendant={`q-${active}`}
@@ -369,8 +369,14 @@ function QueueList() {
         style={{ border: "1px solid var(--i258-border-strong)", borderRadius: 8, padding: 4 }}
       >
         {rows.map((r, i) => (
-          <div key={r} id={`q-${i}`} role="option" aria-selected={i === active} style={{ padding: 4 }}>
-            {r}
+          <div
+            key={r}
+            id={`q-${i}`}
+            role={role === "treegrid" ? "row" : "option"}
+            aria-selected={i === active}
+            style={{ padding: 4 }}
+          >
+            {role === "treegrid" ? <span role="gridcell">{r}</span> : r}
           </div>
         ))}
       </div>
@@ -469,6 +475,33 @@ export const StaticList: Story = {
     await press("u");
     await expect(c.getByTestId("last")).toHaveTextContent("Undo");
     // Off the list, the page's ↓ runs.
+    blur();
+    await press("{ArrowDown}");
+    await expect(c.getByTestId("last")).toHaveTextContent("Next view");
+  },
+};
+
+/** A focused treegrid keeps its arrow keys too. */
+export const TreegridKeepsArrows: Story = {
+  name: "A focused treegrid keeps its arrow keys",
+  render: () => <QueueList role="treegrid" />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const grid = c.getByRole("treegrid", { name: "Queue" });
+    grid.focus();
+    let arrowKept: boolean | undefined;
+    const spy = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown") arrowKept = !e.defaultPrevented;
+    };
+    document.addEventListener("keydown", spy);
+    try {
+      await press("{ArrowDown}");
+    } finally {
+      document.removeEventListener("keydown", spy);
+    }
+    await expect(grid).toHaveAttribute("aria-activedescendant", "q-1");
+    await expect(c.getByTestId("last")).toHaveTextContent("Nothing yet");
+    await expect(arrowKept).toBe(true);
     blur();
     await press("{ArrowDown}");
     await expect(c.getByTestId("last")).toHaveTextContent("Next view");

@@ -114,7 +114,7 @@ const ACTIVATES =
   'button, a[href], summary, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="option"], [role^="menuitem"], [role="treeitem"], [role="gridcell"], ' +
   '[role="listbox"], [role="tree"], [role="treegrid"], [role="grid"], [role="menubar"]';
 const COMPOSITE =
-  '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="grid"], [role="slider"], [role="separator"][tabindex], input[type="range"], input[type="radio"]';
+  '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="treegrid"], [role="grid"], [role="slider"], [role="separator"][tabindex], input[type="range"], input[type="radio"]';
 const ARROWS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]);
 
 /** True when the focused element handles this key itself. */
