@@ -177,7 +177,8 @@ export const Abacus: Story = {
     await expect(c.getAllByRole("link")).toHaveLength(4);
     const check = c.getByRole("link", { name: "0 Ledger check passing" });
     await expect(check).not.toHaveAttribute("data-zero");
-    const failed = c.getByRole("link", { name: "— Unmapped payees failed to load" });
+    // "—" is read as "Unknown", not as punctuation or a zero.
+    const failed = c.getByRole("link", { name: "Unknown Unmapped payees failed to load" });
     await expect(failed).toHaveAttribute("data-zero");
     // A readout is neither a button nor a link.
     const imports = c.getByText("Imports").closest("[data-slot='summary-tile']")!;

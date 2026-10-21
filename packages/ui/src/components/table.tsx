@@ -16,10 +16,15 @@ export type TableContainerProps = React.ComponentProps<"div">;
  * Wrap a table so a wide one scrolls inside its own box rather than the
  * page (WCAG 1.4.10). While it overflows it is a keyboard stop (2.1.1)
  * and, if you name it with `aria-label` or `aria-labelledby`, a region; a
- * table that fits is neither.
+ * table that fits is neither (and the name is dropped, since a plain box
+ * can't carry one). Overflow is re-checked when the container or the
+ * table resizes and when the table element is replaced.
  */
 export const TableContainer = React.forwardRef<HTMLDivElement, TableContainerProps>(
-  function TableContainer({ className, ...props }, ref) {
+  function TableContainer(
+    { className, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, ...props },
+    ref,
+  ) {
     const local = React.useRef<HTMLDivElement | null>(null);
     const [scrolls, setScrolls] = React.useState(false);
     React.useEffect(() => {
@@ -27,21 +32,36 @@ export const TableContainer = React.forwardRef<HTMLDivElement, TableContainerPro
       if (!el || typeof ResizeObserver === "undefined") return;
       const check = () =>
         setScrolls(el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
-      check();
-      const observer = new ResizeObserver(check);
-      observer.observe(el);
-      if (el.firstElementChild) observer.observe(el.firstElementChild);
-      return () => observer.disconnect();
+      const resize = new ResizeObserver(check);
+      let child: Element | null = null;
+      const watch = () => {
+        if (el.firstElementChild !== child) {
+          if (child) resize.unobserve(child);
+          child = el.firstElementChild;
+          if (child) resize.observe(child);
+        }
+        check();
+      };
+      resize.observe(el);
+      watch();
+      const children = new MutationObserver(watch);
+      children.observe(el, { childList: true });
+      return () => {
+        resize.disconnect();
+        children.disconnect();
+      };
     }, []);
     const composedRef = useComposedRefs(local, ref);
-    const named = props["aria-label"] != null || props["aria-labelledby"] != null;
+    const region = scrolls && (ariaLabel != null || ariaLabelledBy != null);
     return (
       <div
         ref={composedRef}
         data-slot="table-container"
         data-scrolls={scrolls ? "" : undefined}
         tabIndex={scrolls ? 0 : undefined}
-        role={scrolls && named ? "region" : undefined}
+        role={region ? "region" : undefined}
+        aria-label={region ? ariaLabel : undefined}
+        aria-labelledby={region ? ariaLabelledBy : undefined}
         className={cn("i258-table-wrap", className)}
         {...props}
       />

@@ -120,9 +120,10 @@
     color: var(--i258-foreground);
   }
 
-  /* A ghost button that opens a menu keeps the hover fill while it's open. */
+  /* A ghost button that opens a menu keeps the hover fill while it's open
+     (not a tooltip trigger, which Base UI also marks data-popup-open). */
   .i258-btn--ghost:hover:not(:disabled),
-  .i258-btn--ghost[data-popup-open] {
+  .i258-btn--ghost[data-popup-open][aria-haspopup="menu"] {
     background: var(--i258-hover);
   }
 
@@ -2298,7 +2299,8 @@
     transition: color var(--i258-duration-fast) var(--i258-ease-standard);
   }
 
-  /* The bar sits on the list's hairline. */
+  /* The bar sits along the tab's bottom edge, just above the list's
+     hairline (inside it, so the scrolling list never clips it). */
   .i258-tabs__tab::after {
     content: "";
     position: absolute;
@@ -2598,6 +2600,10 @@
     inset-inline-end: 0.5rem;
     color: var(--i258-muted);
     pointer-events: none;
+  }
+
+  .i258-select:has(> .i258-select__control:disabled) .i258-select__chevron {
+    opacity: 0.5;
   }
 
   /* —— SummaryStrip / SummaryTile ——
@@ -2904,6 +2910,16 @@
       border-color: Highlight;
       outline: 2px solid Highlight;
       outline-offset: -3px;
+    }
+
+    /* The pressed outlines above replace the focus ring at the same
+       specificity. Focused, the outline moves outside the (Highlight)
+       edge, so focus still shows as a ring of its own. */
+    .i258-summary-tile[aria-pressed="true"]:focus-visible,
+    .i258-toggle-chip[data-state="on"]:focus-visible,
+    .i258-choice[data-pressed]:focus-visible {
+      outline: var(--i258-focus-ring-width) solid Highlight;
+      outline-offset: var(--i258-focus-ring-offset);
     }
 
     .i258-status[data-tinted] {

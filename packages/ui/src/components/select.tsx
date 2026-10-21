@@ -16,7 +16,8 @@ const selectVariants = cva("i258-select", {
   },
 });
 
-export type SelectProps = Omit<React.ComponentProps<"select">, "size"> &
+/** Single choice only: a fixed-height control can't show a `multiple` list. */
+export type SelectProps = Omit<React.ComponentProps<"select">, "size" | "multiple"> &
   VariantProps<typeof selectVariants>;
 
 /**

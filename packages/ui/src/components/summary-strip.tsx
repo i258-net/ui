@@ -67,7 +67,8 @@ export type SummaryTileProps = Omit<useRender.ComponentProps<"button">, "childre
     label: React.ReactNode;
     /**
      * The number; it leads the accessible name ("9 Decisions waiting on
-     * you"). `"—"` means unknown (a failed load), never a fake zero.
+     * you"). `"—"` means unknown (a failed load), never a fake zero; it is
+     * read as "Unknown".
      */
     count: React.ReactNode;
     /** A short qualifier under the label: "waiting on you", "≥ 14 d". */
@@ -108,7 +109,16 @@ export const SummaryTile = React.forwardRef<HTMLElement, SummaryTileProps>(funct
         "data-slot": "summary-tile",
         children: (
           <>
-            <span className="i258-summary-tile__count">{count}</span>{" "}
+            <span className="i258-summary-tile__count">
+              {count === "—" ? (
+                <>
+                  <span aria-hidden="true">—</span>
+                  <span className="i258-sr-only">Unknown</span>
+                </>
+              ) : (
+                count
+              )}
+            </span>{" "}
             <span className="i258-summary-tile__label">{label}</span>
             {icon != null ? (
               <span className="i258-summary-tile__icon" aria-hidden="true">

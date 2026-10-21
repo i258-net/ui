@@ -19,16 +19,17 @@ type Story = StoryObj;
 */
 const ROWS = [
   { id: "X-101", title: "Choose the retention window", tone: "accent" },
-  { id: "X-102", title: "Waiting on an upstream release", tone: "warning" },
+  { id: "X-102", title: "Review the migration plan", tone: "warning" },
   { id: "X-103", title: "Rollout under way", tone: "success" },
-  { id: "X-104", title: "Owner not set", tone: "danger" },
+  { id: "X-104", title: "Front matter fails the schema", tone: "danger" },
 ] as const;
 
 const TAG_LABEL = {
   accent: "decision",
-  warning: "blocked",
+  // Amber is only for what waits on you; blocked and unset are neutral.
+  warning: "waiting on you",
   success: "in progress",
-  danger: "unset",
+  danger: "schema error",
 } as const;
 
 function ThemeCard({ theme }: { theme: "light" | "dark" }) {

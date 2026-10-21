@@ -95,6 +95,8 @@ export const Default: Story = {
     await expect(container).not.toHaveAttribute("tabindex");
     await expect(container).not.toHaveAttribute("role");
     await expect(c.queryByRole("region")).toBeNull();
+    // A plain box can't carry a name, so it isn't given one while it fits.
+    await expect(container).not.toHaveAttribute("aria-label");
   },
 };
 
@@ -120,6 +122,33 @@ export const Scrolling: Story = {
     await expect(region).toHaveFocus();
     await userEvent.tab();
     await expect(within(region).getByRole("link", { name: "P-1041" })).toHaveFocus();
+  },
+};
+
+/**
+ * The table arrives after a placeholder (loading → data): the container
+ * re-checks its overflow and becomes a keyboard stop and a region.
+ */
+export const Loads: Story = {
+  render: function Loads() {
+    const [loaded, setLoaded] = React.useState(false);
+    return (
+      <div style={{ display: "grid", gap: 8, width: 320 }}>
+        <button type="button" onClick={() => setLoaded(true)}>
+          Load postings
+        </button>
+        <TableContainer aria-label="October postings">
+          {loaded ? <Ledger /> : <p style={{ margin: 8 }}>Loading…</p>}
+        </TableContainer>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.queryByRole("region")).toBeNull();
+    await userEvent.click(c.getByRole("button", { name: "Load postings" }));
+    const region = await c.findByRole("region", { name: "October postings" });
+    await expect(region).toHaveAttribute("tabindex", "0");
   },
 };
 
