@@ -265,6 +265,11 @@ export const InterleavedGroups: Story = {
     await expect(active()).toBe(shown[2]!.id);
     await userEvent.keyboard("{Control>}{End}{/Control}");
     await expect(active()).toBe(shown[3]!.id);
+    await userEvent.keyboard("{Control>}{Home}{/Control}");
+    await expect(active()).toBe(shown[0]!.id);
+    await expect(shown[0]).toHaveTextContent("Alpha");
+    await userEvent.keyboard("{Control>}{End}{/Control}");
+    await expect(active()).toBe(shown[3]!.id);
     await userEvent.keyboard("{ArrowDown}");
     await expect(active()).toBe(shown[0]!.id);
     await userEvent.keyboard("{ArrowUp}{ArrowUp}");
