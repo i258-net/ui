@@ -17,7 +17,7 @@ async function fontsReady() {
     await Promise.all([
       document.fonts.load('1em "Geist Sans"'),
       document.fonts.load('1em "Geist Mono"'),
-      document.fonts.load('1em "i258 Symbols"', "⌃⌘⌥"),
+      document.fonts.load('1em "i258 Symbols"', "⌃⌘⌥⌫✓"),
     ]);
     await document.fonts.ready;
   } catch {

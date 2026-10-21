@@ -16,8 +16,9 @@
   font-display: swap;
 }
 
-/* Key-cap modifiers Geist lacks: ⌃ (Noto Sans Symbols) and ⌘ ⌥ (Noto Sans
-   Symbols 2), subset to those code points (SIL OFL 1.1, NotoSansSymbols-OFL.txt).
+/* Symbols Geist lacks: the key caps ⌃ (Noto Sans Symbols) and ⌘ ⌥ ⌫, plus
+   the ✓ in pressed ToggleChip / SummaryTile boxes (Noto Sans Symbols 2),
+   subset to those code points (SIL OFL 1.1, NotoSansSymbols-OFL.txt).
    Without them each platform draws its own system fallback. Both faces
    claim the same weights: the browser matches weight before unicode-range,
    so a face with a narrower weight would never be picked for its glyphs. */
@@ -32,9 +33,9 @@
 
 @font-face {
   font-family: "i258 Symbols";
-  src: url("../fonts/NotoSansSymbols2-Keys.woff2") format("woff2");
+  src: url("../fonts/NotoSansSymbols2-UI.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+2318, U+2325;
+  unicode-range: U+2318, U+2325, U+232B, U+2713;
 }
