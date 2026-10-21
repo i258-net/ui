@@ -40,7 +40,8 @@ export type TooltipProps = {
   /**
    * Controlled open state, for a trigger with its own way in (a touch
    * long-press). Hover, focus and Escape still report through
-   * `onOpenChange`; leave it unset otherwise.
+   * `onOpenChange`, which must follow them: while `open` stays true the
+   * tip takes every Escape. Leave it unset otherwise.
    */
   open?: boolean | undefined;
   onOpenChange?: ((open: boolean) => void) | undefined;
@@ -89,8 +90,14 @@ export function Tooltip({
   React.useLayoutEffect(() => {
     onOpenChangeRef.current = onOpenChange;
   });
+  // Base UI and the Escape handler below can both report one close: tell
+  // the app once.
+  const reported = React.useRef(open);
+  reported.current = open;
   const setOpen = React.useCallback((next: boolean) => {
     setInnerOpen(next);
+    if (reported.current === next) return;
+    reported.current = next;
     onOpenChangeRef.current?.(next);
   }, []);
   const actions = React.useRef<TooltipPrimitive.Root.Actions | null>(null);
