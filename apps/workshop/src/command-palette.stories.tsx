@@ -218,6 +218,63 @@ export const NoResults: Story = {
   },
 };
 
+function InterleavedDemo() {
+  const [open, setOpen] = React.useState(true);
+  const [last, setLast] = React.useState("none");
+  const items = React.useMemo<CommandItem[]>(
+    () =>
+      (
+        [
+          ["a", "Alpha", "Files"],
+          ["b", "Bravo", "Views"],
+          ["c", "Charlie", "Files"],
+          ["d", "Delta", "Views"],
+        ] as const
+      ).map(([id, label, group]) => ({ id, label, group, onSelect: () => setLast(label) })),
+    [],
+  );
+  return (
+    <>
+      <p style={{ margin: 0 }}>
+        Ran: <output data-testid="ran">{last}</output>
+      </p>
+      <CommandPalette open={open} onOpenChange={setOpen} items={items} />
+    </>
+  );
+}
+
+/**
+ * Items whose groups interleave (Files, Views, Files, Views) show grouped,
+ * and ↑/↓, Ctrl+Home / Ctrl+End and Enter follow what's shown.
+ */
+export const InterleavedGroups: Story = {
+  name: "Interleaved groups",
+  args: { open: false, onOpenChange: () => {}, items: [] },
+  render: () => <InterleavedDemo />,
+  play: async ({ canvasElement }) => {
+    const input = await body().findByRole("combobox", { name: "Search commands" });
+    await waitFor(() => expect(input).toHaveFocus());
+    const shown = body().getAllByRole("option");
+    await expect(shown.map((o) => o.textContent)).toEqual(["Alpha", "Charlie", "Bravo", "Delta"]);
+    const active = () => input.getAttribute("aria-activedescendant");
+    await expect(active()).toBe(shown[0]!.id);
+    await userEvent.keyboard("{ArrowDown}");
+    await expect(active()).toBe(shown[1]!.id);
+    await expect(shown[1]).toHaveAttribute("aria-selected", "true");
+    await userEvent.keyboard("{ArrowDown}");
+    await expect(active()).toBe(shown[2]!.id);
+    await userEvent.keyboard("{Control>}{End}{/Control}");
+    await expect(active()).toBe(shown[3]!.id);
+    await userEvent.keyboard("{ArrowDown}");
+    await expect(active()).toBe(shown[0]!.id);
+    await userEvent.keyboard("{ArrowUp}{ArrowUp}");
+    await expect(active()).toBe(shown[2]!.id);
+    await userEvent.keyboard("{Enter}");
+    await waitFor(() => expect(body().queryByRole("dialog")).toBeNull());
+    await expect(within(canvasElement).getByTestId("ran")).toHaveTextContent("Bravo");
+  },
+};
+
 /** Open, for the a11y check and VRT. */
 export const Open: Story = {
   args: { open: false, onOpenChange: () => {}, items: [] },

@@ -128,19 +128,24 @@ export function CommandPalette({
     allowInLayer: open,
   });
 
-  const results = React.useMemo(() => filter(items, query.trim()), [filter, items, query]);
-  const activeIndex = results.length ? Math.min(active, results.length - 1) : -1;
-
-  const groups = React.useMemo(() => {
-    const byName = new Map<string, { item: CommandItem; index: number }[]>();
-    results.forEach((item, index) => {
+  // Matches gathered under their group headings, and `results` in that same
+  // order: what's drawn is what ↑/↓, the active option and Enter walk, even
+  // when the filter interleaves groups.
+  const { groups, results } = React.useMemo(() => {
+    const byName = new Map<string, CommandItem[]>();
+    for (const item of filter(items, query.trim())) {
       const name = item.group ?? "";
       let entries = byName.get(name);
       if (!entries) byName.set(name, (entries = []));
-      entries.push({ item, index });
-    });
-    return [...byName];
-  }, [results]);
+      entries.push(item);
+    }
+    let index = 0;
+    const groups = [...byName].map(
+      ([name, entries]) => [name, entries.map((item) => ({ item, index: index++ }))] as const,
+    );
+    return { groups, results: [...byName.values()].flat() };
+  }, [filter, items, query]);
+  const activeIndex = results.length ? Math.min(active, results.length - 1) : -1;
 
   React.useEffect(() => {
     if (activeIndex < 0) return;
