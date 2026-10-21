@@ -60,9 +60,10 @@ export default defineConfig({
       // snapshots, 84 in all, and every one passed at 0.2 and at 0.1; at
       // 0.05 only the success-text badge failed.
       //
-      // 0 is the floor for the same reason maxDiffPixels is: the Linux render
-      // is byte-identical run to run and to the CI baselines, so there is no
-      // noise for a threshold to absorb. At 0 every one of those 84 fails.
+      // 0 is the floor for the same reason maxDiffPixels is: repeated
+      // Linux-container runs matched the committed CI baselines exactly, so
+      // there was no measured noise for a threshold to absorb; runner-image
+      // updates remain a drift risk. At 0 every one of those 84 fails.
       // pixelmatch still skips pixels it judges anti-aliased (Playwright
       // gives no includeAA option): a muted-text change that moves 2,920
       // pixels of the inspector frame reports 1,655. A change confined to
