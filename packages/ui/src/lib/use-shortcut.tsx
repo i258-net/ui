@@ -130,6 +130,8 @@ function isElement(target: EventTarget | null): target is Element {
 }
 
 function onKeyDown(event: KeyboardEvent) {
+  // Chrome's autofill dispatches keydown events with no `key`.
+  if (typeof event.key !== "string") return;
   if (event.defaultPrevented || event.isComposing || event.repeat) return;
   if (event.key === "Shift" || event.key === "Control" || event.key === "Alt" || event.key === "Meta") return;
   const step = bindingFromEvent(event);

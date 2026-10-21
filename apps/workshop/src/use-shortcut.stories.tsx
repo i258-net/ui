@@ -507,3 +507,28 @@ export const TreegridKeepsArrows: Story = {
     await expect(c.getByTestId("last")).toHaveTextContent("Next view");
   },
 };
+
+/**
+ * Chrome's autofill dispatches keydown events with no `key`. The hook
+ * ignores them instead of throwing.
+ */
+export const KeylessKeydown: Story = {
+  name: "A keydown with no key is ignored",
+  render: () => <QueueList />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const errors: unknown[] = [];
+    const onError = (e: ErrorEvent) => errors.push(e.error);
+    window.addEventListener("error", onError);
+    try {
+      document.dispatchEvent(new Event("keydown", { bubbles: true, cancelable: true }));
+    } finally {
+      window.removeEventListener("error", onError);
+    }
+    await expect(errors).toEqual([]);
+    await expect(c.getByTestId("last")).toHaveTextContent("Nothing yet");
+    // The hook still answers real keys afterwards.
+    await press("{ArrowDown}");
+    await expect(c.getByTestId("last")).toHaveTextContent("Next view");
+  },
+};
