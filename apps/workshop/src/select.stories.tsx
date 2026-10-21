@@ -31,6 +31,32 @@ const Options = () => (
   </>
 );
 
+/** Resolve a length token to pixels the same way the select's padding is computed. */
+function paddingLengthPx(length: string, el: HTMLElement) {
+  const probe = document.createElement("div");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.paddingLeft = length;
+  el.appendChild(probe);
+  const px = parseFloat(getComputedStyle(probe).paddingLeft);
+  probe.remove();
+  return px;
+}
+
+function expectSelectChevronPadding(select: HTMLElement) {
+  const rtl = getComputedStyle(select).direction === "rtl";
+  const space3 = paddingLengthPx("var(--i258-space-3)", select);
+  const chevronGap = paddingLengthPx("1.75rem", select);
+  const { paddingLeft, paddingRight } = getComputedStyle(select);
+  if (rtl) {
+    expect(parseFloat(paddingLeft)).toBe(chevronGap);
+    expect(parseFloat(paddingRight)).toBe(space3);
+  } else {
+    expect(parseFloat(paddingLeft)).toBe(space3);
+    expect(parseFloat(paddingRight)).toBe(chevronGap);
+  }
+}
+
 export const Default: Story = {
   render: (args) => (
     <Select aria-label="Sort by" defaultValue="updated" {...args}>
@@ -46,6 +72,25 @@ export const Default: Story = {
     // The chevron is decoration.
     const chevron = canvasElement.querySelector(".i258-select__chevron");
     await expect(chevron).toHaveAttribute("aria-hidden", "true");
+    expectSelectChevronPadding(select);
+  },
+};
+
+/** RTL: the chevron gap stays on inline-end (physical left). */
+export const Rtl: Story = {
+  name: "RTL",
+  render: (args) => (
+    <div dir="rtl">
+      <Select aria-label="Sort by" defaultValue="updated" {...args}>
+        <Options />
+      </Select>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole("combobox", { name: "Sort by" });
+    expectSelectChevronPadding(select);
+    await userEvent.selectOptions(select, "priority");
+    await expect(select).toHaveValue("priority");
   },
 };
 

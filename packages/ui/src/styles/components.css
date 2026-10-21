@@ -2587,7 +2587,8 @@
     width: 100%;
     min-width: 0;
     margin: 0;
-    padding: 0 1.75rem 0 var(--i258-space-3);
+    padding-block: 0;
+    padding-inline: var(--i258-space-3) 1.75rem;
     border: 1px solid var(--i258-border-strong);
     border-radius: var(--i258-radius-md);
     background: var(--i258-background);
@@ -2620,7 +2621,7 @@
 
   .i258-select--sm .i258-select__control {
     height: var(--i258-control-sm);
-    padding-inline-start: var(--i258-space-2);
+    padding-inline: var(--i258-space-2) 1.75rem;
   }
 
   .i258-select--md .i258-select__control {
