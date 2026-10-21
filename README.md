@@ -148,11 +148,12 @@ to the new view's heading.
 ### Status, tone and tips
 
 - **Amber means waiting on you.** `warning` is for a decision, an action or a
-  review that needs the user, and nothing else on a board: blocked, missing
-  priority, drift and stale rows are `neutral` / `muted` with their own glyph.
-  A global stale-data notice (an `EmptyState` or `Alert` about the whole view)
-  may stay amber, since it affects trust in everything shown. `danger` is
-  broken data or a failing check; `success` a passing one.
+  review that needs the user, and nothing else: blocked, missing priority,
+  drift and stale rows are `neutral` / `muted` with their own glyph. The one
+  sanctioned exception (accepted in I25-119) is a global stale-data notice (an
+  `EmptyState` or `Alert` about the whole view), which may be amber because it
+  affects trust in everything shown. `danger` is broken data or a failing
+  check; `success` a passing one.
 - **`StatusLabel`** is a status as glyph + word, colour on the status only
   (never the row); `tinted` adds the badge wash. The app maps its values to
   tones. **`Badge`** is a quiet tag for anything else.
