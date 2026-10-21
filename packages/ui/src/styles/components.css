@@ -39,12 +39,29 @@
       background-color var(--i258-duration-fast) var(--i258-ease-standard),
       color var(--i258-duration-fast) var(--i258-ease-standard),
       border-color var(--i258-duration-fast) var(--i258-ease-standard),
-      box-shadow var(--i258-duration-fast) var(--i258-ease-standard);
+      box-shadow var(--i258-duration-fast) var(--i258-ease-standard),
+      scale var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-btn:active:not(:disabled) {
+    scale: var(--i258-press-scale);
   }
 
   .i258-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .i258-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* The 24px floor: compact density does not shrink it. */
+  .i258-btn--xs {
+    height: var(--i258-control-xs);
+    padding: 0 var(--i258-space-2);
+    border-radius: calc(var(--i258-radius-md) - 2px);
+    font-size: var(--i258-text-xs);
   }
 
   .i258-btn--sm {
@@ -63,6 +80,13 @@
     height: var(--i258-control-lg);
     padding: 0 var(--i258-space-4);
     font-size: var(--i258-text-md);
+  }
+
+  /* Square at any size, under either box-sizing (height and width both
+     count the same border). */
+  .i258-btn--icon {
+    aspect-ratio: 1;
+    padding-inline: 0;
   }
 
   .i258-btn--primary {
@@ -96,7 +120,10 @@
     color: var(--i258-foreground);
   }
 
-  .i258-btn--ghost:hover:not(:disabled) {
+  /* A ghost button that opens a menu keeps the hover fill while it's open
+     (not a tooltip trigger, which Base UI also marks data-popup-open). */
+  .i258-btn--ghost:hover:not(:disabled),
+  .i258-btn--ghost[data-popup-open][aria-haspopup="menu"] {
     background: var(--i258-hover);
   }
 
@@ -399,15 +426,17 @@
     display: inline-flex;
     align-items: center;
     gap: var(--i258-space-1);
-    height: 1.5rem;
-    padding: 0 var(--i258-space-2);
+    /* A 4px-cornered tag, not a pill: a pill reads as a control, and a row
+       of them as a row of buttons. */
+    height: 1.25rem;
+    padding: 0 0.375rem;
     /* Transparent base border, like .i258-btn: every variant carries a
        hairline, so geometry does not move between them and the kit does not
        depend on the consumer's box-sizing. */
     border: 1px solid transparent;
-    border-radius: var(--i258-radius-full);
+    border-radius: var(--i258-radius-sm);
     font-family: var(--i258-font-sans);
-    font-size: var(--i258-text-xs);
+    font-size: var(--i258-text-2xs);
     font-weight: 500;
     text-box: trim-both cap alphabetic;
     white-space: nowrap;
@@ -536,7 +565,11 @@
     background: color-mix(in srgb, var(--i258-danger) var(--i258-tint-mix), var(--i258-surface));
   }
 
-  /* —— ToggleChip —— */
+  /* —— ToggleChip ——
+     Pressed is a wash, an indicator edge *and* a ✓ box, so the state reads
+     without colour. The box is drawn off too (an empty 3:1 square) so it
+     doesn't shift the label. `/ ""` keeps it out of the accessible name;
+     aria-pressed carries the state. */
   .i258-toggle-chip {
     appearance: none;
     display: inline-flex;
@@ -554,11 +587,39 @@
     transition:
       background-color var(--i258-duration-fast) var(--i258-ease-standard),
       color var(--i258-duration-fast) var(--i258-ease-standard),
-      border-color var(--i258-duration-fast) var(--i258-ease-standard);
+      border-color var(--i258-duration-fast) var(--i258-ease-standard),
+      scale var(--i258-duration-fast) var(--i258-ease-standard);
   }
 
   .i258-toggle-chip:hover:not(:disabled) {
     background: var(--i258-hover);
+  }
+
+  .i258-toggle-chip:active:not(:disabled) {
+    scale: var(--i258-press-scale);
+  }
+
+  .i258-toggle-chip::before {
+    content: "" / "";
+    flex-shrink: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-inline-start: -0.125rem;
+    border: 1px solid var(--i258-border-strong);
+    border-radius: 3px;
+    /* Under either box-sizing the box is the same 12px square. */
+    box-sizing: border-box;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: calc(0.75rem - 2px);
+    text-align: center;
+  }
+
+  .i258-toggle-chip[data-state="on"]::before {
+    content: "✓" / "";
+    border-color: var(--i258-indicator);
+    background: var(--i258-indicator);
+    color: var(--i258-background);
   }
 
   /* Pressed: wash + a 2px indicator edge (inset shadow on the border), so
@@ -2118,6 +2179,623 @@
     outline-offset: 0;
   }
 
+  /* —— StatusLabel ——
+     Glyph + word, colour on the status only. Tones are the `-text` tokens,
+     which clear 4.5:1 on the page ladder, on hovered and selected rows and
+     on their own wash (src/lib/contrast.test.ts). */
+  .i258-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    max-width: 100%;
+    font-family: var(--i258-font-sans);
+    font-weight: 500;
+    line-height: var(--i258-leading-tight);
+    white-space: nowrap;
+    color: var(--i258-status-tone);
+  }
+
+  .i258-status--md {
+    font-size: var(--i258-text-sm);
+  }
+
+  .i258-status--sm {
+    gap: 0.3125rem;
+    font-size: var(--i258-text-xs);
+  }
+
+  .i258-status__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .i258-status__icon svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .i258-status--sm .i258-status__icon svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+  }
+
+  .i258-status__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .i258-status--neutral {
+    --i258-status-tone: var(--i258-foreground);
+    --i258-status-wash: var(--i258-surface-raised);
+  }
+
+  .i258-status--muted {
+    --i258-status-tone: var(--i258-muted);
+    --i258-status-wash: var(--i258-surface-raised);
+  }
+
+  .i258-status--accent {
+    --i258-status-tone: var(--i258-accent-text);
+    --i258-status-wash: color-mix(in srgb, var(--i258-accent) var(--i258-tint-mix), var(--i258-surface));
+  }
+
+  .i258-status--success {
+    --i258-status-tone: var(--i258-success-text);
+    --i258-status-wash: color-mix(in srgb, var(--i258-success) var(--i258-tint-mix), var(--i258-surface));
+  }
+
+  .i258-status--warning {
+    --i258-status-tone: var(--i258-warning-text);
+    --i258-status-wash: color-mix(in srgb, var(--i258-warning) var(--i258-tint-mix), var(--i258-surface));
+  }
+
+  .i258-status--danger {
+    --i258-status-tone: var(--i258-danger-text);
+    --i258-status-wash: color-mix(in srgb, var(--i258-danger) var(--i258-tint-mix), var(--i258-surface));
+  }
+
+  /* The badge washes; neutral and muted sit on the raised surface. */
+  .i258-status[data-tinted] {
+    padding: 0.125rem 0.4375rem;
+    border-radius: var(--i258-radius-full);
+    background: var(--i258-status-wash);
+  }
+
+  /* —— Tabs ——
+     An underlined strip: the selected tab is the 2px indicator bar plus
+     foreground type; the others are muted. */
+  .i258-tabs__list {
+    display: flex;
+    align-items: stretch;
+    gap: var(--i258-space-1);
+    border-bottom: 1px solid var(--i258-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  /* No block padding: the height is the tab under either box-sizing. */
+  .i258-tabs__tab {
+    appearance: none;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    height: var(--i258-control-md);
+    margin: 0;
+    padding: 0 var(--i258-space-2);
+    border: 0;
+    border-radius: var(--i258-radius-md) var(--i258-radius-md) 0 0;
+    background: transparent;
+    color: var(--i258-muted);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  /* The bar sits along the tab's bottom edge, just above the list's
+     hairline (inside it, so the scrolling list never clips it). */
+  .i258-tabs__tab::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: transparent;
+  }
+
+  .i258-tabs__tab:hover:not([data-disabled]) {
+    color: var(--i258-foreground);
+  }
+
+  .i258-tabs__tab[data-active] {
+    color: var(--i258-foreground);
+  }
+
+  .i258-tabs__tab[data-active]::after {
+    background: var(--i258-indicator);
+  }
+
+  .i258-tabs__tab[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Inset: the list scrolls, so an outside ring would be clipped. */
+  .i258-tabs__tab:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: calc(var(--i258-focus-ring-width) * -1);
+  }
+
+  .i258-tabs__count {
+    color: var(--i258-muted);
+    font-size: var(--i258-text-xs);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .i258-tabs__panel {
+    outline: 0;
+  }
+
+  .i258-tabs__panel:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+    border-radius: var(--i258-radius-sm);
+  }
+
+  /* Vertical: the strip stands beside the panel as a column, its hairline
+     and the indicator bar on the inline-end edge (so they mirror in RTL). */
+  .i258-tabs[data-orientation="vertical"] {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--i258-space-4);
+  }
+
+  .i258-tabs__list[data-orientation="vertical"] {
+    flex-direction: column;
+    flex-shrink: 0;
+    border-bottom: 0;
+    border-inline-end: 1px solid var(--i258-border);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .i258-tabs__tab[data-orientation="vertical"] {
+    justify-content: flex-start;
+    border-start-start-radius: var(--i258-radius-md);
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--i258-radius-md);
+    border-end-end-radius: 0;
+  }
+
+  .i258-tabs__tab[data-orientation="vertical"]::after {
+    inset-inline: auto 0;
+    inset-block: 0;
+    width: 2px;
+    height: auto;
+  }
+
+  .i258-tabs__panel[data-orientation="vertical"] {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* —— Tooltip ——
+     A small label in the menus' clothing (same background, hairline and
+     shadow, so the same contrast pairs apply). Above every other layer: a
+     tip can belong to a control inside a dialog or a menu. */
+  .i258-tooltip__positioner {
+    z-index: 90;
+  }
+
+  .i258-tooltip {
+    max-width: min(18rem, calc(100vw - 1rem));
+    padding: var(--i258-space-1) var(--i258-space-2);
+    border: 1px solid var(--i258-border);
+    border-radius: var(--i258-radius-md);
+    background: var(--i258-background);
+    box-shadow: var(--i258-shadow-lg);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-xs);
+    font-weight: 500;
+    line-height: var(--i258-leading-snug);
+    overflow-wrap: break-word;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity var(--i258-duration-fast) var(--i258-ease-standard),
+      scale var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-tooltip:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    scale: 0.98;
+  }
+
+  /* Moving between neighbours inside a provider: no fade. */
+  .i258-tooltip[data-instant] {
+    transition: none;
+  }
+
+  /* —— EmptyState —— */
+  .i258-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 30rem;
+    margin: var(--i258-space-10) auto;
+    padding: 0 var(--i258-space-4);
+    font-family: var(--i258-font-sans);
+    text-align: center;
+  }
+
+  .i258-empty__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: var(--i258-space-3);
+    border: 1px solid var(--i258-border);
+    border-radius: var(--i258-radius-lg);
+    background: var(--i258-surface);
+    color: var(--i258-muted);
+  }
+
+  .i258-empty__icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .i258-empty--warning .i258-empty__icon {
+    color: var(--i258-warning-text);
+  }
+
+  .i258-empty--danger .i258-empty__icon {
+    color: var(--i258-danger-text);
+  }
+
+  .i258-empty__title {
+    margin: 0;
+    color: var(--i258-foreground);
+    font-size: var(--i258-text-md);
+    font-weight: 600;
+    line-height: var(--i258-leading-tight);
+  }
+
+  .i258-empty__body {
+    margin-top: var(--i258-space-1);
+    color: var(--i258-muted);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-normal);
+  }
+
+  .i258-empty__body > p {
+    margin: 0;
+  }
+
+  .i258-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--i258-space-2);
+    margin-top: var(--i258-space-4);
+  }
+
+  /* —— Table ——
+     Hairline rows in a rounded panel; the header row is sticky inside the
+     container when it has a max-height. Cells take their block padding
+     from the density set. */
+  .i258-table-wrap {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--i258-border);
+    border-radius: var(--i258-radius-lg);
+  }
+
+  .i258-table-wrap:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-snug);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .i258-table__caption {
+    caption-side: top;
+    padding: var(--i258-space-2) var(--i258-space-3);
+    border-bottom: 1px solid var(--i258-border);
+    color: var(--i258-foreground);
+    font-size: var(--i258-text-sm);
+    font-weight: 600;
+    text-align: start;
+  }
+
+  .i258-table__head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: var(--i258-space-2) var(--i258-space-3);
+    border-bottom: 1px solid var(--i258-border);
+    background: var(--i258-surface);
+    color: var(--i258-muted);
+    font-size: var(--i258-text-xs);
+    font-weight: 500;
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  .i258-table__row-head,
+  .i258-table__cell {
+    padding: var(--i258-cell-pad-y) var(--i258-space-3);
+    border-bottom: 1px solid var(--i258-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .i258-table__row-head {
+    font-weight: 500;
+  }
+
+  .i258-table__row:last-child > :is(.i258-table__cell, .i258-table__row-head) {
+    border-bottom: 0;
+  }
+
+  .i258-table tbody > .i258-table__row:hover > :is(.i258-table__cell, .i258-table__row-head) {
+    background: var(--i258-hover);
+  }
+
+  .i258-table [data-numeric] {
+    text-align: end;
+  }
+
+  .i258-table [data-mono] {
+    font-family: var(--i258-font-mono);
+    font-size: var(--i258-text-xs);
+  }
+
+  /* —— Select (native) ——
+     The wrapper sizes it and holds the chevron; the <select> has no
+     native arrow. */
+  .i258-select {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    vertical-align: middle;
+  }
+
+  .i258-select__control {
+    appearance: none;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--i258-space-3) 1.75rem;
+    border: 1px solid var(--i258-border-strong);
+    border-radius: var(--i258-radius-md);
+    background: var(--i258-background);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-normal);
+    cursor: pointer;
+    transition: border-color var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  .i258-select__control:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-select__control[data-invalid],
+  .i258-select__control[aria-invalid="true"] {
+    border-color: var(--i258-danger);
+  }
+
+  .i258-select__control:is([data-invalid], [aria-invalid="true"]):focus-visible {
+    outline-color: var(--i258-danger);
+  }
+
+  .i258-select__control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .i258-select--sm .i258-select__control {
+    height: var(--i258-control-sm);
+    padding-inline: var(--i258-space-2) 1.75rem;
+  }
+
+  .i258-select--md .i258-select__control {
+    height: var(--i258-input-height);
+  }
+
+  .i258-select--lg .i258-select__control {
+    height: var(--i258-control-lg);
+    font-size: var(--i258-text-md);
+  }
+
+  .i258-select__chevron {
+    position: absolute;
+    inset-inline-end: 0.5rem;
+    color: var(--i258-muted);
+    pointer-events: none;
+  }
+
+  .i258-select:has(> .i258-select__control:disabled) .i258-select__chevron {
+    opacity: 0.5;
+  }
+
+  /* —— SummaryStrip / SummaryTile ——
+     Counts above a view that double as filters. Tiles are calm panels
+     (hairline, surface) until they have something to say; colour sits on
+     the glyph and the caption only, and only for state. */
+  .i258-summary__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(8.25rem, 100%), 1fr));
+    gap: var(--i258-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .i258-summary__item {
+    display: flex;
+    min-width: 0;
+  }
+
+  /* Count and glyph, then the label, then the caption: the label gets the
+     tile's whole width, so words don't break in eight-across. */
+  .i258-summary-tile {
+    appearance: none;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "count icon"
+      "label label"
+      "caption caption";
+    align-content: start;
+    align-items: center;
+    row-gap: 0.0625rem;
+    column-gap: var(--i258-space-2);
+    width: 100%;
+    margin: 0;
+    padding: var(--i258-tile-pad-y) var(--i258-space-3);
+    border: 1px solid var(--i258-border);
+    border-radius: var(--i258-radius-lg);
+    background: var(--i258-surface);
+    color: var(--i258-foreground);
+    font-family: var(--i258-font-sans);
+    font-size: var(--i258-text-sm);
+    line-height: var(--i258-leading-tight);
+    text-align: start;
+    text-decoration: none;
+  }
+
+  button.i258-summary-tile,
+  a.i258-summary-tile {
+    cursor: pointer;
+    transition:
+      background-color var(--i258-duration-fast) var(--i258-ease-standard),
+      scale var(--i258-duration-fast) var(--i258-ease-standard);
+  }
+
+  button.i258-summary-tile:hover,
+  a.i258-summary-tile:hover {
+    background: var(--i258-hover);
+  }
+
+  button.i258-summary-tile:active {
+    scale: 0.985;
+  }
+
+  .i258-summary-tile:focus-visible {
+    outline: var(--i258-focus-ring-width) solid var(--i258-focus-ring);
+    outline-offset: var(--i258-focus-ring-offset);
+  }
+
+  .i258-summary-tile__count {
+    grid-area: count;
+    font-size: var(--i258-tile-count-size);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .i258-summary-tile__label {
+    grid-area: label;
+    min-width: 0;
+    overflow-wrap: break-word;
+    font-weight: 500;
+  }
+
+  .i258-summary-tile__icon {
+    grid-area: icon;
+    display: inline-flex;
+    color: var(--i258-tile-tone, var(--i258-muted));
+  }
+
+  .i258-summary-tile__icon svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .i258-summary-tile__caption {
+    grid-area: caption;
+    min-width: 0;
+    overflow-wrap: break-word;
+    color: var(--i258-tile-tone, var(--i258-muted));
+    font-size: var(--i258-text-xs);
+  }
+
+  .i258-summary-tile--warning {
+    --i258-tile-tone: var(--i258-warning-text);
+  }
+
+  .i258-summary-tile--danger {
+    --i258-tile-tone: var(--i258-danger-text);
+  }
+
+  .i258-summary-tile--success {
+    --i258-tile-tone: var(--i258-success-text);
+  }
+
+  /* Nothing to count: no tone, a quiet number. */
+  .i258-summary-tile[data-zero] {
+    --i258-tile-tone: var(--i258-muted);
+  }
+
+  .i258-summary-tile[data-zero] .i258-summary-tile__count {
+    color: var(--i258-muted);
+    font-weight: 500;
+  }
+
+  /* Pressed: this tile is filtering the view. A 2px indicator edge, the
+     selected fill, and a ✓ box in place of the glyph. */
+  .i258-summary-tile[aria-pressed="true"] {
+    border-color: var(--i258-indicator);
+    box-shadow: inset 0 0 0 1px var(--i258-indicator);
+    background: var(--i258-selected);
+  }
+
+  .i258-summary-tile[aria-pressed="true"] .i258-summary-tile__icon {
+    display: none;
+  }
+
+  .i258-summary-tile[aria-pressed="true"]::after {
+    content: "✓" / "";
+    grid-area: icon;
+    justify-self: end;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 3px;
+    background: var(--i258-indicator);
+    color: var(--i258-background);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 0.875rem;
+    text-align: center;
+  }
+
   /* —— Coarse pointers: 44px targets ——
      Fine-pointer heights follow the density set; touch never goes under
      44×44 whatever the density. Width too: a one-character chip or an
@@ -2127,9 +2805,15 @@
     .i258-input,
     .i258-toggle-chip,
     .i258-choice,
-    .i258-disclosure__trigger {
+    .i258-disclosure__trigger,
+    .i258-select__control,
+    .i258-tabs__tab {
       min-height: var(--i258-target-coarse);
       min-width: var(--i258-target-coarse);
+    }
+
+    .i258-tabs__tab {
+      justify-content: center;
     }
 
     .i258-frame__sheet {
@@ -2241,6 +2925,44 @@
       outline: 2px solid Highlight;
       outline-offset: -2px;
     }
+
+    .i258-toggle-chip[data-state="on"]::before,
+    .i258-summary-tile[aria-pressed="true"]::after {
+      border-color: Highlight;
+      background: Highlight;
+      color: HighlightText;
+      forced-color-adjust: none;
+    }
+
+    .i258-tabs__tab[data-active]::after {
+      background: Highlight;
+      forced-color-adjust: none;
+    }
+
+    .i258-tooltip,
+    .i258-summary-tile {
+      border-color: CanvasText;
+    }
+
+    .i258-summary-tile[aria-pressed="true"] {
+      border-color: Highlight;
+      outline: 2px solid Highlight;
+      outline-offset: -3px;
+    }
+
+    /* The pressed outlines above replace the focus ring at the same
+       specificity. Focused, the outline moves outside the (Highlight)
+       edge, so focus still shows as a ring of its own. */
+    .i258-summary-tile[aria-pressed="true"]:focus-visible,
+    .i258-toggle-chip[data-state="on"]:focus-visible,
+    .i258-choice[data-pressed]:focus-visible {
+      outline: var(--i258-focus-ring-width) solid Highlight;
+      outline-offset: var(--i258-focus-ring-offset);
+    }
+
+    .i258-status[data-tinted] {
+      outline: 1px solid CanvasText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2261,10 +2983,21 @@
     .i258-dialog__backdrop,
     .i258-dialog,
     .i258-menu,
+    .i258-tooltip,
+    .i258-tabs__tab,
+    .i258-select__control,
+    button.i258-summary-tile,
+    a.i258-summary-tile,
     .i258-theme-toggle__core,
     .i258-theme-toggle__clip,
     .i258-theme-toggle__ray {
       transition: none;
+    }
+
+    .i258-btn:active:not(:disabled),
+    .i258-toggle-chip:active:not(:disabled),
+    button.i258-summary-tile:active {
+      scale: none;
     }
   }
 }

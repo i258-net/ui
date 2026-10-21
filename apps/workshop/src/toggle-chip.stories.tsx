@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { ToggleChip } from "@i258/ui";
 import { chromaticPilotParameters } from "../.storybook/modes";
 
@@ -48,6 +49,21 @@ export const Interactive: Story = {
         Decision
       </ToggleChip>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const chip = within(canvasElement).getByRole("button", { name: "Decision 7" });
+    const glyph = () => getComputedStyle(chip, "::before").content;
+    await expect(chip).toHaveAttribute("aria-pressed", "false");
+    // Off: an empty box, so the label doesn't move when it fills.
+    await expect(glyph()).toMatch(/^"" \/ ""$|^""$/);
+    const offLeft = chip.querySelector(".i258-toggle-chip__label")!.getBoundingClientRect().left;
+    await userEvent.click(chip);
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    // On: a ✓ in the box, so the state isn't colour alone. It's out of the name.
+    await expect(glyph()).toContain("✓");
+    await expect(chip).toHaveAccessibleName("Decision 7");
+    const onLeft = chip.querySelector(".i258-toggle-chip__label")!.getBoundingClientRect().left;
+    await expect(onLeft).toBe(offLeft);
   },
 };
 

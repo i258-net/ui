@@ -127,6 +127,10 @@ function pairs(t: Theme): Pair[] {
   on("danger", ladder, 3);
   // Checkbox tick on its fill.
   on("accent-foreground", { accent: c("accent") }, 3);
+  // The ✓ in a pressed toggle chip's box and a pressed summary tile's box
+  // (the glyph is the page colour on the indicator fill), held to the text
+  // ratio because it is a character.
+  on("background", { indicator: c("indicator") }, 4.5);
   return out;
 }
 

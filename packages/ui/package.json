@@ -128,6 +128,34 @@
       "types": "./dist/components/command-palette.d.ts",
       "import": "./dist/components/command-palette.js"
     },
+    "./table": {
+      "types": "./dist/components/table.d.ts",
+      "import": "./dist/components/table.js"
+    },
+    "./tabs": {
+      "types": "./dist/components/tabs.d.ts",
+      "import": "./dist/components/tabs.js"
+    },
+    "./status-label": {
+      "types": "./dist/components/status-label.d.ts",
+      "import": "./dist/components/status-label.js"
+    },
+    "./empty-state": {
+      "types": "./dist/components/empty-state.d.ts",
+      "import": "./dist/components/empty-state.js"
+    },
+    "./summary-strip": {
+      "types": "./dist/components/summary-strip.d.ts",
+      "import": "./dist/components/summary-strip.js"
+    },
+    "./tooltip": {
+      "types": "./dist/components/tooltip.d.ts",
+      "import": "./dist/components/tooltip.js"
+    },
+    "./select": {
+      "types": "./dist/components/select.d.ts",
+      "import": "./dist/components/select.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css"
   },

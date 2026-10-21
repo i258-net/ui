@@ -55,6 +55,9 @@
   --i258-duration-fast: 120ms;
   --i258-duration-normal: 200ms;
   --i258-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Buttons and chips shrink this much while pressed (none under reduced
+     motion). */
+  --i258-press-scale: 0.97;
 
   --i258-focus-ring-width: 2px;
   --i258-focus-ring-offset: 2px;
@@ -85,6 +88,9 @@
   --i258-pane-pad-x: var(--i258-space-5);
   --i258-pane-pad-y: var(--i258-space-4);
   --i258-pane-gap: var(--i258-space-4);
+  /* Summary tiles: block padding and the count's size. */
+  --i258-tile-pad-y: var(--i258-space-2);
+  --i258-tile-count-size: var(--i258-text-lg);
 }
 
 [data-density="compact"] {
@@ -99,6 +105,8 @@
   --i258-pane-pad-x: var(--i258-space-3);
   --i258-pane-pad-y: var(--i258-space-3);
   --i258-pane-gap: var(--i258-space-3);
+  --i258-tile-pad-y: 0.3125rem;
+  --i258-tile-count-size: var(--i258-text-md);
 }
 
 /* Touch: rows are targets too, so no density takes them under 44px. */

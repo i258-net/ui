@@ -17,6 +17,15 @@ const STORIES = [
   { id: "primitives-choice--single-select-chip", name: "choice-single" },
   { id: "primitives-formfield--matrix", name: "form-field-matrix" },
   { id: "primitives-fieldset--matrix", name: "fieldset-matrix" },
+  { id: "primitives-button--icon-only", name: "button-icon-only" },
+  { id: "primitives-table--default", name: "table-default" },
+  { id: "primitives-tabs--selected", name: "tabs-selected" },
+  { id: "primitives-tabs--vertical-selected", name: "tabs-vertical" },
+  { id: "primitives-statuslabel--tones", name: "status-label-tones" },
+  { id: "primitives-emptystate--states", name: "empty-state-states" },
+  { id: "primitives-select--sizes", name: "select-sizes" },
+  { id: "patterns-summarystrip--pressed", name: "summary-strip-pressed" },
+  { id: "patterns-summarystrip--abacus", name: "summary-strip-abacus" },
   // Patterns: the shared app bar, whose whole point is being identical per app.
   { id: "patterns-appshell--with-nav", name: "app-shell-with-nav" },
   { id: "patterns-appshell--with-subtitle", name: "app-shell-with-subtitle" },
@@ -40,6 +49,7 @@ for (const theme of THEMES) {
           await Promise.all([
             document.fonts.load('1em "Geist Sans"'),
             document.fonts.load('1em "Geist Mono"'),
+            document.fonts.load('1em "i258 Symbols"', "⌃⌘⌥⌫✓"),
           ]);
           await document.fonts.ready;
         });
