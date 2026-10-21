@@ -97,6 +97,13 @@ export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): str
     const cap = /^(?:Key([A-Z])|Digit([0-9]))$/.exec(event.code);
     if (cap) key = cap[1] ?? cap[2] ?? key;
   }
+  if (altGr) {
+    const out: string[] = [];
+    if (event.shiftKey && (key.length > 1 || key === " " || /^[a-z]$/i.test(key)))
+      out.push("shift");
+    out.push(normaliseKey(key));
+    return out.join("+");
+  }
   const out: string[] = [];
   if (event.ctrlKey) out.push("ctrl");
   if (event.altKey) out.push("alt");
