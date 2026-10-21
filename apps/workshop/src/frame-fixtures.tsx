@@ -9,6 +9,13 @@ import {
   SidebarSection,
 } from "@i258/ui";
 
+declare global {
+  interface Window {
+    /** Sidebar items whose click was followed, when a test sets it to []. */
+    __demoFollowed?: string[];
+  }
+}
+
 /*
   Synthetic, generic content for the frame stories. No app data: the frame
   is domain-free, so the fixtures are too.
@@ -77,7 +84,12 @@ export function DemoSidebar({
                 count={"count" in item ? item.count : undefined}
                 countLabel={"countLabel" in item ? item.countLabel : undefined}
                 countTone={"tone" in item ? item.tone : undefined}
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  // Stay on the story; log a click the item did not cancel
+                  // itself (a rail long-press does) as followed.
+                  if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
+                  e.preventDefault();
+                }}
               >
                 {item.label}
               </SidebarItem>

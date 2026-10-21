@@ -1,17 +1,18 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * AppFrame screenshots: the wide frame with the inspector open, and the
- * narrow nav sheet, light and dark. Behaviour and geometry are in
- * frame.spec.ts and frame-panes.spec.ts; these catch what those cannot —
- * the frame's look. Baselines come from CI's Linux actuals, never a Mac.
+ * AppFrame screenshots: the wide frame with the inspector open, a rail
+ * item's name (the kit Tooltip), and the narrow nav sheet, light and
+ * dark. Behaviour and geometry are in frame.spec.ts and frame-panes.spec.ts;
+ * these catch what those cannot — the frame's look. Baselines come from CI's Linux actuals, never a Mac.
  */
 
 const THEMES = ["light", "dark"] as const;
 
 async function open(page: Page, id: string, theme: (typeof THEMES)[number]) {
   const globals = encodeURIComponent(`theme:${theme}`);
-  await page.goto(`/iframe.html?id=patterns-appframe--${id}&viewMode=story&globals=${globals}`, {
+  const storyId = id.includes("--") ? id : `patterns-appframe--${id}`;
+  await page.goto(`/iframe.html?id=${storyId}&viewMode=story&globals=${globals}`, {
     waitUntil: "networkidle",
   });
   await page.locator(`#storybook-root [data-theme="${theme}"] .i258-frame`).waitFor();
@@ -47,6 +48,17 @@ for (const theme of THEMES) {
           "400",
         );
         await expect(page).toHaveScreenshot(`frame-inspector-${theme}.png`);
+      });
+
+      test("rail name", async ({ page }) => {
+        await open(page, "patterns-sidebar--rail", theme);
+        await page.getByRole("link", { name: /Reports/ }).focus();
+        const tip = page.locator("[data-slot='tooltip']");
+        await expect(tip).toHaveText("Reports2");
+        await page.waitForFunction(() =>
+          [...document.querySelectorAll(".i258-tooltip")].every((el) => el.getAnimations().length === 0),
+        );
+        await expect(page).toHaveScreenshot(`frame-rail-name-${theme}.png`);
       });
     });
 

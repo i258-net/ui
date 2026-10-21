@@ -168,7 +168,7 @@ export const PortalInheritance: Story = {
     item.focus();
     fireEvent.focus(item);
     const tip = await waitFor(() => {
-      const el = frame.querySelector<HTMLElement>(".i258-sidebar__tip");
+      const el = frame.querySelector<HTMLElement>("[data-slot='tooltip']");
       expect(el).not.toBeNull();
       return el!;
     });
@@ -181,7 +181,8 @@ export const PortalInheritance: Story = {
     const tipStyle = getComputedStyle(tip);
     await expect(tipStyle.getPropertyValue("--i258-control-md").trim()).toBe("1.75rem");
     const probe = document.createElement("div");
-    probe.style.background = "var(--i258-surface-raised)";
+    // The kit Tooltip's own clothing, under the frame's theme.
+    probe.style.background = "var(--i258-background)";
     frame.append(probe);
     const expected = getComputedStyle(probe).backgroundColor;
     probe.remove();

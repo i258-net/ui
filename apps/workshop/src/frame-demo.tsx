@@ -5,6 +5,7 @@ import {
   FrameHeader,
   Inspector,
   useFrameLayout,
+  useShortcut,
   type AppFrameProps,
   type SidebarMode,
 } from "@i258/ui";
@@ -33,6 +34,8 @@ export type FrameDemoProps = {
    * a React 19 cleanup). What it saw is in `window.__frameDemo.refLog`.
    */
   consumerRef?: "object" | "callback";
+  /** Escape closes the inline inspector, as an app's `useShortcut` would. */
+  escapeClosesInspector?: boolean;
 };
 
 export type FrameDemoHooks = {
@@ -72,6 +75,7 @@ export function FrameDemo({
   dir,
   testHooks = false,
   consumerRef,
+  escapeClosesInspector = false,
 }: FrameDemoProps) {
   const { navIsSheet } = useFrameLayout();
   const [mode, setMode] = React.useState<SidebarMode>(initialMode);
@@ -80,6 +84,9 @@ export function FrameDemo({
   const [widths, setWidths] = React.useState(controlledWidths);
   const [sidebarPresent, setSidebarPresent] = React.useState(true);
   const row = ROWS.find((r) => r.id === selected);
+  useShortcut("Escape", () => setSelected(null), {
+    enabled: escapeClosesInspector && row != null,
+  });
 
   const calls = React.useRef<string[]>([]);
   const refLog = React.useRef<string[]>([]);
