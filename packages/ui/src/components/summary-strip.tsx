@@ -81,21 +81,26 @@ export type SummaryTileProps = Omit<useRender.ComponentProps<"button">, "childre
      * (`render={<div />}`).
      */
     pressed?: boolean | undefined;
-    /** Keep the tone at zero: a passing check is still worth its green. */
+    /**
+     * Keep the tone at zero: a passing check is still worth its green. An
+     * unknown count (`"—"`) stays toneless regardless.
+     */
     alert?: boolean | undefined;
   };
 
 /**
  * Count + label tile. The tone shows only while the count is non-zero (or
- * `alert`), so a healthy view looks quiet. Pressed is drawn as an
+ * `alert`) and known, so a healthy view looks quiet. Pressed is drawn as an
  * indicator edge plus a ✓ box in place of the glyph, not by tint alone.
  */
 export const SummaryTile = React.forwardRef<HTMLElement, SummaryTileProps>(function SummaryTile(
   { label, count, caption, icon, pressed, alert, tone, className, render, type, ...props },
   ref,
 ) {
-  // "—" is unknown: no tone, it would claim a state we don't have.
-  const quiet = count === 0 || count === "0" || count === "—";
+  // "—" is unknown: no tone, even with `alert`; it would claim a state we
+  // don't have.
+  const unknown = count === "—";
+  const quiet = unknown || (!alert && (count === 0 || count === "0"));
   return useRender({
     defaultTagName: "button",
     ref,
@@ -105,7 +110,7 @@ export const SummaryTile = React.forwardRef<HTMLElement, SummaryTileProps>(funct
         className: cn(summaryTileVariants({ tone }), className),
         type: render ? undefined : (type ?? "button"),
         "aria-pressed": pressed,
-        "data-zero": quiet && !alert ? "" : undefined,
+        "data-zero": quiet ? "" : undefined,
         "data-slot": "summary-tile",
         children: (
           <>

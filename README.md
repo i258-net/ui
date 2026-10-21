@@ -160,8 +160,8 @@ to the new view's heading.
   and Abacus. A tile is a filter (`pressed` makes it a toggle button), a link
   (`render={<a href=… />}`) or a readout (`render={<div />}`); the count leads
   its name ("9 Decisions waiting on you"). Its tone shows only while the count
-  is non-zero (or `alert`); `"—"` means unknown, never a fake zero. Pressed is
-  an indicator edge plus a ✓ box.
+  is non-zero (or `alert`); `"—"` means unknown, never a fake zero, and has no
+  tone even with `alert`. Pressed is an indicator edge plus a ✓ box.
 - **`Tooltip`** is a visual label for an icon-only control or a glyph, never
   content: the tip is `aria-hidden`, so the trigger keeps its own name
   (`aria-label`, or visually hidden words on a glyph). It meets WCAG 1.4.13

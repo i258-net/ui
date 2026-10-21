@@ -187,6 +187,50 @@ export const Abacus: Story = {
   },
 };
 
+/**
+ * A passing check whose next load fails: the count becomes "—" and the
+ * green goes with it, `alert` or not. Unknown never keeps a tone.
+ */
+export const CheckGoesUnknown: Story = {
+  args: { label: "Ledger summary" },
+  render: function CheckGoesUnknown() {
+    const [failed, setFailed] = React.useState(false);
+    return (
+      <div style={{ display: "grid", gap: 16, maxWidth: 960, justifyItems: "start" }}>
+        <SummaryStrip label="Ledger summary">
+          <SummaryTile
+            tone="success"
+            alert
+            icon={Icons.ledger}
+            count={failed ? "—" : 0}
+            label="Ledger check"
+            caption={failed ? "failed to load" : "passing"}
+            render={<a href="#check" />}
+          />
+          <SummaryTile icon={Icons.stale} count={0} label="Stale accounts" render={<a href="#accounts" />} />
+        </SummaryStrip>
+        <button type="button" onClick={() => setFailed(true)}>
+          Reload
+        </button>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const countColor = (el: HTMLElement) =>
+      getComputedStyle(el.querySelector(".i258-summary-tile__count")!).color;
+    const quiet = countColor(c.getByRole("link", { name: "0 Stale accounts" }));
+    const passing = c.getByRole("link", { name: "0 Ledger check passing" });
+    await expect(passing).not.toHaveAttribute("data-zero");
+    await expect(countColor(passing)).not.toBe(quiet);
+
+    await userEvent.click(c.getByRole("button", { name: "Reload" }));
+    const unknown = c.getByRole("link", { name: "Unknown Ledger check failed to load" });
+    await expect(unknown).toHaveAttribute("data-zero");
+    await expect(countColor(unknown)).toBe(quiet);
+  },
+};
+
 /** Two columns at 320px; nothing scrolls sideways. */
 export const Narrow: Story = {
   args: { label: "Board summary" },
