@@ -16,11 +16,19 @@ Changes since 0.7.3: #81 (I25-106), #83 (I25-107), #86 (I25-108), #87
 ### What consumers must do
 
 - **Expect the new look and smaller sizes.** Update any app screenshots or
-  visual tests. Default (`md`) Button is 32px tall (was 36), Input 32 (was 38),
-  ThemeToggle 28 (was 32), AppShell bar 41 (was 45). Body UI text is 13px (was 14).
+  visual tests. The kit ships no preflight (see AGENTS.md), so controls with a
+  1px border state both ways: content-box outer height, then under a border-box
+  reset such as Tailwind Preflight. Default (`md`) Button `--i258-control-md`
+  2.25rem→2rem (38→34px content-box; 36→32px border-box). Input
+  `--i258-input-height` 2.25rem→1.875rem (38→32px content-box; 36→30px
+  border-box). ThemeToggle (default `sm`) `--i258-control-sm` 2rem→1.75rem
+  (34→30px content-box; 32→28px border-box). AppShell bar ~41px tall (was ~45;
+  tallest child is usually ThemeToggle plus `--i258-space-3` padding and the
+  bottom hairline). Body UI text is 13px (was 14).
 - **Checkbox takes more layout space.** The element is now its own 24×24 target
-  (44×44 on coarse pointers) and draws the 16px box inside it. A checkbox you
-  spaced by hand sits 4px (fine) / 14px (coarse) further from its neighbours.
+  (44×44 on coarse pointers) and draws a 1rem box inside (20→18px content-box
+  outer edge; 18→16px border-box). A checkbox you spaced by hand sits 4px
+  (fine) / 14px (coarse) further from its neighbours.
 - **Keep declaring layer order before any import.** This hasn't changed:
   `@layer theme, base, components, i258-components, utilities;` in an earlier
   file (see README "Cascade layers").
