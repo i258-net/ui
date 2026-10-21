@@ -154,8 +154,10 @@ Changes since 0.7.3: #81 (I25-106), #83 (I25-107), #86 (I25-108), #87
   `--i258-tint-mix`.
 - **Checkbox:** the element is its own 24/44px target, as above. It clears
   native button chrome itself when rendered with `render={<button />} nativeButton`.
-- **Input, Textarea, Choice:** edges use `--i258-border-strong`, heights follow
-  the density tokens, and pressed choices use `--i258-indicator`.
+- **Input, Textarea, Choice:** edges use `--i258-border-strong`, and pressed
+  choices use `--i258-indicator`. **Input** heights and **Choice** `chip` `md`
+  height follow the density tokens; **Textarea** min-heights and **Choice**
+  `option` padding are fixed and ignore `data-density`.
 - **Coarse pointers:** buttons, chips, choices, selects and tabs get a 44px
   minimum width as well as height.
 - New pieces have forced-colours and reduced-motion rules.
