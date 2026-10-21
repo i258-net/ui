@@ -67,6 +67,35 @@ describe("bindingFromEvent", () => {
     expect(bindingFromEvent(ev("л", { metaKey: true, code: "KeyK" }), true)).toBe("meta+k");
   });
 
+  it("keeps Shift on a digit in a command chord, so shifted and plain digits differ", () => {
+    // US: Ctrl+1 types "1", Ctrl+Shift+1 types "!".
+    expect(bindingFromEvent(ev("1", { ctrlKey: true, code: "Digit1" }), false)).toBe("ctrl+1");
+    expect(bindingFromEvent(ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false)).toBe(
+      "ctrl+shift+1",
+    );
+    // Mac: ⌥1 types "¡", ⌥⇧1 types "⁄"; ⌘⇧1 may report "!" or "1".
+    expect(bindingFromEvent(ev("⁄", { altKey: true, shiftKey: true, code: "Digit1" }), true)).toBe(
+      "alt+shift+1",
+    );
+    expect(bindingFromEvent(ev("!", { metaKey: true, shiftKey: true, code: "Digit1" }), true)).toBe(
+      "meta+shift+1",
+    );
+    expect(bindingFromEvent(ev("1", { metaKey: true, shiftKey: true, code: "Digit1" }), true)).toBe(
+      "meta+shift+1",
+    );
+    // AZERTY: the 1 key types "&", and "1" with Shift. Same chords as US.
+    expect(bindingFromEvent(ev("&", { ctrlKey: true, code: "Digit1" }), false)).toBe("ctrl+1");
+    expect(bindingFromEvent(ev("1", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false)).toBe(
+      "ctrl+shift+1",
+    );
+  });
+
+  it("leaves Shift off a digit typed without a command modifier", () => {
+    // AZERTY types "1" with Shift: that is the character binding `1`.
+    expect(bindingFromEvent(ev("1", { shiftKey: true, code: "Digit1" }), false)).toBe("1");
+    expect(bindingFromEvent(ev("!", { shiftKey: true, code: "Digit1" }), false)).toBe("!");
+  });
+
   it("keeps the letter the layout typed, and leaves AltGr alone", () => {
     // QWERTZ: the key labelled Z sits where US QWERTY has Y.
     expect(bindingFromEvent(ev("z", { altKey: true, code: "KeyY" }), false)).toBe("alt+z");

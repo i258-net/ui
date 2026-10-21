@@ -61,7 +61,8 @@ export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): str
   // letter or digit is what the user pressed on their own layout (QWERTZ's Z
   // is code KeyY), and Ctrl+Alt elsewhere is AltGr typing a character.
   const altGr = event.ctrlKey && event.altKey && !event.metaKey && !apple;
-  if ((event.ctrlKey || event.altKey || event.metaKey) && !altGr && event.code && !/^[a-z0-9]$/i.test(key)) {
+  const command = (event.ctrlKey || event.altKey || event.metaKey) && !altGr;
+  if (command && event.code && !/^[a-z0-9]$/i.test(key)) {
     const cap = /^(?:Key([A-Z])|Digit([0-9]))$/.exec(event.code);
     if (cap) key = cap[1] ?? cap[2] ?? key;
   }
@@ -70,8 +71,11 @@ export function bindingFromEvent(event: KeyLike, apple = isApplePlatform()): str
   if (event.altKey) out.push("alt");
   if (event.metaKey) out.push("meta");
   // A typed symbol already spells Shift (`?` is shift+/); letters and named
-  // keys carry it as a modifier.
-  if (event.shiftKey && (key.length > 1 || /^[a-z]$/i.test(key))) out.push("shift");
+  // keys carry it as a modifier. So does a digit in a command chord, however
+  // the layout reports it: Ctrl+Shift+1 types "!" on US (bound by its key
+  // cap above) and "1" on AZERTY, and both are ctrl+shift+1, never ctrl+1.
+  if (event.shiftKey && (key.length > 1 || /^[a-z]$/i.test(key) || (command && /^[0-9]$/.test(key))))
+    out.push("shift");
   out.push(normaliseKey(key));
   return out.join("+");
 }
