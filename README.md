@@ -14,7 +14,7 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Repo | public |
 | Package | `@i258/ui` on npmjs.org (org `i258`) — `0.5.1` tagged broken for bundlers; this branch targets `0.5.2` |
 | License | MIT — Copyright (c) 2026 Daniel Newton |
-| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono · Base UI/CVA · Storybook 10 |
+| Stack | pnpm · TypeScript 7 · Tailwind v4 (`--i258-*` + `@layer i258-components` → compiled CSS) · self-hosted Geist Sans/Mono + i258 Symbols · Base UI/CVA · Storybook 10 |
 | Baseline | Tokens + light/dark themes · Button, Input, Textarea, Label, FormField, Link, Checkbox, Badge, Surface, Alert, ToggleChip, Disclosure, Choice/ChoiceGroup, ThemeToggle, Kbd, Dialog, Menu |
 | Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
@@ -73,7 +73,7 @@ expect it to sit 4px (fine) or 14px (coarse) further from its neighbours than be
 The same holds with `render={<button />} nativeButton`: the kit clears the button's
 UA border, padding, background and appearance itself, so no consumer reset is needed.
 
-Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL); `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
+Consumers import **compiled** CSS (`@i258/ui/styles.css`). They do **not** Tailwind-scan this package's source. The package builds CSS with `@tailwindcss/cli` using **`@layer i258-components` + plain `--i258-*` custom properties** (no `@theme` / no `tailwindcss/theme` import — those emit unprefixed `--font-sans` / `--radius-md` that collide with consumer Tailwind). No preflight, no utilities. Component classes are package-owned (`i258-*`). `--i258-font-sans` / `--i258-font-mono` point at self-hosted **Geist** (SIL OFL), followed by **i258 Symbols** (Noto Sans Symbols / Symbols 2 subsets for ⌃ ⌘ ⌥, SIL OFL), which Geist lacks, so `Kbd` glyphs render the same on every platform; `styles.css` / `tokens.css` ship `@font-face` plus `dist/fonts/*.woff2` so Storybook, Playwright VRT, Chromatic, and consumers rasterize the same outlines.
 
 **Cascade layers:** component rules ship in `@layer i258-components`, not Tailwind's shared `components` name. Layer order is first-declaration-wins, so a Tailwind consumer's preflight (`base`) can beat or lose to us depending on import order if we share `components`. Declare order **before** any `@import`:
 
@@ -130,10 +130,12 @@ accepted in I25-119. They are the same in every app:
 - **Enter confirms.** Pressing the same number again never confirms: there are
   no "press twice" bindings, and auto-repeat never fires a binding.
 - **Visible action buttons.** Every shortcut needs a visible control that does
-  the same thing. Show its `Kbd` cap (with `aria-hidden`) and
-  `aria-keyshortcuts` only while the shortcut is live
-  (`useSingleKeyShortcuts()`); `formatShortcut` / `ariaKeyShortcuts` spell a
-  binding for the current platform.
+  the same thing, with its `Kbd` cap (`aria-hidden`) and `aria-keyshortcuts`
+  shown while the shortcut is registered. Only single-character bindings are
+  gated: show their cap and `aria-keyshortcuts` only when
+  `useSingleKeyShortcuts()` is true. Modifier chords and named keys (`mod+k`,
+  Escape) keep both whenever they're registered. `formatShortcut` /
+  `ariaKeyShortcuts` spell a binding for the current platform.
 
 `Dialog`, `Menu` and `CommandPalette` sit on Base UI (focus trap, inert page,
 Escape, focus return). Inside an `AppFrame` they portal into the frame's layer
