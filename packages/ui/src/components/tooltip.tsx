@@ -87,13 +87,14 @@ export function Tooltip({
   const [innerOpen, setInnerOpen] = React.useState(false);
   const open = openProp ?? innerOpen;
   const onOpenChangeRef = React.useRef(onOpenChange);
+  // Base UI and the Escape handler below can both report one close: tell
+  // the app once. Synced to what was committed, not to a render React may
+  // discard (a suspended transition), so a later close is never swallowed.
+  const reported = React.useRef(open);
   React.useLayoutEffect(() => {
     onOpenChangeRef.current = onOpenChange;
+    reported.current = open;
   });
-  // Base UI and the Escape handler below can both report one close: tell
-  // the app once.
-  const reported = React.useRef(open);
-  reported.current = open;
   const setOpen = React.useCallback((next: boolean) => {
     setInnerOpen(next);
     if (reported.current === next) return;
