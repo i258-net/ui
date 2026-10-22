@@ -37,6 +37,14 @@ export type TooltipProps = {
   delay?: number | undefined;
   closeDelay?: number | undefined;
   disabled?: boolean | undefined;
+  /**
+   * Controlled open state, for a trigger with its own way in (a touch
+   * long-press). Hover, focus and Escape still report through
+   * `onOpenChange`, which must follow them: while `open` stays true the
+   * tip takes every Escape. Leave it unset otherwise.
+   */
+  open?: boolean | undefined;
+  onOpenChange?: ((open: boolean) => void) | undefined;
   className?: string | undefined;
   /**
    * Where the tip portals to. Default: the enclosing AppFrame's layer (so
@@ -50,7 +58,10 @@ export type TooltipProps = {
  * Tooltip. Meets WCAG 1.4.13: the tip is hoverable (the pointer can move
  * onto it), persistent (it stays until hover or focus leaves) and
  * dismissible (Escape closes it without moving focus or the pointer). It
- * opens on hover and keyboard focus, never on touch.
+ * opens on hover and keyboard focus, never on a tap (a tap is the
+ * trigger's own action). A trigger can add a touch gesture of its own
+ * through `open` / `onOpenChange`, as the sidebar rail does with a
+ * long-press.
  *
  * Escape while a tip is open closes only the tip, however it opened
  * (hover with focus elsewhere included). The key is taken in the capture
@@ -67,11 +78,29 @@ export function Tooltip({
   delay,
   closeDelay,
   disabled,
+  open: openProp,
+  onOpenChange,
   className,
   container,
 }: TooltipProps) {
   const frameLayer = useFrameLayer();
-  const [open, setOpen] = React.useState(false);
+  const [innerOpen, setInnerOpen] = React.useState(false);
+  const open = openProp ?? innerOpen;
+  const onOpenChangeRef = React.useRef(onOpenChange);
+  // Base UI and the Escape handler below can both report one close: tell
+  // the app once. Synced to what was committed, not to a render React may
+  // discard (a suspended transition), so a later close is never swallowed.
+  const reported = React.useRef(open);
+  React.useLayoutEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+    reported.current = open;
+  });
+  const setOpen = React.useCallback((next: boolean) => {
+    setInnerOpen(next);
+    if (reported.current === next) return;
+    reported.current = next;
+    onOpenChangeRef.current?.(next);
+  }, []);
   const actions = React.useRef<TooltipPrimitive.Root.Actions | null>(null);
 
   React.useEffect(() => {
@@ -89,12 +118,13 @@ export function Tooltip({
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [open]);
+  }, [open, setOpen]);
 
   return (
     <TooltipPrimitive.Root
       actionsRef={actions}
       onOpenChange={setOpen}
+      {...(openProp !== undefined ? { open: openProp } : {})}
       {...(disabled !== undefined ? { disabled } : {})}
     >
       <TooltipPrimitive.Trigger

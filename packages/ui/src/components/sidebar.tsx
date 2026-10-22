@@ -1,15 +1,11 @@
 import * as React from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { Tooltip } from "@base-ui/react/tooltip";
 import { useRender } from "@base-ui/react/use-render";
 import { mergeProps } from "@base-ui/react/merge-props";
 
-import {
-  FramePortalContext,
-  SidebarHandleContext,
-  SidebarModeContext,
-} from "../lib/frame-context.js";
+import { SidebarHandleContext, SidebarModeContext } from "../lib/frame-context.js";
 import { cn } from "../lib/utils.js";
+import { Tooltip, TooltipProvider } from "./tooltip.js";
 
 /**
  * Whether the sidebar is drawn as an icon rail. AppFrame provides it; use
@@ -43,8 +39,9 @@ export function Sidebar({
       className={cn("i258-sidebar", className)}
       {...props}
     >
-      {/* One provider so moving along the rail shows each name at once. */}
-      <Tooltip.Provider delay={300}>{children}</Tooltip.Provider>
+      {/* The rail's own provider, so moving along it shows each name at
+          once. Apps need not mount one for the rail. */}
+      <TooltipProvider delay={300}>{children}</TooltipProvider>
       {handle}
     </aside>
   );
@@ -163,7 +160,9 @@ export type SidebarItemProps = Omit<useRender.ComponentProps<"a">, "children"> &
 
 /**
  * A navigation link in a SidebarSection. Renders an `<a>`; pass `render`
- * for a router link. In the rail its name shows on hover and keyboard focus.
+ * for a router link. In the rail its name (and count) shows as a Tooltip on
+ * hover, keyboard focus and a touch long-press; the link keeps its own
+ * accessible name.
  */
 export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
   function SidebarItem(
@@ -181,6 +180,7 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
     ref,
   ) {
     const collapsed = useSidebarCollapsed();
+    const longPress = useLongPress(collapsed);
     const link = useRender({
       defaultTagName: "a",
       ref,
@@ -210,52 +210,148 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
           ),
         } as React.ComponentProps<"a">,
         props,
+        longPress.triggerProps,
       ),
     });
+    // Always mounted (disabled while expanded) so the item element is the
+    // same node in both modes and a collapse keeps focus on it.
     return (
       <li className="i258-sidebar__li">
-        <RailName collapsed={collapsed} name={children} count={count}>
+        <Tooltip
+          disabled={!collapsed}
+          open={longPress.open}
+          onOpenChange={longPress.setOpen}
+          side="inline-end"
+          sideOffset={8}
+          className="i258-sidebar__tip"
+          content={
+            <>
+              {children}
+              {count != null ? (
+                <span className="i258-sidebar__tip-count">{count}</span>
+              ) : null}
+            </>
+          }
+        >
           {link}
-        </RailName>
+        </Tooltip>
       </li>
     );
   },
 );
 
-/*
-  Rail names. Private and deliberately minimal: a Base UI tooltip with no
-  public API, so this PR does not ship the kit Tooltip ahead of its own
-  review (I25-109). When that lands, swap this for it.
+/** How long a touch must rest on a rail item to show its name, ms. */
+const LONG_PRESS_MS = 500;
+/** Finger travel that turns a press into a scroll, px. */
+const LONG_PRESS_SLOP = 10;
+/** How long after the lift a long-press's click is still swallowed, ms. */
+const LONG_PRESS_RELEASE_MS = 400;
 
-  Always mounted (disabled while expanded) so the item element is the same
-  node in both modes and a collapse keeps focus on it. Portals into the
-  frame's layer so it inherits the frame's theme and density.
+/*
+  Rail names on touch. The kit Tooltip never opens on a tap (a tap
+  follows the link), so a long-press shows the name instead, as native
+  toolbars do. The press does not also navigate, open the browser's link
+  menu or select text; the tip stays until the next tap elsewhere or
+  Escape. Mouse and pen leave it to the Tooltip's hover and focus.
 */
-function RailName({
-  collapsed,
-  name,
-  count,
-  children,
-}: {
-  collapsed: boolean;
-  name: React.ReactNode;
-  count: React.ReactNode;
-  children: React.ReactElement;
-}) {
-  const container = React.useContext(FramePortalContext);
-  return (
-    <Tooltip.Root disabled={!collapsed}>
-      <Tooltip.Trigger render={children} />
-      <Tooltip.Portal container={container}>
-        <Tooltip.Positioner side="inline-end" sideOffset={8} className="i258-sidebar__tip-positioner">
-          <Tooltip.Popup className="i258-sidebar__tip">
-            {name}
-            {count != null ? (
-              <span className="i258-sidebar__tip-count">{count}</span>
-            ) : null}
-          </Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
-    </Tooltip.Root>
+function useLongPress(enabled: boolean) {
+  const [open, setOpen] = React.useState(false);
+  const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const origin = React.useRef<{ x: number; y: number } | null>(null);
+  // Set by a long-press, for the click (if any) its lift sends; cleared
+  // shortly after the lift so no later click is lost.
+  const suppressClick = React.useRef(false);
+  const release = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // A second finger anywhere (another item, the page) while a press is
+  // pending: a gesture, not a press. The item never hears that pointer.
+  const onOtherPointer = React.useRef<((event: PointerEvent) => void) | null>(null);
+
+  const cancel = React.useCallback(() => {
+    clearTimeout(timer.current);
+    timer.current = undefined;
+    origin.current = null;
+    if (onOtherPointer.current) {
+      document.removeEventListener("pointerdown", onOtherPointer.current, true);
+      onOtherPointer.current = null;
+    }
+  }, []);
+  const show = React.useCallback(() => {
+    cancel();
+    clearTimeout(release.current);
+    suppressClick.current = true;
+    setOpen(true);
+  }, [cancel]);
+  const lift = React.useCallback(() => {
+    cancel();
+    if (!suppressClick.current) return;
+    clearTimeout(release.current);
+    release.current = setTimeout(() => {
+      suppressClick.current = false;
+    }, LONG_PRESS_RELEASE_MS);
+  }, [cancel]);
+
+  React.useEffect(() => {
+    if (enabled) return;
+    cancel();
+    clearTimeout(release.current);
+    suppressClick.current = false;
+    setOpen(false);
+  }, [enabled, cancel]);
+  React.useEffect(
+    () => () => {
+      cancel();
+      clearTimeout(release.current);
+    },
+    [cancel],
   );
+
+  const triggerProps: React.ComponentProps<"a"> = enabled
+    ? {
+        onPointerDown(event) {
+          // A second finger: a gesture, not a press.
+          if (!event.isPrimary) {
+            cancel();
+            return;
+          }
+          clearTimeout(release.current);
+          suppressClick.current = false;
+          if (event.pointerType !== "touch") return;
+          cancel();
+          origin.current = { x: event.clientX, y: event.clientY };
+          timer.current = setTimeout(show, LONG_PRESS_MS);
+          const pointerId = event.pointerId;
+          onOtherPointer.current = (other) => {
+            if (other.pointerId !== pointerId) cancel();
+          };
+          document.addEventListener("pointerdown", onOtherPointer.current, true);
+        },
+        onPointerMove(event) {
+          const o = origin.current;
+          if (!o || event.pointerType !== "touch") return;
+          if (Math.hypot(event.clientX - o.x, event.clientY - o.y) > LONG_PRESS_SLOP) cancel();
+        },
+        onPointerUp: lift,
+        onPointerCancel: lift,
+        // Android raises the link menu on a long-press, at about the same
+        // moment as the timer: take it as the long-press.
+        onContextMenu(event) {
+          if (origin.current == null && !suppressClick.current) return;
+          event.preventDefault();
+          if (!suppressClick.current) show();
+        },
+        // Some browsers still send a click when the finger lifts. It must
+        // neither follow the link nor close the tip it just opened. Taken
+        // in the capture phase, so no onClick runs for it: the item's own,
+        // a `render` element's (a router link's navigate) or the Tooltip's.
+        onClickCapture(event) {
+          if (!suppressClick.current) return;
+          suppressClick.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+        },
+      }
+    : {};
+
+  return { open, setOpen, triggerProps };
 }

@@ -307,6 +307,80 @@ export const Disabled: Story = {
   },
 };
 
+const never = new Promise<never>(() => {});
+function SuspendsWhen({ on }: { on: boolean }) {
+  if (on) React.use(never);
+  return null;
+}
+
+/** What a controlled tip reported through onOpenChange, for the play function. */
+const controlledReports: boolean[] = [];
+
+function ControlledDemo() {
+  const [open, setOpen] = React.useState(true);
+  const [suspend, setSuspend] = React.useState(false);
+  const [, startTransition] = React.useTransition();
+  return (
+    <TooltipProvider delay={0}>
+      <div style={{ display: "flex", gap: 24, alignItems: "center", padding: 48 }}>
+        <Tooltip
+          content="Archive"
+          open={open}
+          onOpenChange={(next) => {
+            controlledReports.push(next);
+            setOpen(next);
+          }}
+        >
+          <Button variant="ghost" size="sm" shape="icon" aria-label="Archive">
+            <ArchiveIcon />
+          </Button>
+        </Tooltip>
+        {/* Renders the tip closed in a transition that never commits. */}
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            startTransition(() => {
+              setOpen(false);
+              setSuspend(true);
+            })
+          }
+        >
+          Close in a suspended transition
+        </Button>
+        <React.Suspense fallback={null}>
+          <SuspendsWhen on={suspend} />
+        </React.Suspense>
+      </div>
+    </TooltipProvider>
+  );
+}
+
+/**
+ * Controlled `open`. A render React discards (here a transition that
+ * suspends) does not count as reported: the next Escape still closes the
+ * committed tip, and reports the close once.
+ */
+export const Controlled: Story = {
+  args: { content: "Archive", children: <span /> },
+  render: () => <ControlledDemo />,
+  play: async ({ canvasElement }) => {
+    controlledReports.length = 0;
+    const c = within(canvasElement);
+    await waitFor(() => expect(tip()).toBeVisible());
+
+    // A click event alone: no pointerdown, so no outside press.
+    c.getByRole("button", { name: "Close in a suspended transition" }).click();
+    await new Promise((r) => setTimeout(r, 200));
+    await expect(tip()).toBeVisible();
+    await expect(controlledReports).toEqual([]);
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(tip()).toBeNull());
+    await expect(controlledReports).toEqual([false]);
+  },
+};
+
 /** The pair with no play function, for the real-pointer checks in vrt/tooltip.spec.ts. */
 export const Static: Story = {
   args: { content: "Archive", children: <span /> },

@@ -1474,8 +1474,9 @@
   }
 
   /* Rail: icons only. Labels and counts are visually hidden, not removed;
-     section headers give way to their hairlines. Names show on hover and
-     keyboard focus in a popup portaled to the frame's layer. */
+     section headers give way to their hairlines. Names show in the kit
+     Tooltip (portaled to the frame's layer) on hover, keyboard focus and a
+     touch long-press, which must not raise the link callout or select. */
   .i258-sidebar[data-collapsed] .i258-sidebar__section-trigger {
     display: none;
   }
@@ -1483,6 +1484,9 @@
   .i258-sidebar[data-collapsed] .i258-sidebar__item {
     justify-content: center;
     padding: 0;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .i258-sidebar[data-collapsed] .i258-sidebar__label,
@@ -1496,22 +1500,11 @@
     white-space: nowrap;
   }
 
-  .i258-sidebar__tip-positioner {
-    z-index: 50;
-  }
-
+  /* The tip is the kit Tooltip; this lays out its name and count, on one
+     line as before. */
   .i258-sidebar__tip {
-    display: inline-flex;
+    display: flex;
     gap: var(--i258-space-2);
-    padding: var(--i258-space-1) var(--i258-space-2);
-    border: 1px solid var(--i258-border);
-    border-radius: var(--i258-radius-md);
-    background: var(--i258-surface-raised);
-    box-shadow: var(--i258-shadow-md);
-    color: var(--i258-foreground);
-    font-family: var(--i258-font-sans);
-    font-size: var(--i258-text-xs);
-    line-height: var(--i258-leading-snug);
     white-space: nowrap;
   }
 
@@ -2893,7 +2886,6 @@
       forced-color-adjust: none;
     }
 
-    .i258-sidebar__tip,
     .i258-frame__sheet,
     .i258-menu,
     .i258-kbd {

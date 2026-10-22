@@ -353,14 +353,117 @@ for (const boxSizing of ["content-box", "border-box"] as const) {
 }
 
 test.describe("rail names", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  const tip = (page: Page) => page.locator("[data-slot='tooltip']");
+
   test("a focused rail item shows its name without a second accessible description", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
     await open(page, "compact-dark-rail", "dark");
     const item = page.getByRole("link", { name: /Projects/ });
     await item.focus();
-    await expect(page.locator(".i258-sidebar__tip")).toHaveText("Projects");
+    await expect(tip(page)).toHaveText("Projects");
+    await expect(tip(page)).toHaveAttribute("aria-hidden", "true");
     await expect(item).toHaveAccessibleName("Projects");
     await expect(item).not.toHaveAttribute("aria-describedby", /.+/);
+  });
+
+  test("hoverable: the pointer can move from the item onto its name", async ({ page }) => {
+    await open(page, "compact-dark-rail", "dark");
+    const item = page.getByRole("link", { name: /Reports/ });
+    await item.hover();
+    await expect(tip(page)).toHaveText("Reports2");
+    const a = (await item.boundingBox())!;
+    const t = (await tip(page).boundingBox())!;
+    // Inline-end of the rail, beside its item.
+    expect(t.x).toBeGreaterThan(a.x + a.width);
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 8 });
+    await page.waitForTimeout(300);
+    await expect(tip(page)).toBeVisible();
+  });
+
+  test.describe("touch", () => {
+    test.use({ hasTouch: true, isMobile: true });
+
+    async function press(page: Page, name: RegExp, ms: number) {
+      const box = (await page.getByRole("link", { name }).boundingBox())!;
+      const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+      await page.waitForTimeout(ms);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await page.waitForTimeout(100);
+    }
+
+    test("a long-press shows the name and does not follow the link; a tap follows it", async ({ page }) => {
+      await open(page, "compact-dark-rail", "dark");
+      await page.evaluate(() => {
+        window.__demoFollowed = [];
+      });
+      const followed = () => page.evaluate(() => window.__demoFollowed);
+
+      await press(page, /Reports/, 800);
+      await expect(tip(page)).toHaveText("Reports2");
+      expect(await followed()).toEqual([]);
+      // Persistent: it stays after the finger lifts.
+      await page.waitForTimeout(600);
+      await expect(tip(page)).toBeVisible();
+
+      // A tap elsewhere dismisses it; a tap on an item follows it, no tip.
+      await page.getByRole("main").tap();
+      await expect(tip(page)).toHaveCount(0);
+      await page.getByRole("link", { name: /Projects/ }).tap();
+      await page.waitForTimeout(700);
+      expect(await followed()).toEqual(["projects"]);
+      await expect(tip(page)).toHaveCount(0);
+    });
+
+    test("a second finger anywhere turns the press into a gesture: no name", async ({ page }) => {
+      await open(page, "compact-dark-rail", "dark");
+      const box = (await page.getByRole("link", { name: /Reports/ }).boundingBox())!;
+      const main = (await page.getByRole("main").boundingBox())!;
+      const first = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 0 };
+      const second = { x: main.x + main.width / 2, y: main.y + main.height / 2, id: 1 };
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [first] });
+      await page.waitForTimeout(100);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [first, second] });
+      await page.waitForTimeout(800);
+      await expect(tip(page)).toHaveCount(0);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    });
+
+    test("Android's long-press link menu is taken as the long-press", async ({ page }) => {
+      await open(page, "compact-dark-rail", "dark");
+      const prevented = await page.getByRole("link", { name: /Starred/ }).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const at = { clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, bubbles: true, cancelable: true };
+        el.dispatchEvent(new PointerEvent("pointerdown", { ...at, pointerType: "touch", isPrimary: true }));
+        const menu = new MouseEvent("contextmenu", at);
+        el.dispatchEvent(menu);
+        return menu.defaultPrevented;
+      });
+      expect(prevented).toBe(true);
+      await expect(tip(page)).toHaveText("Starred");
+    });
+  });
+
+  test("Escape closes the name only: focus stays and nothing else hears the key", async ({ page }) => {
+    await open(page, "compact-dark-rail", "dark");
+    await page.evaluate(() => {
+      (window as unknown as { __escapes: number }).__escapes = 0;
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") (window as unknown as { __escapes: number }).__escapes++;
+      });
+    });
+    const item = page.getByRole("link", { name: /Inbox/ });
+    await item.focus();
+    await expect(tip(page)).toHaveText("Inbox12");
+    await page.keyboard.press("Escape");
+    await expect(tip(page)).toHaveCount(0);
+    await expect(item).toBeFocused();
+    expect(await page.evaluate(() => (window as unknown as { __escapes: number }).__escapes)).toBe(0);
+    await page.keyboard.press("Escape");
+    expect(await page.evaluate(() => (window as unknown as { __escapes: number }).__escapes)).toBe(1);
   });
 });
 

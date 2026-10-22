@@ -9,6 +9,13 @@ import {
   SidebarSection,
 } from "@i258/ui";
 
+declare global {
+  interface Window {
+    /** Sidebar items whose click was followed, when a test sets it to []. */
+    __demoFollowed?: string[];
+  }
+}
+
 /*
   Synthetic, generic content for the frame stories. No app data: the frame
   is domain-free, so the fixtures are too.
@@ -77,7 +84,17 @@ export function DemoSidebar({
                 count={"count" in item ? item.count : undefined}
                 countLabel={"countLabel" in item ? item.countLabel : undefined}
                 countTone={"tone" in item ? item.tone : undefined}
-                onClick={(e) => e.preventDefault()}
+                // As a router link would: its own onClick on the `render`
+                // element, which stays on the story and logs the click as
+                // followed. A rail long-press's click never reaches it.
+                render={
+                  <a
+                    onClick={(e) => {
+                      if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
+                      e.preventDefault();
+                    }}
+                  />
+                }
               >
                 {item.label}
               </SidebarItem>
