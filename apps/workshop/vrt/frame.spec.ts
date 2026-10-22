@@ -417,6 +417,21 @@ test.describe("rail names", () => {
       await expect(tip(page)).toHaveCount(0);
     });
 
+    test("a second finger anywhere turns the press into a gesture: no name", async ({ page }) => {
+      await open(page, "compact-dark-rail", "dark");
+      const box = (await page.getByRole("link", { name: /Reports/ }).boundingBox())!;
+      const main = (await page.getByRole("main").boundingBox())!;
+      const first = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 0 };
+      const second = { x: main.x + main.width / 2, y: main.y + main.height / 2, id: 1 };
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [first] });
+      await page.waitForTimeout(100);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [first, second] });
+      await page.waitForTimeout(800);
+      await expect(tip(page)).toHaveCount(0);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    });
+
     test("Android's long-press link menu is taken as the long-press", async ({ page }) => {
       await open(page, "compact-dark-rail", "dark");
       const prevented = await page.getByRole("link", { name: /Starred/ }).evaluate((el) => {

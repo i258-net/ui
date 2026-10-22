@@ -2,7 +2,6 @@ import * as React from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { useRender } from "@base-ui/react/use-render";
 import { mergeProps } from "@base-ui/react/merge-props";
-import type { BaseUIEvent } from "@base-ui/react/types";
 
 import { SidebarHandleContext, SidebarModeContext } from "../lib/frame-context.js";
 import { cn } from "../lib/utils.js";
@@ -264,10 +263,18 @@ function useLongPress(enabled: boolean) {
   const suppressClick = React.useRef(false);
   const release = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // A second finger anywhere (another item, the page) while a press is
+  // pending: a gesture, not a press. The item never hears that pointer.
+  const onOtherPointer = React.useRef<((event: PointerEvent) => void) | null>(null);
+
   const cancel = React.useCallback(() => {
     clearTimeout(timer.current);
     timer.current = undefined;
     origin.current = null;
+    if (onOtherPointer.current) {
+      document.removeEventListener("pointerdown", onOtherPointer.current, true);
+      onOtherPointer.current = null;
+    }
   }, []);
   const show = React.useCallback(() => {
     cancel();
@@ -313,6 +320,11 @@ function useLongPress(enabled: boolean) {
           cancel();
           origin.current = { x: event.clientX, y: event.clientY };
           timer.current = setTimeout(show, LONG_PRESS_MS);
+          const pointerId = event.pointerId;
+          onOtherPointer.current = (other) => {
+            if (other.pointerId !== pointerId) cancel();
+          };
+          document.addEventListener("pointerdown", onOtherPointer.current, true);
         },
         onPointerMove(event) {
           const o = origin.current;
@@ -329,13 +341,14 @@ function useLongPress(enabled: boolean) {
           if (!suppressClick.current) show();
         },
         // Some browsers still send a click when the finger lifts. It must
-        // neither follow the link nor close the tip it just opened, and
-        // the item's own onClick does not run.
-        onClick(event) {
+        // neither follow the link nor close the tip it just opened. Taken
+        // in the capture phase, so no onClick runs for it: the item's own,
+        // a `render` element's (a router link's navigate) or the Tooltip's.
+        onClickCapture(event) {
           if (!suppressClick.current) return;
           suppressClick.current = false;
           event.preventDefault();
-          (event as BaseUIEvent<typeof event>).preventBaseUIHandler();
+          event.stopPropagation();
         },
       }
     : {};

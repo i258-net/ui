@@ -84,12 +84,17 @@ export function DemoSidebar({
                 count={"count" in item ? item.count : undefined}
                 countLabel={"countLabel" in item ? item.countLabel : undefined}
                 countTone={"tone" in item ? item.tone : undefined}
-                onClick={(e) => {
-                  // Stay on the story, and log the click as followed. A rail
-                  // long-press's click never reaches this handler.
-                  if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
-                  e.preventDefault();
-                }}
+                // As a router link would: its own onClick on the `render`
+                // element, which stays on the story and logs the click as
+                // followed. A rail long-press's click never reaches it.
+                render={
+                  <a
+                    onClick={(e) => {
+                      if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
+                      e.preventDefault();
+                    }}
+                  />
+                }
               >
                 {item.label}
               </SidebarItem>

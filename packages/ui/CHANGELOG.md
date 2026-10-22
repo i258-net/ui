@@ -9,7 +9,8 @@ does not. Entries before 0.8.0 live in the commit titles (`… (0.7.3) (#69)`).
   touch gesture. Uncontrolled use is unchanged.
 - Sidebar rail names are now the kit `Tooltip` (I25-124): hover, keyboard
   focus and a touch long-press (500ms), which shows the name without
-  following the link; the item's `onClick` does not run for it. The tip takes
+  following the link; no `onClick` runs for it (the item's or a `render`
+  element's). The tip takes
   the `Tooltip`'s look (`--i258-background`, `--i258-shadow-lg`, weight 500)
   instead of the raised surface, and keeps the name on one line. The private
   `.i258-sidebar__tip-positioner` class is gone. `Sidebar` brings its own

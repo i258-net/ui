@@ -176,8 +176,8 @@ to the new view's heading.
 - **Sidebar rail names** are `Tooltip`s, owned by `SidebarItem`: name and
   count on hover, keyboard focus and a touch long-press (500ms; it shows the
   name without following the link, opening the link menu or selecting text,
-  and stays until a tap elsewhere or Escape; the item's `onClick` does not
-  run for it). The link keeps its own accessible name. Names stay on one
+  and stays until a tap elsewhere or Escape; no `onClick` runs for it, the
+  item's or a `render` element's). The link keeps its own accessible name. Names stay on one
   line, and the rail opens them after 300ms (the kit's 100ms close delay
   applies). `Sidebar` brings its own `TooltipProvider` for them, so
   apps mount nothing for the rail; an app-root provider does not change the
