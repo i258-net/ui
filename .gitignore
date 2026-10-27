@@ -12,3 +12,6 @@ test-results
 .turbo
 *.log
 .scratch
+
+# JetBrains project state
+.idea
