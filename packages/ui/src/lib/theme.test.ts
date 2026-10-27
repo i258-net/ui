@@ -138,8 +138,7 @@ describe("readAppliedTheme", () => {
 
   function nodeComputing(value: string): Element {
     vi.stubGlobal("getComputedStyle", () => ({
-      getPropertyValue: (property: string) =>
-        property === "--i258-theme-is-dark" ? value : "",
+      getPropertyValue: (property: string) => (property === "--i258-theme-is-dark" ? value : ""),
     }));
     return {} as Element;
   }

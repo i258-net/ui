@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fitPanes, inspectorFits, type FitInput } from "./frame-fit.js";
+import { type FitInput, fitPanes, inspectorFits } from "./frame-fit.js";
 
 const defaults: FitInput = {
   frame: null,
@@ -17,7 +17,14 @@ const fit = (o: Partial<FitInput>) => fitPanes({ ...defaults, ...o });
 
 /** Every number a handle would announce is finite and not negative. */
 function sane(r: ReturnType<typeof fitPanes>) {
-  for (const v of [r.sidebar, r.sidebarMin, r.sidebarMax, r.inspector, r.inspectorMin, r.inspectorMax]) {
+  for (const v of [
+    r.sidebar,
+    r.sidebarMin,
+    r.sidebarMax,
+    r.inspector,
+    r.inspectorMin,
+    r.inspectorMax,
+  ]) {
     if (v == null) continue;
     expect(Number.isFinite(v)).toBe(true);
     expect(v).toBeGreaterThanOrEqual(0);
@@ -35,7 +42,13 @@ function sane(r: ReturnType<typeof fitPanes>) {
 describe("fitPanes", () => {
   it("unmeasured: stored widths clamped to their own range", () => {
     const r = fit({ sidebar: 400, inspector: 720 });
-    expect(r).toMatchObject({ sidebar: 400, sidebarMax: 400, inspector: 720, inspectorMax: 720, squeezed: false });
+    expect(r).toMatchObject({
+      sidebar: 400,
+      sidebarMax: 400,
+      inspector: 720,
+      inspectorMax: 720,
+      squeezed: false,
+    });
   });
 
   it("980px, controlled 400/720: main keeps 320, both panes stay usable", () => {
@@ -66,8 +79,17 @@ describe("fitPanes", () => {
   it("a rail is not squeezed; the main pane takes what is left", () => {
     const r = fit({ frame: 300, sidebar: null, sidebarFixed: 56 });
     expect(r).toMatchObject({ sidebar: null, squeezed: true });
-    const wide = fit({ frame: 980, sidebar: null, sidebarFixed: 56, inspector: 2000 });
-    expect(wide).toMatchObject({ inspector: 604, inspectorMax: 604, squeezed: false });
+    const wide = fit({
+      frame: 980,
+      sidebar: null,
+      sidebarFixed: 56,
+      inspector: 2000,
+    });
+    expect(wide).toMatchObject({
+      inspector: 604,
+      inspectorMax: 604,
+      squeezed: false,
+    });
   });
 
   it("custom minima and maxima", () => {
@@ -91,7 +113,15 @@ describe("fitPanes", () => {
   it("no negative or NaN bounds from bad input", () => {
     const bad = [NaN, -50, Infinity, -Infinity];
     for (const v of bad) {
-      for (const key of ["mainMin", "sidebarMin", "sidebarMax", "inspectorMin", "inspectorMax", "sidebar", "inspector"] as const) {
+      for (const key of [
+        "mainMin",
+        "sidebarMin",
+        "sidebarMax",
+        "inspectorMin",
+        "inspectorMax",
+        "sidebar",
+        "inspector",
+      ] as const) {
         for (const frame of [null, 0, -10, NaN, 450, 1280]) {
           const r = fit({ frame, inspector: 400, [key]: v });
           // Infinity is a legitimate "no maximum" while unmeasured.
@@ -111,7 +141,12 @@ describe("fitPanes", () => {
 });
 
 describe("inspectorFits", () => {
-  const base = { frame: 980, sidebarFloor: 200, mainMin: 320, inspectorMin: 320 };
+  const base = {
+    frame: 980,
+    sidebarFloor: 200,
+    mainMin: 320,
+    inspectorMin: 320,
+  };
   it("fits at the accepted full-viewport defaults", () => {
     expect(inspectorFits(base)).toBe(true);
     expect(inspectorFits({ ...base, frame: 840 })).toBe(true);
@@ -119,13 +154,28 @@ describe("inspectorFits", () => {
   it("does not fit in a narrower frame", () => {
     expect(inspectorFits({ ...base, frame: 839 })).toBe(false);
     expect(inspectorFits({ ...base, frame: 450 })).toBe(false);
-    expect(inspectorFits({ ...base, frame: 450, sidebarFloor: 0, mainMin: 0, inspectorMin: 450 })).toBe(true);
+    expect(
+      inspectorFits({
+        ...base,
+        frame: 450,
+        sidebarFloor: 0,
+        mainMin: 0,
+        inspectorMin: 450,
+      }),
+    ).toBe(true);
   });
   it("unknown or zero widths fit (server, hidden container)", () => {
     expect(inspectorFits({ ...base, frame: null })).toBe(true);
     expect(inspectorFits({ ...base, frame: 0 })).toBe(true);
   });
   it("bad minima count as 0", () => {
-    expect(inspectorFits({ frame: 320, sidebarFloor: NaN, mainMin: -5, inspectorMin: 320 })).toBe(true);
+    expect(
+      inspectorFits({
+        frame: 320,
+        sidebarFloor: NaN,
+        mainMin: -5,
+        inspectorMin: 320,
+      }),
+    ).toBe(true);
   });
 });

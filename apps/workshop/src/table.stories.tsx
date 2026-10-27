@@ -1,6 +1,3 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
   Checkbox,
   Link,
@@ -14,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 /**
  * A semantic table: real `<th scope>` and `<td>`, a caption for its name,
@@ -31,13 +31,45 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const POSTINGS = [
-  { id: "P-1041", date: "2026-10-01", payee: "Northwind Utilities", account: "Expenses:Utilities", amount: "-84.20", status: "cleared" },
-  { id: "P-1042", date: "2026-10-03", payee: "Example Grocer", account: "Expenses:Food", amount: "-126.05", status: "cleared" },
-  { id: "P-1043", date: "2026-10-05", payee: "Payroll", account: "Income:Salary", amount: "3,100.00", status: "pending" },
-  { id: "P-1044", date: "2026-10-09", payee: "Unknown payee", account: "Uncategorized", amount: "-12.99", status: "failed" },
+  {
+    id: "P-1041",
+    date: "2026-10-01",
+    payee: "Northwind Utilities",
+    account: "Expenses:Utilities",
+    amount: "-84.20",
+    status: "cleared",
+  },
+  {
+    id: "P-1042",
+    date: "2026-10-03",
+    payee: "Example Grocer",
+    account: "Expenses:Food",
+    amount: "-126.05",
+    status: "cleared",
+  },
+  {
+    id: "P-1043",
+    date: "2026-10-05",
+    payee: "Payroll",
+    account: "Income:Salary",
+    amount: "3,100.00",
+    status: "pending",
+  },
+  {
+    id: "P-1044",
+    date: "2026-10-09",
+    payee: "Unknown payee",
+    account: "Uncategorized",
+    amount: "-12.99",
+    status: "failed",
+  },
 ] as const;
 
-const TONE = { cleared: "success", pending: "muted", failed: "danger" } as const;
+const TONE = {
+  cleared: "success",
+  pending: "muted",
+  failed: "danger",
+} as const;
 
 function Ledger({ caption = "October postings" }: { caption?: string }) {
   return (
@@ -178,7 +210,9 @@ export const StickyHeader: Story = {
     </TableContainer>
   ),
   play: async ({ canvasElement }) => {
-    const region = await within(canvasElement).findByRole("region", { name: "Postings" });
+    const region = await within(canvasElement).findByRole("region", {
+      name: "Postings",
+    });
     const head = within(region).getAllByRole("columnheader")[0]!;
     const before = head.getBoundingClientRect().top;
     region.scrollTop = 200;
@@ -242,7 +276,10 @@ export const WithSelection: Story = {
     const c = within(canvasElement);
     await userEvent.click(c.getByRole("checkbox", { name: "Select Payroll" }));
     await expect(c.getByTestId("count")).toHaveTextContent("1");
-    await expect(c.getByRole("checkbox", { name: "Select all" })).toHaveAttribute("aria-checked", "mixed");
+    await expect(c.getByRole("checkbox", { name: "Select all" })).toHaveAttribute(
+      "aria-checked",
+      "mixed",
+    );
     await userEvent.click(c.getByRole("checkbox", { name: "Select all" }));
     await expect(c.getByTestId("count")).toHaveTextContent("4");
     // The 24px target holds in a compact table cell too.
@@ -267,7 +304,8 @@ export const Density: Story = {
   ),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    const rowHeight = (d: string) => within(c.getByTestId(d)).getAllByRole("row")[1]!.getBoundingClientRect().height;
+    const rowHeight = (d: string) =>
+      within(c.getByTestId(d)).getAllByRole("row")[1]!.getBoundingClientRect().height;
     await expect(rowHeight("compact")).toBeLessThan(rowHeight("comfortable"));
   },
 };

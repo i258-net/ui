@@ -1,6 +1,9 @@
-import * as React from "react";
+import type {
+  TooltipProviderProps as BaseProviderProps,
+  TooltipPositionerProps,
+} from "@base-ui/react/tooltip";
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
-import type { TooltipPositionerProps, TooltipProviderProps as BaseProviderProps } from "@base-ui/react/tooltip";
+import * as React from "react";
 
 import { useFrameLayer } from "../lib/frame-context.js";
 import { cn } from "../lib/utils.js";

@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Alert } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {

@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
 import { SummaryStrip, SummaryTile } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, within } from "storybook/test";
 
 /**
  * Counts above a view. Each tile is a filter (a toggle button with
@@ -20,7 +20,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const glyph = (d: string) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d={d} />
   </svg>
 );
@@ -28,8 +36,12 @@ const Icons = {
   decision: glyph("M8 2.5v4M8 9.5v.01M3 13.5h10L8 2.5z"),
   action: glyph("M3 8h7M7.5 4.5 11 8l-3.5 3.5M13 3v10"),
   pr: glyph("M5 3v10M5 3a1.5 1.5 0 1 0 0 .01M11 13a1.5 1.5 0 1 0 0-.01M11 11.5V6a2 2 0 0 0-2-2H7"),
-  unset: glyph("M8 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM6.5 6.5a1.5 1.5 0 1 1 2 1.4c-.4.2-.5.5-.5.9M8 11v.01"),
-  unowned: glyph("M8 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 13.5c.5-2.5 2.5-3.5 5-3.5s4.5 1 5 3.5"),
+  unset: glyph(
+    "M8 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM6.5 6.5a1.5 1.5 0 1 1 2 1.4c-.4.2-.5.5-.5.9M8 11v.01",
+  ),
+  unowned: glyph(
+    "M8 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 13.5c.5-2.5 2.5-3.5 5-3.5s4.5 1 5 3.5",
+  ),
   stale: glyph("M8 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM8 5v3l2 1.5"),
   problems: glyph("M8 2.5 14 13.5H2zM8 6.5v3M8 11.5v.01"),
   ledger: glyph("M3 3.5h10v9H3zM3 7h10M7 7v5.5"),
@@ -40,15 +52,34 @@ const ISSUES: Issue[] = [
   { id: "X-12", title: "Pick a retention window", facets: ["decision"] },
   { id: "X-14", title: "Rotate the staging key", facets: ["action", "stale"] },
   { id: "X-18", title: "Split the import job", facets: ["unowned", "unset"] },
-  { id: "X-19", title: "Choose the export format", facets: ["decision", "unowned"] },
+  {
+    id: "X-19",
+    title: "Choose the export format",
+    facets: ["decision", "unowned"],
+  },
   { id: "X-23", title: "Archive old fixtures", facets: ["stale"] },
   { id: "X-27", title: "Name the new queue", facets: ["unset"] },
 ];
 
 const TILES = [
-  { key: "decision", label: "Decisions", caption: "waiting on you", tone: "warning" },
-  { key: "action", label: "Actions", caption: "waiting on you", tone: "warning" },
-  { key: "unset", label: "Unclassified", caption: "not triaged", tone: "neutral" },
+  {
+    key: "decision",
+    label: "Decisions",
+    caption: "waiting on you",
+    tone: "warning",
+  },
+  {
+    key: "action",
+    label: "Actions",
+    caption: "waiting on you",
+    tone: "warning",
+  },
+  {
+    key: "unset",
+    label: "Unclassified",
+    caption: "not triaged",
+    tone: "neutral",
+  },
   { key: "unowned", label: "Unowned", caption: undefined, tone: "neutral" },
   { key: "stale", label: "Stale", caption: "≥ 14 d", tone: "neutral" },
 ] as const;
@@ -82,7 +113,14 @@ export const Board: Story = {
             caption="waiting on you"
             render={<a href="#pull-requests" />}
           />
-          <SummaryTile tone="danger" icon={Icons.problems} count={2} label="Data problems" caption="1 dup · 1 schema" pressed={false} />
+          <SummaryTile
+            tone="danger"
+            icon={Icons.problems}
+            count={2}
+            label="Data problems"
+            caption="1 dup · 1 schema"
+            pressed={false}
+          />
         </SummaryStrip>
         <ul aria-label="Issues" style={{ margin: 0, paddingInlineStart: 20 }}>
           {rows.map((i) => (
@@ -103,7 +141,9 @@ export const Board: Story = {
     await expect(issues()).toHaveLength(6);
 
     // The count leads the name; the glyph is not part of it.
-    const decisions = c.getByRole("button", { name: "2 Decisions waiting on you" });
+    const decisions = c.getByRole("button", {
+      name: "2 Decisions waiting on you",
+    });
     await expect(decisions).toHaveAttribute("aria-pressed", "false");
     await expect(decisions).toHaveAttribute("type", "button");
 
@@ -132,7 +172,9 @@ export const Board: Story = {
     await expect(prs).not.toHaveAttribute("aria-pressed");
     await expect(prs).not.toHaveAttribute("type");
     await expect(prs).toHaveAttribute("data-zero");
-    await expect(c.getByRole("button", { name: /^2 Data problems/ })).not.toHaveAttribute("data-zero");
+    await expect(c.getByRole("button", { name: /^2 Data problems/ })).not.toHaveAttribute(
+      "data-zero",
+    );
   },
 };
 
@@ -142,13 +184,47 @@ export const Pressed: Story = {
   render: () => (
     <div style={{ maxWidth: 960 }}>
       <SummaryStrip label="Board summary">
-        <SummaryTile tone="warning" icon={Icons.decision} count={9} label="Decisions" caption="waiting on you" pressed />
-        <SummaryTile tone="warning" icon={Icons.action} count={3} label="Actions" caption="waiting on you" pressed={false} />
-        <SummaryTile tone="warning" icon={Icons.pr} count={0} label="Pull requests" caption="waiting on you" render={<a href="#pull-requests" />} />
-        <SummaryTile icon={Icons.unset} count={4} label="Unclassified" caption="not triaged" pressed={false} />
+        <SummaryTile
+          tone="warning"
+          icon={Icons.decision}
+          count={9}
+          label="Decisions"
+          caption="waiting on you"
+          pressed
+        />
+        <SummaryTile
+          tone="warning"
+          icon={Icons.action}
+          count={3}
+          label="Actions"
+          caption="waiting on you"
+          pressed={false}
+        />
+        <SummaryTile
+          tone="warning"
+          icon={Icons.pr}
+          count={0}
+          label="Pull requests"
+          caption="waiting on you"
+          render={<a href="#pull-requests" />}
+        />
+        <SummaryTile
+          icon={Icons.unset}
+          count={4}
+          label="Unclassified"
+          caption="not triaged"
+          pressed={false}
+        />
         <SummaryTile icon={Icons.unowned} count={6} label="Unowned" pressed={false} />
         <SummaryTile icon={Icons.stale} count={5} label="Stale" caption="≥ 14 d" pressed={false} />
-        <SummaryTile tone="danger" icon={Icons.problems} count={4} label="Data problems" caption="2 dup · 2 schema" pressed={false} />
+        <SummaryTile
+          tone="danger"
+          icon={Icons.problems}
+          count={4}
+          label="Data problems"
+          caption="2 dup · 2 schema"
+          pressed={false}
+        />
       </SummaryStrip>
     </div>
   ),
@@ -164,11 +240,43 @@ export const Abacus: Story = {
   render: () => (
     <div style={{ maxWidth: 960 }}>
       <SummaryStrip label="Ledger summary">
-        <SummaryTile tone="success" alert icon={Icons.ledger} count={0} label="Ledger check" caption="passing" render={<a href="#check" />} />
-        <SummaryTile icon={Icons.stale} count={2} label="Stale accounts" caption="≥ 30 d" render={<a href="#accounts" />} />
-        <SummaryTile icon={Icons.unset} count={14} label="Uncategorized" caption="postings" render={<a href="#postings" />} />
-        <SummaryTile icon={Icons.unowned} count="—" label="Unmapped payees" caption="failed to load" render={<a href="#payees" />} />
-        <SummaryTile icon={Icons.action} count={1} label="Imports" caption="ready" render={<div />} />
+        <SummaryTile
+          tone="success"
+          alert
+          icon={Icons.ledger}
+          count={0}
+          label="Ledger check"
+          caption="passing"
+          render={<a href="#check" />}
+        />
+        <SummaryTile
+          icon={Icons.stale}
+          count={2}
+          label="Stale accounts"
+          caption="≥ 30 d"
+          render={<a href="#accounts" />}
+        />
+        <SummaryTile
+          icon={Icons.unset}
+          count={14}
+          label="Uncategorized"
+          caption="postings"
+          render={<a href="#postings" />}
+        />
+        <SummaryTile
+          icon={Icons.unowned}
+          count="—"
+          label="Unmapped payees"
+          caption="failed to load"
+          render={<a href="#payees" />}
+        />
+        <SummaryTile
+          icon={Icons.action}
+          count={1}
+          label="Imports"
+          caption="ready"
+          render={<div />}
+        />
       </SummaryStrip>
     </div>
   ),
@@ -178,7 +286,9 @@ export const Abacus: Story = {
     const check = c.getByRole("link", { name: "0 Ledger check passing" });
     await expect(check).not.toHaveAttribute("data-zero");
     // "—" is read as "Unknown", not as punctuation or a zero.
-    const failed = c.getByRole("link", { name: "Unknown Unmapped payees failed to load" });
+    const failed = c.getByRole("link", {
+      name: "Unknown Unmapped payees failed to load",
+    });
     await expect(failed).toHaveAttribute("data-zero");
     // A readout is neither a button nor a link.
     const imports = c.getByText("Imports").closest("[data-slot='summary-tile']")!;
@@ -196,7 +306,14 @@ export const CheckGoesUnknown: Story = {
   render: function CheckGoesUnknown() {
     const [failed, setFailed] = React.useState(false);
     return (
-      <div style={{ display: "grid", gap: 16, maxWidth: 960, justifyItems: "start" }}>
+      <div
+        style={{
+          display: "grid",
+          gap: 16,
+          maxWidth: 960,
+          justifyItems: "start",
+        }}
+      >
         <SummaryStrip label="Ledger summary">
           <SummaryTile
             tone="success"
@@ -207,7 +324,12 @@ export const CheckGoesUnknown: Story = {
             caption={failed ? "failed to load" : "passing"}
             render={<a href="#check" />}
           />
-          <SummaryTile icon={Icons.stale} count={0} label="Stale accounts" render={<a href="#accounts" />} />
+          <SummaryTile
+            icon={Icons.stale}
+            count={0}
+            label="Stale accounts"
+            render={<a href="#accounts" />}
+          />
         </SummaryStrip>
         <button type="button" onClick={() => setFailed(true)}>
           Reload
@@ -225,7 +347,9 @@ export const CheckGoesUnknown: Story = {
     await expect(countColor(passing)).not.toBe(quiet);
 
     await userEvent.click(c.getByRole("button", { name: "Reload" }));
-    const unknown = c.getByRole("link", { name: "Unknown Ledger check failed to load" });
+    const unknown = c.getByRole("link", {
+      name: "Unknown Ledger check failed to load",
+    });
     await expect(unknown).toHaveAttribute("data-zero");
     await expect(countColor(unknown)).toBe(quiet);
   },
@@ -247,7 +371,12 @@ export const InForm: Story = {
           e.preventDefault();
           setSubmits((n) => n + 1);
         }}
-        style={{ display: "grid", gap: 16, maxWidth: 960, justifyItems: "start" }}
+        style={{
+          display: "grid",
+          gap: 16,
+          maxWidth: 960,
+          justifyItems: "start",
+        }}
       >
         <SummaryStrip label="Filters">
           <SummaryTile
@@ -262,7 +391,7 @@ export const InForm: Story = {
             icon={Icons.stale}
             count={5}
             label="Stale"
-            render={<button className="custom" />}
+            render={<button type="button" className="custom" />}
             type="button"
             pressed={pressed === "stale"}
             onClick={toggle("stale")}
@@ -301,8 +430,22 @@ export const Narrow: Story = {
   render: () => (
     <div style={{ width: 288 }} data-testid="frame">
       <SummaryStrip label="Board summary">
-        <SummaryTile tone="warning" icon={Icons.decision} count={9} label="Decisions" caption="waiting on you" pressed={false} />
-        <SummaryTile tone="warning" icon={Icons.action} count={3} label="Actions" caption="waiting on you" pressed={false} />
+        <SummaryTile
+          tone="warning"
+          icon={Icons.decision}
+          count={9}
+          label="Decisions"
+          caption="waiting on you"
+          pressed={false}
+        />
+        <SummaryTile
+          tone="warning"
+          icon={Icons.action}
+          count={3}
+          label="Actions"
+          caption="waiting on you"
+          pressed={false}
+        />
         <SummaryTile icon={Icons.unset} count={4} label="Unclassified" pressed={false} />
         <SummaryTile icon={Icons.stale} count={5} label="Stale" caption="≥ 14 d" pressed={false} />
       </SummaryStrip>
@@ -312,7 +455,9 @@ export const Narrow: Story = {
     const frame = within(canvasElement).getByTestId("frame");
     const strip = frame.querySelector("section")!;
     await expect(strip.scrollWidth).toBeLessThanOrEqual(strip.clientWidth);
-    const tops = [...frame.querySelectorAll("li")].map((li) => Math.round(li.getBoundingClientRect().top));
+    const tops = [...frame.querySelectorAll("li")].map((li) =>
+      Math.round(li.getBoundingClientRect().top),
+    );
     await expect(tops[0]).toBe(tops[1]);
     await expect(tops[2]).toBeGreaterThan(tops[0]!);
   },
@@ -326,8 +471,21 @@ export const Compact: Story = {
       {(["comfortable", "compact"] as const).map((d) => (
         <div key={d} data-density={d} data-testid={d}>
           <SummaryStrip label={`Board summary (${d})`}>
-            <SummaryTile tone="warning" icon={Icons.decision} count={9} label="Decisions" caption="waiting on you" pressed={false} />
-            <SummaryTile icon={Icons.stale} count={5} label="Stale" caption="≥ 14 d" pressed={false} />
+            <SummaryTile
+              tone="warning"
+              icon={Icons.decision}
+              count={9}
+              label="Decisions"
+              caption="waiting on you"
+              pressed={false}
+            />
+            <SummaryTile
+              icon={Icons.stale}
+              count={5}
+              label="Stale"
+              caption="≥ 14 d"
+              pressed={false}
+            />
           </SummaryStrip>
         </div>
       ))}

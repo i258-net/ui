@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
 import { FormField, Select } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, within } from "storybook/test";
 
 /**
  * A native `<select>`: the platform's picker and keyboard, forced-colours
@@ -87,7 +87,9 @@ export const Rtl: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const select = within(canvasElement).getByRole("combobox", { name: "Sort by" });
+    const select = within(canvasElement).getByRole("combobox", {
+      name: "Sort by",
+    });
     expectSelectChevronPadding(select);
     await userEvent.selectOptions(select, "priority");
     await expect(select).toHaveValue("priority");
@@ -134,7 +136,9 @@ export const InFormField: Story = {
     await expect(project).toHaveAttribute("aria-invalid", "true");
     await expect(project).toHaveAccessibleDescription("Choose a project.");
     // The edge turns danger.
-    await expect(getComputedStyle(project).borderTopColor).not.toBe(getComputedStyle(group).borderTopColor);
+    await expect(getComputedStyle(project).borderTopColor).not.toBe(
+      getComputedStyle(group).borderTopColor,
+    );
 
     // Clicking the label focuses the control.
     await userEvent.click(c.getByText("Group by"));
@@ -175,7 +179,9 @@ export const FullWidth: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const select = within(canvasElement).getByRole("combobox", { name: "Sort by" });
+    const select = within(canvasElement).getByRole("combobox", {
+      name: "Sort by",
+    });
     await expect(Math.round(select.getBoundingClientRect().width)).toBe(320);
   },
 };

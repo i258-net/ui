@@ -17,8 +17,7 @@
 export function isApplePlatform(): boolean {
   if (typeof navigator === "undefined") return false;
   const platform =
-    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData
-      ?.platform ||
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ||
     navigator.platform ||
     navigator.userAgent;
   return /mac|iphone|ipad|ipod/i.test(platform);
@@ -147,9 +146,7 @@ const ARIA_NAMES: Record<string, string> = {
  */
 export function ariaKeyShortcuts(binding: string, apple = isApplePlatform()): string {
   const parts = normaliseBinding(binding, apple).split(/\+(?!$)/);
-  return parts
-    .map((p) => ARIA_NAMES[p] ?? (p.length === 1 ? p.toUpperCase() : p))
-    .join("+");
+  return parts.map((p) => ARIA_NAMES[p] ?? (p.length === 1 ? p.toUpperCase() : p)).join("+");
 }
 
 const APPLE_GLYPHS: Record<string, string> = {
@@ -185,6 +182,11 @@ export function formatShortcut(binding: string, apple = isApplePlatform()): stri
     const order = ["ctrl", "alt", "shift", "meta"];
     return [...order.filter((m) => parts.includes(m)).map((m) => APPLE_GLYPHS[m]), cap].join("");
   }
-  const names: Record<string, string> = { ctrl: "Ctrl", alt: "Alt", shift: "Shift", meta: "Win" };
+  const names: Record<string, string> = {
+    ctrl: "Ctrl",
+    alt: "Alt",
+    shift: "Shift",
+    meta: "Win",
+  };
   return [...parts.map((m) => names[m] ?? m), cap].join("+");
 }

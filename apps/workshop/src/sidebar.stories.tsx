@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Sidebar } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import type * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { FrameDemo } from "./frame-demo";
 import { DemoSidebar } from "./frame-fixtures";
@@ -46,9 +46,15 @@ export const Default: Story = {
     await expect(within(nav).getByRole("list", { name: "Workspace" })).toBeInTheDocument();
     const current = within(nav).getByRole("link", { name: /Projects/ });
     await expect(current).toHaveAttribute("aria-current", "page");
-    await expect(within(nav).getAllByRole("link").filter((a) => a.hasAttribute("aria-current"))).toHaveLength(1);
+    await expect(
+      within(nav)
+        .getAllByRole("link")
+        .filter((a) => a.hasAttribute("aria-current")),
+    ).toHaveLength(1);
     // Counts carry screen-reader wording.
-    await expect(within(nav).getByRole("link", { name: /Inbox/ })).toHaveAccessibleName(/^Inbox\s*, 12 unread$/);
+    await expect(within(nav).getByRole("link", { name: /Inbox/ })).toHaveAccessibleName(
+      /^Inbox\s*, 12 unread$/,
+    );
     // Expanded, the names are on screen: no tips.
     await userEvent.hover(current);
     await new Promise((r) => setTimeout(r, 400));
@@ -122,7 +128,9 @@ export const RailNames: Story = {
     await expect(reports).toHaveFocus();
     await expect(inspector).toBeInTheDocument();
     await userEvent.keyboard("{Escape}");
-    await waitFor(() => expect(c.queryByRole("complementary", { name: "Item details" })).toBeNull());
+    await waitFor(() =>
+      expect(c.queryByRole("complementary", { name: "Item details" })).toBeNull(),
+    );
 
     // Hover, with focus elsewhere.
     await userEvent.hover(projects);

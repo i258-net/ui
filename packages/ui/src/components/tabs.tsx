@@ -1,11 +1,11 @@
-import * as React from "react";
-import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import type {
   TabsListProps as BaseListProps,
   TabsPanelProps as BasePanelProps,
-  TabsRootProps,
   TabsTabProps as BaseTabProps,
+  TabsRootProps,
 } from "@base-ui/react/tabs";
+import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -16,7 +16,9 @@ import { cn } from "../lib/utils.js";
   For moving between pages use links, not tabs.
 */
 
-export type TabsProps = Omit<TabsRootProps, "className"> & { className?: string | undefined };
+export type TabsProps = Omit<TabsRootProps, "className"> & {
+  className?: string | undefined;
+};
 
 export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   { className, ...props },
@@ -32,7 +34,9 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   );
 });
 
-export type TabsListProps = Omit<BaseListProps, "className"> & { className?: string | undefined };
+export type TabsListProps = Omit<BaseListProps, "className"> & {
+  className?: string | undefined;
+};
 
 /**
  * The underlined tab strip; a column beside the panel when the Tabs are

@@ -1,7 +1,7 @@
-import * as React from "react";
-import { useRender } from "@base-ui/react/use-render";
 import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -24,35 +24,26 @@ export type LinkProps = useRender.ComponentProps<"a"> &
     asChild?: boolean;
   };
 
-export const Link = React.forwardRef<HTMLElement, LinkProps>(
-  function Link({
-    className,
-    variant,
-    render,
-    asChild = false,
-    children,
-    ...props
-  }, ref) {
-    const resolvedRender =
-      render ??
-      (asChild
-        ? (React.Children.only(children) as React.ReactElement)
-        : undefined);
+export const Link = React.forwardRef<HTMLElement, LinkProps>(function Link(
+  { className, variant, render, asChild = false, children, ...props },
+  ref,
+) {
+  const resolvedRender =
+    render ?? (asChild ? (React.Children.only(children) as React.ReactElement) : undefined);
 
-    return useRender({
-      defaultTagName: "a",
-      ref,
-      render: resolvedRender,
-      props: mergeProps<"a">(
-        {
-          className: cn(linkVariants({ variant }), className),
-          children: asChild ? undefined : children,
-          "data-slot": "link",
-        } as React.ComponentProps<"a">,
-        props,
-      ),
-    });
-  },
-);
+  return useRender({
+    defaultTagName: "a",
+    ref,
+    render: resolvedRender,
+    props: mergeProps<"a">(
+      {
+        className: cn(linkVariants({ variant }), className),
+        children: asChild ? undefined : children,
+        "data-slot": "link",
+      } as React.ComponentProps<"a">,
+      props,
+    ),
+  });
+});
 
 export { linkVariants };

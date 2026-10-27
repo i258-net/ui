@@ -18,9 +18,7 @@ export function useMediaQueryState(query: string): boolean | null {
   return React.useSyncExternalStore(
     subscribe,
     () =>
-      typeof window === "undefined" || !window.matchMedia
-        ? null
-        : window.matchMedia(query).matches,
+      typeof window === "undefined" || !window.matchMedia ? null : window.matchMedia(query).matches,
     () => null,
   );
 }

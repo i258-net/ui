@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
 import { Button, EmptyState } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, within } from "storybook/test";
 
 /**
  * Nothing here, no results, stale and failed-to-load: one panel shape for
@@ -19,7 +19,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const glyph = (d: string) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d={d} />
   </svg>
 );
@@ -65,7 +73,9 @@ export const NoResults: Story = {
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(c.getByRole("heading", { level: 3 })).toHaveTextContent("No issues match these filters");
+    await expect(c.getByRole("heading", { level: 3 })).toHaveTextContent(
+      "No issues match these filters",
+    );
     await userEvent.click(c.getByRole("button", { name: "Clear filters" }));
     await expect(c.getByText("Showing all 40 issues.")).toBeInTheDocument();
   },
@@ -96,7 +106,11 @@ export const Failed: Story = {
         tone="danger"
         icon={<AlertIcon />}
         title="Couldn't load the board"
-        actions={<Button size="sm" onClick={() => setTries((n) => n + 1)}>Retry</Button>}
+        actions={
+          <Button size="sm" onClick={() => setTries((n) => n + 1)}>
+            Retry
+          </Button>
+        }
       >
         <p>
           The register didn't answer. Tried <span data-testid="tries">{tries + 1}</span>{" "}
@@ -117,7 +131,13 @@ export const Failed: Story = {
 /** All four, for VRT. */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 22rem))", gap: 16 }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0, 22rem))",
+        gap: 16,
+      }}
+    >
       <EmptyState icon={<InboxIcon />} title="No issues yet" headingLevel={3}>
         <p>Issues you file show up here.</p>
       </EmptyState>
@@ -125,11 +145,20 @@ export const States: Story = {
         icon={<SearchIcon />}
         title="No issues match"
         headingLevel={3}
-        actions={<Button variant="secondary" size="sm">Clear filters</Button>}
+        actions={
+          <Button variant="secondary" size="sm">
+            Clear filters
+          </Button>
+        }
       >
         <p>Status: Blocked · Owner: Unowned</p>
       </EmptyState>
-      <EmptyState tone="warning" icon={<ClockIcon />} title="This data is 3 days old" headingLevel={3}>
+      <EmptyState
+        tone="warning"
+        icon={<ClockIcon />}
+        title="This data is 3 days old"
+        headingLevel={3}
+      >
         <p>The last sync failed.</p>
       </EmptyState>
       <EmptyState

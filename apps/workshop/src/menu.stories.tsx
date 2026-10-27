@@ -1,8 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
+  ariaKeyShortcuts,
   Button,
+  formatShortcut,
   Kbd,
   Menu,
   MenuCheckboxItem,
@@ -14,9 +13,10 @@ import {
   MenuRadioItem,
   MenuSeparator,
   MenuTrigger,
-  ariaKeyShortcuts,
-  formatShortcut,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { withDocumentTheme } from "./document-theme";
 
@@ -39,14 +39,14 @@ type Story = StoryObj<typeof meta>;
 const body = () => within(document.body);
 
 const ArchiveIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+  <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="2" y="3" width="12" height="3" rx="1" />
     <path d="M3 6v6.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6M6.5 9h3" strokeLinecap="round" />
   </svg>
 );
 
 const CopyIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+  <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="5" y="5" width="8.5" height="8.5" rx="1.5" />
     <path d="M10.5 5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1H5" />
   </svg>

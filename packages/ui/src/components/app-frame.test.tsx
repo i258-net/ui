@@ -1,10 +1,9 @@
 import * as React from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-
+import { useMediaQuery } from "../lib/use-media-query.js";
 import { AppFrame, FrameHeader, Inspector } from "./app-frame.js";
 import { Sidebar, SidebarContent, SidebarItem, SidebarSection } from "./sidebar.js";
-import { useMediaQuery } from "../lib/use-media-query.js";
 
 /*
   Server render with no `window` / `matchMedia`: the frame must not touch
@@ -70,8 +69,12 @@ describe("AppFrame on the server", () => {
     const calls: unknown[] = [];
     const html = renderToString(
       <>
-        <AppFrame ref={objectRef} sidebar={<Sidebar />}>a</AppFrame>
-        <AppFrame ref={(el) => void calls.push(el)} sidebar={<Sidebar />}>b</AppFrame>
+        <AppFrame ref={objectRef} sidebar={<Sidebar />}>
+          a
+        </AppFrame>
+        <AppFrame ref={(el) => void calls.push(el)} sidebar={<Sidebar />}>
+          b
+        </AppFrame>
       </>,
     );
     expect(html.match(/data-slot="app-frame"/g)).toHaveLength(2);

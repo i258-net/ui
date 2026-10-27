@@ -25,9 +25,7 @@ export const SidebarHandleContext = React.createContext<React.ReactNode>(null);
  * inside one until its layer element mounts (Base UI waits for a `null`
  * container and portals to the body for `undefined`).
  */
-export const FramePortalContext = React.createContext<HTMLElement | null | undefined>(
-  undefined,
-);
+export const FramePortalContext = React.createContext<HTMLElement | null | undefined>(undefined);
 
 /** The `container` for a kit popup: the frame's layer, or the body outside a frame. */
 export function useFrameLayer(): HTMLElement | null | undefined {
@@ -38,9 +36,9 @@ export function useFrameLayer(): HTMLElement | null | undefined {
  * FrameHeader hands its element to AppFrame, which measures it for the main
  * pane's scroll padding. A ref callback, so a remounted header re-registers.
  */
-export const FrameHeaderRefContext = React.createContext<
-  ((el: HTMLElement | null) => void) | null
->(null);
+export const FrameHeaderRefContext = React.createContext<((el: HTMLElement | null) => void) | null>(
+  null,
+);
 
 /**
  * The frame's own layout, for `useFrameLayout` inside it: which panes are

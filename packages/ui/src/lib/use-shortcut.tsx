@@ -115,7 +115,16 @@ const ACTIVATES =
   '[role="listbox"], [role="tree"], [role="treegrid"], [role="grid"], [role="menubar"]';
 const COMPOSITE =
   '[role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tablist"], [role="toolbar"], [role="tree"], [role="treegrid"], [role="grid"], [role="slider"], [role="separator"][tabindex], input[type="range"], input[type="radio"]';
-const ARROWS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"]);
+const ARROWS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+]);
 
 /** True when the focused element handles this key itself. */
 function targetOwnsKey(target: EventTarget | null, key: string): boolean {
@@ -133,7 +142,13 @@ function onKeyDown(event: KeyboardEvent) {
   // Chrome's autofill dispatches keydown events with no `key`.
   if (typeof event.key !== "string") return;
   if (event.defaultPrevented || event.isComposing || event.repeat) return;
-  if (event.key === "Shift" || event.key === "Control" || event.key === "Alt" || event.key === "Meta") return;
+  if (
+    event.key === "Shift" ||
+    event.key === "Control" ||
+    event.key === "Alt" ||
+    event.key === "Meta"
+  )
+    return;
   const step = bindingFromEvent(event);
   const doc = (event.currentTarget as Document | null) ?? document;
   let typing: boolean | undefined;
@@ -183,8 +198,13 @@ export type ShortcutsProviderProps = {
 };
 
 /** Turns character-key shortcuts on for the bindings registered inside it. */
-export function ShortcutsProvider({ singleKeyShortcuts = false, children }: ShortcutsProviderProps) {
-  return <SingleKeyContext.Provider value={singleKeyShortcuts}>{children}</SingleKeyContext.Provider>;
+export function ShortcutsProvider({
+  singleKeyShortcuts = false,
+  children,
+}: ShortcutsProviderProps) {
+  return (
+    <SingleKeyContext.Provider value={singleKeyShortcuts}>{children}</SingleKeyContext.Provider>
+  );
 }
 
 /**
@@ -232,6 +252,8 @@ export function useShortcut(
         singleKey: singleKeyRef,
       });
     });
-    return () => offs.forEach((off) => off());
+    return () => {
+      for (const off of offs) off();
+    };
   }, [keys, enabled]);
 }

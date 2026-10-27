@@ -1,6 +1,6 @@
-import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -21,18 +21,19 @@ export type InputProps = Omit<React.ComponentProps<"input">, "size"> &
   VariantProps<typeof inputVariants>;
 
 /** Field-aware `<input>` — registers with Base UI `Field` when inside FormField. */
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  function Input({ className, size, type = "text", ...props }, ref) {
-    return (
-      <InputPrimitive
-        ref={ref}
-        data-slot="input"
-        type={type}
-        className={cn(inputVariants({ size }), className)}
-        {...props}
-      />
-    );
-  },
-);
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input(
+  { className, size, type = "text", ...props },
+  ref,
+) {
+  return (
+    <InputPrimitive
+      ref={ref}
+      data-slot="input"
+      type={type}
+      className={cn(inputVariants({ size }), className)}
+      {...props}
+    />
+  );
+});
 
 export { inputVariants };

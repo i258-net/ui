@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { AppShell, Badge, Link, ToggleChip } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 /**
  * The bar every app wears. Sizes and spacing are fixed by the kit — the two

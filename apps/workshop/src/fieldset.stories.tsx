@@ -1,6 +1,6 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button, Fieldset, ToggleChip } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 
 const meta = {
   title: "Primitives/Fieldset",
@@ -57,12 +57,7 @@ export const FilterRow: Story = {
     return (
       <Fieldset legend="status">
         {statuses.map((v) => (
-          <ToggleChip
-            key={v}
-            size="sm"
-            pressed={active.has(v)}
-            onClick={() => toggle(v)}
-          >
+          <ToggleChip key={v} size="sm" pressed={active.has(v)} onClick={() => toggle(v)}>
             {v}
           </ToggleChip>
         ))}

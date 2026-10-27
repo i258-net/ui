@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Link,
   Sidebar,
@@ -8,6 +7,7 @@ import {
   SidebarItem,
   SidebarSection,
 } from "@i258/ui";
+import type * as React from "react";
 
 declare global {
   interface Window {
@@ -23,7 +23,15 @@ declare global {
 
 function Icon({ d }: { d: string }) {
   return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path d={d} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -43,9 +51,22 @@ export const NAV = [
   {
     title: "Workspace",
     items: [
-      { id: "inbox", label: "Inbox", icon: icons.inbox, count: 12, countLabel: "12 unread" },
+      {
+        id: "inbox",
+        label: "Inbox",
+        icon: icons.inbox,
+        count: 12,
+        countLabel: "12 unread",
+      },
       { id: "projects", label: "Projects", icon: icons.folder },
-      { id: "reports", label: "Reports", icon: icons.chart, count: 2, countLabel: "2 failing", tone: "danger" as const },
+      {
+        id: "reports",
+        label: "Reports",
+        icon: icons.chart,
+        count: 2,
+        countLabel: "2 failing",
+        tone: "danger" as const,
+      },
     ],
   },
   {
@@ -88,7 +109,12 @@ export function DemoSidebar({
                 // element, which stays on the story and logs the click as
                 // followed. A rail long-press's click never reaches it.
                 render={
+                  // SidebarItem merges href, role and keyboard handling into
+                  // this element; on its own it only looks like a bare anchor.
+                  // biome-ignore lint/a11y/noStaticElementInteractions: render-prop element
+                  // biome-ignore lint/a11y/useKeyWithClickEvents: render-prop element
                   <a
+                    // biome-ignore lint/a11y/useValidAnchor: render-prop element
                     onClick={(e) => {
                       if (!e.defaultPrevented) window.__demoFollowed?.push(item.id);
                       e.preventDefault();
@@ -120,7 +146,15 @@ export const ROWS = Array.from({ length: 8 }, (_, i) => ({
 /** A long run of focus stops below the fold, for scroll-padding checks. */
 export function LongContent({ count = 40 }: { count?: number }) {
   return (
-    <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 8 }}>
+    <ul
+      style={{
+        margin: 0,
+        padding: 0,
+        listStyle: "none",
+        display: "grid",
+        gap: 8,
+      }}
+    >
       {Array.from({ length: count }, (_, i) => (
         <li key={i}>
           <Link href={`#stop-${i + 1}`} onClick={(e) => e.preventDefault()} data-stop={i + 1}>

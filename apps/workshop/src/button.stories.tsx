@@ -1,6 +1,6 @@
+import { Button } from "@i258/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Button } from "@i258/ui";
 import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
@@ -99,7 +99,13 @@ export const IconOnly: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
       {(["xs", "sm", "md", "lg"] as const).map((size) => (
-        <Button key={size} size={size} shape="icon" variant="ghost" aria-label={`New issue (${size})`}>
+        <Button
+          key={size}
+          size={size}
+          shape="icon"
+          variant="ghost"
+          aria-label={`New issue (${size})`}
+        >
           <PlusIcon />
         </Button>
       ))}
@@ -116,4 +122,3 @@ export const IconOnly: Story = {
     }
   },
 };
-

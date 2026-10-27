@@ -1,9 +1,9 @@
+import { AppFrame } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test";
-import { AppFrame } from "@i258/ui";
 
 import { FrameDemo } from "./frame-demo";
 
@@ -46,7 +46,9 @@ export const Landmarks: Story = {
     await expect(c.getByRole("navigation", { name: "Breadcrumb" })).toBeInTheDocument();
     await expect(c.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     await expect(c.getByRole("link", { name: /Inbox/ })).toHaveAttribute("aria-current", "page");
-    await expect(c.getByRole("link", { name: /Reports/ })).toHaveAccessibleName(/^Reports\s*, 2 failing$/);
+    await expect(c.getByRole("link", { name: /Reports/ })).toHaveAccessibleName(
+      /^Reports\s*, 2 failing$/,
+    );
 
     // The skip link is the first stop and moves focus to <main>.
     await userEvent.tab();
@@ -134,7 +136,9 @@ export const WithInspector: Story = {
     await expect(within(pane).getByRole("heading", { level: 2 })).toHaveTextContent(
       "Example record 3",
     );
-    const handle = within(pane).getByRole("separator", { name: "Resize inspector" });
+    const handle = within(pane).getByRole("separator", {
+      name: "Resize inspector",
+    });
     await expect(handle).toHaveAttribute("aria-valuenow", "400");
     // A start-edge handle grows toward the inline start: ← widens.
     handle.focus();
@@ -143,7 +147,9 @@ export const WithInspector: Story = {
 
     within(pane).getByRole("button", { name: "Close inspector" }).focus();
     await userEvent.keyboard("{Enter}");
-    await waitFor(() => expect(c.queryByRole("complementary", { name: "Item details" })).toBeNull());
+    await waitFor(() =>
+      expect(c.queryByRole("complementary", { name: "Item details" })).toBeNull(),
+    );
     await expect(opener).toHaveFocus();
   },
 };
@@ -209,9 +215,7 @@ export const Hydration: Story = {
     const root = hydrateRoot(host, <FrameDemo initialInspector="item-2" />, {
       onRecoverableError: (e) => errors.push(e),
     });
-    await waitFor(() =>
-      expect(host.querySelector(".i258-frame__inspector")).not.toBeNull(),
-    );
+    await waitFor(() => expect(host.querySelector(".i258-frame__inspector")).not.toBeNull());
     await new Promise((r) => setTimeout(r, 50));
     root.unmount();
     await expect(errors).toEqual([]);
@@ -239,7 +243,11 @@ export const BothSheetsRequested: Story = {
 export const ControlledWidths: Story = {
   name: "Controlled widths",
   render: () => (
-    <FrameDemo testHooks controlledWidths={{ sidebar: 400, inspector: 720 }} initialInspector="item-1" />
+    <FrameDemo
+      testHooks
+      controlledWidths={{ sidebar: 400, inspector: 720 }}
+      initialInspector="item-1"
+    />
   ),
 };
 

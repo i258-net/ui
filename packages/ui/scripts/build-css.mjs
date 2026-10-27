@@ -1,7 +1,7 @@
+import { spawnSync } from "node:child_process";
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const styles = join(root, "src", "styles");
@@ -10,15 +10,11 @@ const dist = join(root, "dist");
 await mkdir(dist, { recursive: true });
 
 function runCli(input, output) {
-  const result = spawnSync(
-    "pnpm",
-    ["exec", "tailwindcss", "-i", input, "-o", output, "--minify"],
-    {
-      cwd: root,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
+  const result = spawnSync("pnpm", ["exec", "tailwindcss", "-i", input, "-o", output, "--minify"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
   if (result.status !== 0) {
     process.stderr.write(result.stdout ?? "");
     process.stderr.write(result.stderr ?? "");
@@ -41,6 +37,4 @@ for (const file of ["styles.css", "tokens.css"]) {
   await writeFile(path, css.replaceAll("url(../fonts/", "url(./fonts/"));
 }
 
-console.log(
-  "wrote dist/styles.css, dist/tokens.css, and dist/fonts/ via tailwindcss CLI",
-);
+console.log("wrote dist/styles.css, dist/tokens.css, and dist/fonts/ via tailwindcss CLI");

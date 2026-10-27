@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { ReactNode } from "react";
 
 /*
   Grouped the way the tokens are meant to be reached for:
@@ -46,7 +46,13 @@ const toneColors = [
 const typeScale = ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"] as const;
 const spaceScale = ["1", "2", "3", "4", "5", "6", "8", "10"] as const;
 const radiusScale = ["sm", "md", "lg", "xl", "full"] as const;
-const controlScale = ["control-xs", "control-sm", "control-md", "control-lg", "input-height"] as const;
+const controlScale = [
+  "control-xs",
+  "control-sm",
+  "control-md",
+  "control-lg",
+  "input-height",
+] as const;
 const densityScale = [
   "control-sm",
   "control-md",
@@ -175,10 +181,7 @@ export const Spacing: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12 }}>
       {spaceScale.map((step) => (
-        <div
-          key={step}
-          style={{ display: "flex", alignItems: "center", gap: 12 }}
-        >
+        <div key={step} style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <code style={{ width: 120, fontSize: 12 }}>--i258-space-{step}</code>
           <div
             style={{
@@ -209,9 +212,7 @@ export const Radius: Story = {
               boxShadow: "var(--i258-shadow-sm)",
             }}
           />
-          <div style={{ fontSize: 12, marginTop: 8, fontFamily: "monospace" }}>
-            {step}
-          </div>
+          <div style={{ fontSize: 12, marginTop: 8, fontFamily: "monospace" }}>{step}</div>
         </div>
       ))}
     </div>
@@ -250,7 +251,7 @@ function ControlBars({ density }: { density: "comfortable" | "compact" }) {
               display: "flex",
               alignItems: "center",
               boxSizing: "border-box",
-            minHeight: "var(--i258-row-height)",
+              minHeight: "var(--i258-row-height)",
               padding: "var(--i258-row-pad-y) var(--i258-pane-pad-x)",
               borderTop: i === 0 ? undefined : "1px solid var(--i258-border)",
               background: i === 1 ? "var(--i258-selected)" : undefined,

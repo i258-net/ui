@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge, Button, Checkbox, Fieldset, Input, Surface, ToggleChip } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
   title: "Foundation/Themes",
@@ -49,9 +49,7 @@ function ThemeCard({ theme }: { theme: "light" | "dark" }) {
         flex: "1 1 340px",
       }}
     >
-      <div style={{ fontWeight: 600 }}>
-        {theme === "light" ? "Day" : "Night"}
-      </div>
+      <div style={{ fontWeight: 600 }}>{theme === "light" ? "Day" : "Night"}</div>
 
       <Surface variant="default" padding="sm">
         <div style={{ display: "grid", gap: 8 }}>
@@ -97,8 +95,7 @@ function ThemeCard({ theme }: { theme: "light" | "dark" }) {
               alignItems: "center",
               padding: "8px 12px",
               background: "var(--i258-surface)",
-              borderTop:
-                i === 0 ? undefined : "1px solid var(--i258-border)",
+              borderTop: i === 0 ? undefined : "1px solid var(--i258-border)",
             }}
           >
             <span
@@ -171,10 +168,7 @@ function RowsCard({ theme }: { theme: "light" | "dark" }) {
             padding: "var(--i258-row-pad-y) 12px",
             background,
             borderTop: i === 0 ? undefined : "1px solid var(--i258-border)",
-            boxShadow:
-              state === "selected"
-                ? "inset 2px 0 0 var(--i258-indicator)"
-                : undefined,
+            boxShadow: state === "selected" ? "inset 2px 0 0 var(--i258-indicator)" : undefined,
           }}
         >
           <Checkbox aria-label={`Select ${state} row`} />
@@ -184,7 +178,12 @@ function RowsCard({ theme }: { theme: "light" | "dark" }) {
           <ToggleChip size="sm" pressed>
             on
           </ToggleChip>
-          <Input size="sm" aria-label={`Note for ${state} row`} placeholder="Note" style={{ width: 96 }} />
+          <Input
+            size="sm"
+            aria-label={`Note for ${state} row`}
+            placeholder="Note"
+            style={{ width: 96 }}
+          />
           <Button size="sm" variant="secondary">
             Open
           </Button>

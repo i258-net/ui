@@ -15,9 +15,7 @@ export function resolveTheme(raw: string | null | undefined): Theme {
   return raw === "light" || raw === "dark" ? raw : DEFAULT_THEME;
 }
 
-export function readStoredTheme(
-  storageKey: string = THEME_STORAGE_KEY,
-): Theme {
+export function readStoredTheme(storageKey: string = THEME_STORAGE_KEY): Theme {
   if (typeof window === "undefined") return DEFAULT_THEME;
   try {
     return resolveTheme(window.localStorage.getItem(storageKey));
@@ -26,10 +24,7 @@ export function readStoredTheme(
   }
 }
 
-export function applyTheme(
-  theme: Theme,
-  root: HTMLElement = document.documentElement,
-): void {
+export function applyTheme(theme: Theme, root: HTMLElement = document.documentElement): void {
   root.setAttribute("data-theme", theme);
 }
 
@@ -49,16 +44,11 @@ export function themeHostOf(node: Element): HTMLElement {
  * Client-only — needs a live element and its computed style.
  */
 export function readAppliedTheme(node: Element): Theme {
-  const isDark = getComputedStyle(node)
-    .getPropertyValue("--i258-theme-is-dark")
-    .trim();
+  const isDark = getComputedStyle(node).getPropertyValue("--i258-theme-is-dark").trim();
   return Number(isDark) > 0 ? "dark" : "light";
 }
 
-export function persistTheme(
-  theme: Theme,
-  storageKey: string = THEME_STORAGE_KEY,
-): void {
+export function persistTheme(theme: Theme, storageKey: string = THEME_STORAGE_KEY): void {
   try {
     window.localStorage.setItem(storageKey, theme);
   } catch {

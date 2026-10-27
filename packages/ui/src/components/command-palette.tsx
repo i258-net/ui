@@ -1,10 +1,9 @@
-import * as React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-
-import { DialogContent, DialogTitle } from "./dialog.js";
-import { Kbd } from "./kbd.js";
+import * as React from "react";
 import { useShortcut } from "../lib/use-shortcut.js";
 import { cn } from "../lib/utils.js";
+import { DialogContent, DialogTitle } from "./dialog.js";
+import { Kbd } from "./kbd.js";
 
 export type CommandItem = {
   id: string;
@@ -69,7 +68,13 @@ export function defaultCommandFilter(
 
 function SearchIcon() {
   return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" className="i258-palette__search-icon">
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      className="i258-palette__search-icon"
+    >
       <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
       <path d="m10.5 10.5 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
@@ -136,7 +141,10 @@ export function CommandPalette({
     for (const item of filter(items, query.trim())) {
       const name = item.group ?? "";
       let entries = byName.get(name);
-      if (!entries) byName.set(name, (entries = []));
+      if (!entries) {
+        entries = [];
+        byName.set(name, entries);
+      }
       entries.push(item);
     }
     let index = 0;
@@ -147,12 +155,11 @@ export function CommandPalette({
   }, [filter, items, query]);
   const activeIndex = results.length ? Math.min(active, results.length - 1) : -1;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: optionId derives from baseId, which never changes; `results` is a deliberate re-scroll trigger when the list changes under a stable index.
   React.useEffect(() => {
     if (activeIndex < 0) return;
     const el = listRef.current?.querySelector(`[id="${CSS.escape(optionId(activeIndex))}"]`);
     el?.scrollIntoView({ block: "nearest" });
-    // optionId is derived from baseId, which never changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, results]);
 
   const run = (item: CommandItem | undefined) => {
@@ -179,13 +186,17 @@ export function CommandPalette({
   };
 
   const renderOption = ({ item, index }: { item: CommandItem; index: number }) => (
+    // Options are never focused: the field keeps focus and points at the active
+    // option through aria-activedescendant, and the field's onKeyDown handles
+    // ↑/↓/Enter. The pointer only moves the active option.
+    // biome-ignore lint/a11y/useFocusableInteractive: aria-activedescendant listbox pattern
+    // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard is handled on the field
     <div
       key={item.id}
       id={optionId(index)}
       role="option"
       aria-selected={index === activeIndex}
       className="i258-palette__option"
-      // Keep focus in the field; the pointer only moves the active option.
       onMouseDown={(e) => e.preventDefault()}
       onMouseMove={() => index !== activeIndex && setActive(index)}
       onClick={() => run(item)}
@@ -239,7 +250,13 @@ export function CommandPalette({
             onKeyDown={onKeyDown}
           />
         </div>
-        <div ref={listRef} id={listId} role="listbox" aria-label={title} className="i258-palette__list">
+        <div
+          ref={listRef}
+          id={listId}
+          role="listbox"
+          aria-label={title}
+          className="i258-palette__list"
+        >
           {groups.map(([name, entries], g) =>
             name ? (
               <div
@@ -248,7 +265,11 @@ export function CommandPalette({
                 aria-labelledby={`${baseId}-group-${g}`}
                 className="i258-palette__group"
               >
-                <div id={`${baseId}-group-${g}`} role="presentation" className="i258-palette__group-label">
+                <div
+                  id={`${baseId}-group-${g}`}
+                  role="presentation"
+                  className="i258-palette__group-label"
+                >
                   {name}
                 </div>
                 {entries.map(renderOption)}

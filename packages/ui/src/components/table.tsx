@@ -54,6 +54,7 @@ export const TableContainer = React.forwardRef<HTMLDivElement, TableContainerPro
     const composedRef = useComposedRefs(local, ref);
     const region = scrolls && (ariaLabel != null || ariaLabelledBy != null);
     return (
+      // biome-ignore lint/a11y/useAriaPropsSupportedByRole: the label props are only set alongside role="region" (see `region` above); the rule cannot follow the conditional.
       <div
         ref={composedRef}
         data-slot="table-container"

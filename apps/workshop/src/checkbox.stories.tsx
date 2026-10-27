@@ -1,6 +1,6 @@
+import { Checkbox, Label } from "@i258/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { Checkbox, Label } from "@i258/ui";
 import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
@@ -127,7 +127,14 @@ function CloseSpacingLayout({ native = false }: { native?: boolean }) {
         <Checkbox {...as} id="lr-b" />
         <Label htmlFor="lr-b">Beta</Label>
       </div>
-      <div data-testid="stack" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+      <div
+        data-testid="stack"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
         {["One", "Two", "Three"].map((name) => (
           <div key={name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Checkbox {...as} id={`stack-${name}`} />

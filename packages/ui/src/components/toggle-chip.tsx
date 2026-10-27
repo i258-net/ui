@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -15,10 +15,7 @@ const toggleChipVariants = cva("i258-toggle-chip", {
   },
 });
 
-export type ToggleChipProps = Omit<
-  React.ComponentProps<"button">,
-  "children"
-> &
+export type ToggleChipProps = Omit<React.ComponentProps<"button">, "children"> &
   VariantProps<typeof toggleChipVariants> & {
     /** Whether the chip is in the pressed / selected state. */
     pressed?: boolean;
@@ -28,36 +25,24 @@ export type ToggleChipProps = Omit<
     count?: React.ReactNode;
   };
 
-export const ToggleChip = React.forwardRef<HTMLButtonElement, ToggleChipProps>(
-  function ToggleChip(
-    {
-      className,
-      size,
-      pressed = false,
-      children,
-      count,
-      type,
-      ...props
-    },
-    ref,
-  ) {
-    return (
-      <button
-        ref={ref}
-        data-slot="toggle-chip"
-        data-state={pressed ? "on" : "off"}
-        type={type ?? "button"}
-        aria-pressed={pressed}
-        className={cn(toggleChipVariants({ size }), className)}
-        {...props}
-      >
-        <span className="i258-toggle-chip__label">{children}</span>
-        {count != null ? (
-          <span className="i258-toggle-chip__count">{count}</span>
-        ) : null}
-      </button>
-    );
-  },
-);
+export const ToggleChip = React.forwardRef<HTMLButtonElement, ToggleChipProps>(function ToggleChip(
+  { className, size, pressed = false, children, count, type, ...props },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      data-slot="toggle-chip"
+      data-state={pressed ? "on" : "off"}
+      type={type ?? "button"}
+      aria-pressed={pressed}
+      className={cn(toggleChipVariants({ size }), className)}
+      {...props}
+    >
+      <span className="i258-toggle-chip__label">{children}</span>
+      {count != null ? <span className="i258-toggle-chip__count">{count}</span> : null}
+    </button>
+  );
+});
 
 export { toggleChipVariants };

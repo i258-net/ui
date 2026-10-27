@@ -1,6 +1,6 @@
-import * as React from "react";
-import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import type { CheckboxRootProps } from "@base-ui/react/checkbox";
+import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -11,26 +11,22 @@ export type CheckboxProps = CheckboxRootProps;
 // keyboard path (Space stops toggling) and puts a `disabled` attribute on the
 // span instead of `aria-disabled`. Only set it alongside a `render` prop that
 // actually supplies a <button>.
-export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(
-  function Checkbox({ className, ...props }, ref) {
-    return (
-      <CheckboxPrimitive.Root
-        ref={ref}
-        data-slot="checkbox"
-        className={cn("i258-checkbox", className)}
-        {...props}
-      >
+export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Checkbox(
+  { className, ...props },
+  ref,
+) {
+  return (
+    <CheckboxPrimitive.Root
+      ref={ref}
+      data-slot="checkbox"
+      className={cn("i258-checkbox", className)}
+      {...props}
+    >
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
         className="i258-checkbox__indicator"
       >
-        <svg
-          viewBox="0 0 16 16"
-          width="12"
-          height="12"
-          aria-hidden="true"
-          focusable="false"
-        >
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false">
           <path
             d="M3.5 8.5 6.5 11.5 12.5 4.5"
             fill="none"
@@ -43,5 +39,4 @@ export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );
-  },
-);
+});

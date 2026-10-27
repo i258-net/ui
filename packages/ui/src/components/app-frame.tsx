@@ -1,22 +1,21 @@
-import * as React from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { useRender } from "@base-ui/react/use-render";
-
-import { Button } from "./button.js";
-import { PaneResizeHandle } from "./pane-resize-handle.js";
+import * as React from "react";
 import { useComposedRefs } from "../lib/compose-refs.js";
-import { CloseIcon } from "../lib/icons.js";
-import { fitPanes, inspectorFits } from "../lib/frame-fit.js";
 import {
   FrameHeaderRefContext,
   FrameLayoutContext,
   FramePortalContext,
   SidebarHandleContext,
-  SidebarModeContext,
   type SidebarMode,
+  SidebarModeContext,
 } from "../lib/frame-context.js";
+import { fitPanes, inspectorFits } from "../lib/frame-fit.js";
+import { CloseIcon } from "../lib/icons.js";
 import { useMediaQueryState } from "../lib/media-query-state.js";
 import { cn } from "../lib/utils.js";
+import { Button } from "./button.js";
+import { PaneResizeHandle } from "./pane-resize-handle.js";
 
 export type { SidebarMode };
 
@@ -36,7 +35,10 @@ export const FRAME_NARROW_INSPECTOR = "(max-width: 61.24rem)";
  * breakpoints. The two agree on `navIsSheet` always, and on
  * `inspectorIsSheet` whenever the frame fills the viewport.
  */
-export function useFrameLayout(): { navIsSheet: boolean; inspectorIsSheet: boolean } {
+export function useFrameLayout(): {
+  navIsSheet: boolean;
+  inspectorIsSheet: boolean;
+} {
   const frame = React.useContext(FrameLayoutContext);
   const navIsSheet = useMediaQueryState(FRAME_NARROW_NAV) ?? false;
   const inspectorIsSheet = useMediaQueryState(FRAME_NARROW_INSPECTOR) ?? false;
@@ -57,7 +59,12 @@ function nextSheetAsks(prev: SheetAsks, nav: boolean, inspector: boolean): Sheet
   if (nav && inspector) {
     const navNew = !prev.nav;
     const inspectorNew = !prev.inspector;
-    owner = navNew && !inspectorNew ? "nav" : inspectorNew && !navNew ? "inspector" : (prev.owner ?? "inspector");
+    owner =
+      navNew && !inspectorNew
+        ? "nav"
+        : inspectorNew && !navNew
+          ? "inspector"
+          : (prev.owner ?? "inspector");
   }
   return { nav, inspector, owner };
 }
@@ -393,9 +400,11 @@ export function AppFrame({
   }, [headerEl]);
 
   // —— focus continuity ——
-  const lastFocus = React.useRef<{ el: HTMLElement; region: Region; inSheet: boolean } | null>(
-    null,
-  );
+  const lastFocus = React.useRef<{
+    el: HTMLElement;
+    region: Region;
+    inSheet: boolean;
+  } | null>(null);
   const lastOutsideInspector = React.useRef<HTMLElement | null>(null);
   const lastOutsideSheets = React.useRef<HTMLElement | null>(null);
 
@@ -414,6 +423,7 @@ export function AppFrame({
     if (region !== "inspector") lastOutsideInspector.current = el;
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the layout-state deps are deliberate triggers, so focus is re-homed after every pane/sheet change, not values the effect reads.
   React.useLayoutEffect(() => {
     const last = lastFocus.current;
     if (!last || (last.region === "other" && !last.inSheet)) return;
@@ -517,116 +527,113 @@ export function AppFrame({
       </a>
 
       <FrameLayoutContext.Provider value={layout}>
-      <FramePortalContext.Provider value={portal}>
-        {hasSidebar ? (
-          <div
-            ref={sidebarRef}
-            id={sidebarId}
-            tabIndex={-1}
-            className="i258-frame__sidebar"
-            data-frame-pane="sidebar"
-          >
-            <SidebarModeContext.Provider value={sidebarMode}>
-              <SidebarHandleContext.Provider value={sidebarHandle}>
-                {sidebar}
-              </SidebarHandleContext.Provider>
-            </SidebarModeContext.Provider>
-          </div>
-        ) : null}
-
-        <div
-          ref={mainPaneRef}
-          className="i258-frame__main"
-          data-scrolled={scrolled ? "" : undefined}
-          onScroll={(e) => {
-            const next = e.currentTarget.scrollTop > 0;
-            if (next !== scrolled) setScrolled(next);
-          }}
-        >
-          <FrameHeaderRefContext.Provider value={setHeaderEl}>
-            {header}
-          </FrameHeaderRefContext.Provider>
-          <main id={mainId} tabIndex={-1} className="i258-frame__content">
-            {children}
-          </main>
-        </div>
-
-        {navSheet ? (
-          <Dialog.Root
-            open={navShown}
-            onOpenChange={(open) => onNavSheetOpenChange?.(open)}
-          >
-            <Dialog.Portal container={portal}>
-              <Dialog.Backdrop className="i258-frame__backdrop" />
-              <Dialog.Popup
-                className="i258-frame__sheet"
-                data-placement="start"
-                finalFocus={sheetFinalFocus}
-                data-frame-pane="sidebar"
-              >
-                <Dialog.Title className="i258-sr-only">{navSheetLabel}</Dialog.Title>
-                <Dialog.Close
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="i258-frame__sheet-close"
-                      aria-label={closeNavSheetLabel}
-                    />
-                  }
-                >
-                  <CloseIcon />
-                </Dialog.Close>
-                <SidebarModeContext.Provider value="expanded">
+        <FramePortalContext.Provider value={portal}>
+          {hasSidebar ? (
+            <div
+              ref={sidebarRef}
+              id={sidebarId}
+              tabIndex={-1}
+              className="i258-frame__sidebar"
+              data-frame-pane="sidebar"
+            >
+              <SidebarModeContext.Provider value={sidebarMode}>
+                <SidebarHandleContext.Provider value={sidebarHandle}>
                   {sidebar}
-                </SidebarModeContext.Provider>
-              </Dialog.Popup>
-            </Dialog.Portal>
-          </Dialog.Root>
-        ) : null}
+                </SidebarHandleContext.Provider>
+              </SidebarModeContext.Provider>
+            </div>
+          ) : null}
 
-        {inspectorSheet ? (
-          <Dialog.Root
-            open={inspectorShown}
-            onOpenChange={(open) => onInspectorOpenChange?.(open)}
+          <div
+            ref={mainPaneRef}
+            className="i258-frame__main"
+            data-scrolled={scrolled ? "" : undefined}
+            onScroll={(e) => {
+              const next = e.currentTarget.scrollTop > 0;
+              if (next !== scrolled) setScrolled(next);
+            }}
           >
-            <Dialog.Portal container={portal}>
-              <Dialog.Backdrop className="i258-frame__backdrop" />
-              <Dialog.Popup
-                className="i258-frame__sheet"
-                data-placement="end"
-                data-frame-pane="inspector"
-                finalFocus={sheetFinalFocus}
-                aria-label={inspectorLabel}
-              >
-                {inspector}
-              </Dialog.Popup>
-            </Dialog.Portal>
-          </Dialog.Root>
-        ) : null}
+            <FrameHeaderRefContext.Provider value={setHeaderEl}>
+              {header}
+            </FrameHeaderRefContext.Provider>
+            <main id={mainId} tabIndex={-1} className="i258-frame__content">
+              {children}
+            </main>
+          </div>
 
-        {showInspector ? (
-          <aside
-            id={inspectorId}
-            aria-label={inspectorLabel}
-            className="i258-frame__inspector"
-            data-frame-pane="inspector"
-          >
-            {inspectorResizable ? (
-              <PaneResizeHandle
-                label="Resize inspector"
-                edge="start"
-                value={drawnInspectorWidth}
-                min={fitted.inspectorMin}
-                max={fitted.inspectorMax}
-                onValueChange={setInspectorWidth}
-                controls={inspectorId}
-              />
-            ) : null}
-            {inspector}
-          </aside>
-        ) : null}
-      </FramePortalContext.Provider>
+          {navSheet ? (
+            <Dialog.Root open={navShown} onOpenChange={(open) => onNavSheetOpenChange?.(open)}>
+              <Dialog.Portal container={portal}>
+                <Dialog.Backdrop className="i258-frame__backdrop" />
+                <Dialog.Popup
+                  className="i258-frame__sheet"
+                  data-placement="start"
+                  finalFocus={sheetFinalFocus}
+                  data-frame-pane="sidebar"
+                >
+                  <Dialog.Title className="i258-sr-only">{navSheetLabel}</Dialog.Title>
+                  <Dialog.Close
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="i258-frame__sheet-close"
+                        aria-label={closeNavSheetLabel}
+                      />
+                    }
+                  >
+                    <CloseIcon />
+                  </Dialog.Close>
+                  <SidebarModeContext.Provider value="expanded">
+                    {sidebar}
+                  </SidebarModeContext.Provider>
+                </Dialog.Popup>
+              </Dialog.Portal>
+            </Dialog.Root>
+          ) : null}
+
+          {inspectorSheet ? (
+            <Dialog.Root
+              open={inspectorShown}
+              onOpenChange={(open) => onInspectorOpenChange?.(open)}
+            >
+              <Dialog.Portal container={portal}>
+                <Dialog.Backdrop className="i258-frame__backdrop" />
+                <Dialog.Popup
+                  className="i258-frame__sheet"
+                  data-placement="end"
+                  data-frame-pane="inspector"
+                  finalFocus={sheetFinalFocus}
+                  aria-label={inspectorLabel}
+                >
+                  {inspector}
+                </Dialog.Popup>
+              </Dialog.Portal>
+            </Dialog.Root>
+          ) : null}
+
+          {showInspector ? (
+            <aside
+              id={inspectorId}
+              aria-label={inspectorLabel}
+              className="i258-frame__inspector"
+              data-frame-pane="inspector"
+            >
+              {inspectorResizable ? (
+                <PaneResizeHandle
+                  label="Resize inspector"
+                  edge="start"
+                  value={drawnInspectorWidth}
+                  min={fitted.inspectorMin}
+                  max={fitted.inspectorMax}
+                  onValueChange={setInspectorWidth}
+                  controls={inspectorId}
+                />
+              ) : null}
+              {inspector}
+            </aside>
+          ) : null}
+        </FramePortalContext.Provider>
       </FrameLayoutContext.Provider>
 
       {/* Floating layers (sheets, rail names) portal here to inherit the
@@ -690,14 +697,13 @@ export function FrameHeader({
       className={cn("i258-frame-header", className)}
       {...props}
     >
-      {leading != null ? (
-        <div className="i258-frame-header__leading">{leading}</div>
-      ) : null}
+      {leading != null ? <div className="i258-frame-header__leading">{leading}</div> : null}
       <div className="i258-frame-header__title-row">
         {breadcrumbs.length > 0 ? (
           <nav aria-label="Breadcrumb" className="i258-breadcrumb">
             <ol>
               {breadcrumbs.map((b, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: a trail is positional; items carry no stable id and never reorder
                 <li key={i}>
                   <BreadcrumbLink {...b} />
                   <span className="i258-breadcrumb__sep" aria-hidden="true">
@@ -713,9 +719,7 @@ export function FrameHeader({
         </h1>
         {meta != null ? <div className="i258-frame-header__meta">{meta}</div> : null}
       </div>
-      {actions != null ? (
-        <div className="i258-frame-header__actions">{actions}</div>
-      ) : null}
+      {actions != null ? <div className="i258-frame-header__actions">{actions}</div> : null}
     </header>
   );
 }
@@ -742,19 +746,11 @@ export function Inspector({
   ...props
 }: InspectorProps) {
   return (
-    <div
-      data-slot="inspector"
-      className={cn("i258-inspector", className)}
-      {...props}
-    >
+    <div data-slot="inspector" className={cn("i258-inspector", className)} {...props}>
       <div className="i258-inspector__header">
         <div className="i258-inspector__heading">
-          {eyebrow != null ? (
-            <div className="i258-inspector__eyebrow">{eyebrow}</div>
-          ) : null}
-          <h2 className="i258-inspector__title">
-            {title}
-          </h2>
+          {eyebrow != null ? <div className="i258-inspector__eyebrow">{eyebrow}</div> : null}
+          <h2 className="i258-inspector__title">{title}</h2>
         </div>
         {actions != null || onClose ? (
           <div className="i258-inspector__actions">

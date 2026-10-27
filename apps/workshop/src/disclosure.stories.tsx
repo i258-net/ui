@@ -1,6 +1,6 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Disclosure, DisclosurePanel, DisclosureTrigger } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 
 const meta = {
   title: "Primitives/Disclosure",
@@ -24,9 +24,7 @@ export const Closed: Story = {
   render: () => (
     <Disclosure>
       <DisclosureTrigger>Pending PRs</DisclosureTrigger>
-      <DisclosurePanel>
-        Three open pull requests waiting on review.
-      </DisclosurePanel>
+      <DisclosurePanel>Three open pull requests waiting on review.</DisclosurePanel>
     </Disclosure>
   ),
 };
@@ -36,8 +34,7 @@ export const DefaultOpen: Story = {
     <Disclosure defaultOpen>
       <DisclosureTrigger>Issue body</DisclosureTrigger>
       <DisclosurePanel>
-        Markdown and structured sections live in the app; this panel is the
-        chrome.
+        Markdown and structured sections live in the app; this panel is the chrome.
       </DisclosurePanel>
     </Disclosure>
   ),
@@ -48,9 +45,7 @@ export const Controlled: Story = {
     const [open, setOpen] = React.useState(false);
     return (
       <Disclosure open={open} onOpenChange={setOpen}>
-        <DisclosureTrigger>
-          {open ? "Hide details" : "Show details"}
-        </DisclosureTrigger>
+        <DisclosureTrigger>{open ? "Hide details" : "Show details"}</DisclosureTrigger>
         <DisclosurePanel keepMounted>
           Controlled open state for app-driven expand/collapse.
         </DisclosurePanel>

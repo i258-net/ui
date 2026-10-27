@@ -27,12 +27,14 @@ function attach<T>(ref: PossibleRef<T>, el: T): () => void {
 export function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
   return (el) => {
     const detach = refs.map((ref) => attach(ref, el));
-    return () => detach.forEach((d) => d());
+    return () => {
+      for (const d of detach) d();
+    };
   };
 }
 
 /** `composeRefs`, stable while the refs are. */
 export function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the rest array is the dependency list by design; callers pass a fixed arity.
   return React.useCallback(composeRefs(...refs), refs);
 }
