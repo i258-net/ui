@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { PaneResizeHandle } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 /**
  * Window-splitter: `role="separator"` with a value. ←/→ step 16px (Shift:
@@ -29,7 +29,9 @@ type Story = StoryObj<typeof meta>;
 function Panes({
   rtl = false,
   ...handle
-}: React.ComponentProps<typeof PaneResizeHandle> & { rtl?: boolean | undefined }) {
+}: React.ComponentProps<typeof PaneResizeHandle> & {
+  rtl?: boolean | undefined;
+}) {
   const dir = rtl ? "rtl" : "ltr";
   const [width, setWidth] = React.useState(handle.value);
   return (
@@ -56,7 +58,9 @@ function Panes({
 export const Keyboard: Story = {
   render: (args) => <Panes {...args} />,
   play: async ({ canvasElement, args }) => {
-    const handle = within(canvasElement).getByRole("separator", { name: "Resize panel" });
+    const handle = within(canvasElement).getByRole("separator", {
+      name: "Resize panel",
+    });
     await expect(handle).toHaveAttribute("tabindex", "0");
     await expect(handle).toHaveAttribute("aria-orientation", "vertical");
     await expect(handle).toHaveAttribute("aria-controls", "demo-pane");
@@ -84,7 +88,9 @@ export const RightToLeft: Story = {
   name: "Right to left",
   render: (args) => <Panes {...args} rtl />,
   play: async ({ canvasElement }) => {
-    const handle = within(canvasElement).getByRole("separator", { name: "Resize panel" });
+    const handle = within(canvasElement).getByRole("separator", {
+      name: "Resize panel",
+    });
     handle.focus();
     await userEvent.keyboard("{ArrowLeft}");
     await expect(handle).toHaveAttribute("aria-valuenow", "256");
@@ -135,7 +141,9 @@ export const RightToLeftDrag: Story = {
   tags: ["!autodocs"],
   render: (args) => <Panes {...args} rtl />,
   play: async ({ canvasElement }) => {
-    const handle = within(canvasElement).getByRole("separator", { name: "Resize panel" });
+    const handle = within(canvasElement).getByRole("separator", {
+      name: "Resize panel",
+    });
     await drag(handle, -40);
     await expect(handle).toHaveAttribute("aria-valuenow", "280");
     await expect(resizing()).toBeUndefined();
@@ -160,7 +168,9 @@ export const ComposedHandlers: Story = {
   },
   render: (args) => <Panes {...args} />,
   play: async ({ canvasElement, args }) => {
-    const handle = within(canvasElement).getByRole("separator", { name: "Resize panel" });
+    const handle = within(canvasElement).getByRole("separator", {
+      name: "Resize panel",
+    });
     await drag(handle, 40);
     await expect(handle).toHaveAttribute("aria-valuenow", "280");
     await expect(args.onPointerDown).toHaveBeenCalled();

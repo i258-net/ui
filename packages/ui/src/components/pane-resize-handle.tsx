@@ -2,10 +2,7 @@ import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
-export type PaneResizeHandleProps = Omit<
-  React.ComponentProps<"div">,
-  "onChange" | "children"
-> & {
+export type PaneResizeHandleProps = Omit<React.ComponentProps<"div">, "onChange" | "children"> & {
   /** Accessible name, e.g. "Resize sidebar". */
   label: string;
   /** Current pane width in CSS px. */

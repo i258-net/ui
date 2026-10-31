@@ -164,7 +164,6 @@
     "build": "tsdown && tsc -p tsconfig.build.json && pnpm build:css",
     "build:css": "node ./scripts/build-css.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "node ./scripts/lint-deferred.mjs",
     "test": "vitest run --passWithNoTests",
     "pack:verify": "node ./scripts/pack-verify.mjs"
   },

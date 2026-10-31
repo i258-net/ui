@@ -1,6 +1,6 @@
+import { StatusLabel } from "@i258/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { StatusLabel } from "@i258/ui";
 
 /**
  * A status as glyph + word, colour on the status only. The app maps its
@@ -29,7 +29,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const glyph = (d: string) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d={d} />
   </svg>
 );
@@ -63,7 +71,15 @@ export const Tones: Story = {
     <div style={{ display: "grid", gap: 12 }}>
       {([false, true] as const).map((tinted) =>
         (["md", "sm"] as const).map((size) => (
-          <div key={`${tinted}-${size}`} style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
+          <div
+            key={`${tinted}-${size}`}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 16,
+              alignItems: "center",
+            }}
+          >
             {TONES.map((t) => (
               <StatusLabel key={t.label} tone={t.tone} icon={t.icon} size={size} tinted={tinted}>
                 {t.label}

@@ -19,7 +19,7 @@ Honeycomb + abacus targeting `@i258/ui@0.5.2` (packaging fix: ESM dist must matc
 | Patterns | AppShell — shared application chrome (title · nav · meta · theme + identity) · AppFrame — sidebar / header / main / inspector frame (FrameHeader, Sidebar family, Inspector, PaneResizeHandle, `useMediaQuery`) · CommandPalette (⌘K) · `useShortcut` / `ShortcutsProvider` · SummaryStrip / SummaryTile |
 | Themes | Zinc / indigo — Day (light) + Night (dark), one family at two exposures |
 | Quality | Storybook vitest + addon-a11y (`test: "error"`); in-repo Playwright VRT (`pnpm vrt`) |
-| Lint | deferred until typescript-eslint supports TS 7 (hard reject on 7.0.2) |
+| Lint | Biome (`pnpm lint` = `biome ci`; `pnpm lint:fix` / `pnpm format` write) — rules in `biome.json`; no typescript-eslint until it supports TS 7 |
 
 ### Tone tokens
 

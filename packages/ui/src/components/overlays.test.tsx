@@ -1,12 +1,10 @@
-import * as React from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-
+import { ShortcutsProvider, useShortcut, useSingleKeyShortcuts } from "../lib/use-shortcut.js";
 import { CommandPalette } from "./command-palette.js";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./dialog.js";
 import { Kbd } from "./kbd.js";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "./menu.js";
-import { ShortcutsProvider, useShortcut, useSingleKeyShortcuts } from "../lib/use-shortcut.js";
 
 /*
   Server render with no `window` / `document`: shortcuts register nothing,

@@ -1,19 +1,18 @@
-import * as React from "react";
-import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import type {
   DialogCloseProps as BaseCloseProps,
   DialogDescriptionProps as BaseDescriptionProps,
-  DialogPopupProps,
-  DialogRootProps,
   DialogTitleProps as BaseTitleProps,
   DialogTriggerProps as BaseTriggerProps,
+  DialogPopupProps,
+  DialogRootProps,
 } from "@base-ui/react/dialog";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { cva, type VariantProps } from "class-variance-authority";
-
-import { Button } from "./button.js";
+import * as React from "react";
 import { useFrameLayer } from "../lib/frame-context.js";
 import { CloseIcon } from "../lib/icons.js";
 import { cn } from "../lib/utils.js";
+import { Button } from "./button.js";
 
 export type DialogProps = DialogRootProps;
 
@@ -81,15 +80,7 @@ export type DialogContentProps = Omit<DialogPopupProps, "className"> &
  */
 export const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   function DialogContent(
-    {
-      className,
-      size,
-      closeButton = true,
-      closeLabel = "Close",
-      container,
-      children,
-      ...props
-    },
+    { className, size, closeButton = true, closeLabel = "Close", container, children, ...props },
     ref,
   ) {
     const frameLayer = useFrameLayer();
@@ -131,11 +122,7 @@ export type DialogTitleProps = Omit<BaseTitleProps, "className"> & {
 export const DialogTitle = React.forwardRef<HTMLHeadingElement, DialogTitleProps>(
   function DialogTitle({ className, ...props }, ref) {
     return (
-      <DialogPrimitive.Title
-        ref={ref}
-        className={cn("i258-dialog__title", className)}
-        {...props}
-      />
+      <DialogPrimitive.Title ref={ref} className={cn("i258-dialog__title", className)} {...props} />
     );
   },
 );
@@ -145,18 +132,17 @@ export type DialogDescriptionProps = Omit<BaseDescriptionProps, "className"> & {
 };
 
 /** Read with the title when the dialog opens. */
-export const DialogDescription = React.forwardRef<
-  HTMLParagraphElement,
-  DialogDescriptionProps
->(function DialogDescription({ className, ...props }, ref) {
-  return (
-    <DialogPrimitive.Description
-      ref={ref}
-      className={cn("i258-dialog__description", className)}
-      {...props}
-    />
-  );
-});
+export const DialogDescription = React.forwardRef<HTMLParagraphElement, DialogDescriptionProps>(
+  function DialogDescription({ className, ...props }, ref) {
+    return (
+      <DialogPrimitive.Description
+        ref={ref}
+        className={cn("i258-dialog__description", className)}
+        {...props}
+      />
+    );
+  },
+);
 
 export type DialogBodyProps = React.ComponentProps<"div">;
 

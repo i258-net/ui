@@ -25,9 +25,7 @@ function block(selector: string): Theme {
   const open = themesCss.indexOf("{", start);
   const close = themesCss.indexOf("}", open);
   const out: Theme = {};
-  for (const m of themesCss
-    .slice(open + 1, close)
-    .matchAll(/--i258-([a-z0-9-]+):\s*([^;]+);/g)) {
+  for (const m of themesCss.slice(open + 1, close).matchAll(/--i258-([a-z0-9-]+):\s*([^;]+);/g)) {
     out[m[1]!] = m[2]!.trim();
   }
   return out;
@@ -66,7 +64,13 @@ const percent = (v: string | undefined) => {
 };
 
 /** Token names for the test title; resolved colours for the ratio. */
-type Pair = { fg: string; bg: string; fgValue: string; bgValue: string; min: number };
+type Pair = {
+  fg: string;
+  bg: string;
+  fgValue: string;
+  bgValue: string;
+  min: number;
+};
 
 function pairs(t: Theme): Pair[] {
   const c = (name: string) => {

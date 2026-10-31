@@ -1,7 +1,7 @@
-import * as React from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { useRender } from "@base-ui/react/use-render";
 import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import * as React from "react";
 
 import { SidebarHandleContext, SidebarModeContext } from "../lib/frame-context.js";
 import { cn } from "../lib/utils.js";
@@ -47,10 +47,7 @@ export function Sidebar({
   );
 }
 
-export function SidebarHeader({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div className={cn("i258-sidebar__header", className)} {...props} />;
 }
 
@@ -61,18 +58,11 @@ export function SidebarContent({
   ...props
 }: React.ComponentProps<"nav">) {
   return (
-    <nav
-      aria-label={ariaLabel}
-      className={cn("i258-sidebar__content", className)}
-      {...props}
-    />
+    <nav aria-label={ariaLabel} className={cn("i258-sidebar__content", className)} {...props} />
   );
 }
 
-export function SidebarFooter({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return <div className={cn("i258-sidebar__footer", className)} {...props} />;
 }
 
@@ -164,81 +154,75 @@ export type SidebarItemProps = Omit<useRender.ComponentProps<"a">, "children"> &
  * hover, keyboard focus and a touch long-press; the link keeps its own
  * accessible name.
  */
-export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
-  function SidebarItem(
-    {
-      icon,
-      children,
-      count,
-      countLabel,
-      countTone = "default",
-      current = false,
-      render,
-      className,
-      ...props
-    },
-    ref,
-  ) {
-    const collapsed = useSidebarCollapsed();
-    const longPress = useLongPress(collapsed);
-    const link = useRender({
-      defaultTagName: "a",
-      ref,
-      render,
-      props: mergeProps<"a">(
-        {
-          "aria-current": current === true ? "page" : current || undefined,
-          "data-current": current ? "" : undefined,
-          className: cn("i258-sidebar__item", className),
-          children: (
-            <>
-              {icon != null ? (
-                <span className="i258-sidebar__icon" aria-hidden="true">
-                  {icon}
-                </span>
-              ) : null}
-              <span className="i258-sidebar__label">{children}</span>
-              {count != null ? (
-                <span className="i258-sidebar__count" data-tone={countTone}>
-                  <span aria-hidden={countLabel ? true : undefined}>{count}</span>
-                  {countLabel ? (
-                    <span className="i258-sr-only">, {countLabel}</span>
-                  ) : null}
-                </span>
-              ) : null}
-            </>
-          ),
-        } as React.ComponentProps<"a">,
-        props,
-        longPress.triggerProps,
-      ),
-    });
-    // Always mounted (disabled while expanded) so the item element is the
-    // same node in both modes and a collapse keeps focus on it.
-    return (
-      <li className="i258-sidebar__li">
-        <Tooltip
-          disabled={!collapsed}
-          open={longPress.open}
-          onOpenChange={longPress.setOpen}
-          side="inline-end"
-          sideOffset={8}
-          className="i258-sidebar__tip"
-          content={
-            <>
-              {children}
-              {count != null ? (
-                <span className="i258-sidebar__tip-count">{count}</span>
-              ) : null}
-            </>
-          }
-        >
-          {link}
-        </Tooltip>
-      </li>
-    );
+export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(function SidebarItem(
+  {
+    icon,
+    children,
+    count,
+    countLabel,
+    countTone = "default",
+    current = false,
+    render,
+    className,
+    ...props
   },
-);
+  ref,
+) {
+  const collapsed = useSidebarCollapsed();
+  const longPress = useLongPress(collapsed);
+  const link = useRender({
+    defaultTagName: "a",
+    ref,
+    render,
+    props: mergeProps<"a">(
+      {
+        "aria-current": current === true ? "page" : current || undefined,
+        "data-current": current ? "" : undefined,
+        className: cn("i258-sidebar__item", className),
+        children: (
+          <>
+            {icon != null ? (
+              <span className="i258-sidebar__icon" aria-hidden="true">
+                {icon}
+              </span>
+            ) : null}
+            <span className="i258-sidebar__label">{children}</span>
+            {count != null ? (
+              <span className="i258-sidebar__count" data-tone={countTone}>
+                <span aria-hidden={countLabel ? true : undefined}>{count}</span>
+                {countLabel ? <span className="i258-sr-only">, {countLabel}</span> : null}
+              </span>
+            ) : null}
+          </>
+        ),
+      } as React.ComponentProps<"a">,
+      props,
+      longPress.triggerProps,
+    ),
+  });
+  // Always mounted (disabled while expanded) so the item element is the
+  // same node in both modes and a collapse keeps focus on it.
+  return (
+    <li className="i258-sidebar__li">
+      <Tooltip
+        disabled={!collapsed}
+        open={longPress.open}
+        onOpenChange={longPress.setOpen}
+        side="inline-end"
+        sideOffset={8}
+        className="i258-sidebar__tip"
+        content={
+          <>
+            {children}
+            {count != null ? <span className="i258-sidebar__tip-count">{count}</span> : null}
+          </>
+        }
+      >
+        {link}
+      </Tooltip>
+    </li>
+  );
+});
 
 /** How long a touch must rest on a rail item to show its name, ms. */
 const LONG_PRESS_MS = 500;

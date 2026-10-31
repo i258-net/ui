@@ -1,6 +1,6 @@
-import * as React from "react";
-import type { Decorator } from "@storybook/react-vite";
 import { isApplePlatform } from "@i258/ui";
+import type { Decorator } from "@storybook/react-vite";
+import * as React from "react";
 
 /**
  * Dialogs and menus outside an AppFrame portal to `document.body`, outside

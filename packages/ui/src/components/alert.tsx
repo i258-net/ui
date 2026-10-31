@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -23,29 +23,30 @@ export type AlertProps = React.ComponentProps<"div"> &
     title?: React.ReactNode;
   };
 
-export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  function Alert({ className, tone, title, children, role, ...props }, ref) {
-    return (
-      <div
-        ref={ref}
-        data-slot="alert"
-        role={role ?? (tone === "danger" ? "alert" : "status")}
-        className={cn(alertVariants({ tone }), className)}
-        {...props}
-      >
-        {title != null ? (
-          <div data-slot="alert-title" className="i258-alert__title">
-            {title}
-          </div>
-        ) : null}
-        {children != null ? (
-          <div data-slot="alert-body" className="i258-alert__body">
-            {children}
-          </div>
-        ) : null}
-      </div>
-    );
-  },
-);
+export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  { className, tone, title, children, role, ...props },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      data-slot="alert"
+      role={role ?? (tone === "danger" ? "alert" : "status")}
+      className={cn(alertVariants({ tone }), className)}
+      {...props}
+    >
+      {title != null ? (
+        <div data-slot="alert-title" className="i258-alert__title">
+          {title}
+        </div>
+      ) : null}
+      {children != null ? (
+        <div data-slot="alert-body" className="i258-alert__body">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
+});
 
 export { alertVariants };

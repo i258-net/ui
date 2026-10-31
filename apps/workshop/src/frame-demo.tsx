@@ -1,16 +1,16 @@
-import * as React from "react";
 import {
   AppFrame,
+  type AppFrameProps,
   Button,
   FrameHeader,
   Inspector,
+  type SidebarMode,
   useFrameLayout,
   useShortcut,
-  type AppFrameProps,
-  type SidebarMode,
 } from "@i258/ui";
+import * as React from "react";
 
-import { DemoSidebar, LongContent, ROWS, icons } from "./frame-fixtures";
+import { DemoSidebar, icons, LongContent, ROWS } from "./frame-fixtures";
 
 export type FrameDemoProps = {
   initialMode?: SidebarMode;
@@ -150,7 +150,9 @@ export function FrameDemo({
 
   return (
     <AppFrame
-      ref={consumerRef === "object" ? objectRef : consumerRef === "callback" ? callbackRef : undefined}
+      ref={
+        consumerRef === "object" ? objectRef : consumerRef === "callback" ? callbackRef : undefined
+      }
       dir={dir}
       data-demo-nav-open={navOpen ? "" : undefined}
       data-demo-selected={selected ?? undefined}
@@ -199,9 +201,15 @@ export function FrameDemo({
             <>
               {manyActions ? (
                 <>
-                  <Button variant="secondary" size="sm">Filter</Button>
-                  <Button variant="secondary" size="sm">Sort</Button>
-                  <Button variant="secondary" size="sm">Export</Button>
+                  <Button variant="secondary" size="sm">
+                    Filter
+                  </Button>
+                  <Button variant="secondary" size="sm">
+                    Sort
+                  </Button>
+                  <Button variant="secondary" size="sm">
+                    Export
+                  </Button>
                 </>
               ) : null}
               <Button size="sm">New item</Button>
@@ -211,11 +219,7 @@ export function FrameDemo({
       }
       inspector={
         row ? (
-          <Inspector
-            eyebrow={row.id}
-            title={row.title}
-            onClose={() => setSelected(null)}
-          >
+          <Inspector eyebrow={row.id} title={row.title} onClose={() => setSelected(null)}>
             <p style={{ margin: 0 }}>
               Details for {row.title}. Synthetic content for the frame demo.
             </p>
@@ -235,7 +239,15 @@ export function FrameDemo({
           Stored widths: sidebar {widths.sidebar}, inspector {widths.inspector}
         </p>
       ) : null}
-      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 4 }}>
+      <ul
+        style={{
+          margin: 0,
+          padding: 0,
+          listStyle: "none",
+          display: "grid",
+          gap: 4,
+        }}
+      >
         {ROWS.map((r) => (
           <li key={r.id}>
             <Button
@@ -268,7 +280,8 @@ function LayoutProbe() {
       data-inspector-sheet={String(inspectorIsSheet)}
       style={{ marginTop: 0 }}
     >
-      Layout: nav {navIsSheet ? "sheet" : "inline"}, inspector {inspectorIsSheet ? "sheet" : "inline"}
+      Layout: nav {navIsSheet ? "sheet" : "inline"}, inspector{" "}
+      {inspectorIsSheet ? "sheet" : "inline"}
     </p>
   );
 }

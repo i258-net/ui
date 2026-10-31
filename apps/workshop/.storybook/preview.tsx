@@ -1,5 +1,5 @@
-import { useEffect, useRef, type ReactNode } from "react";
 import type { Preview } from "@storybook/react-vite";
+import { type ReactNode, useEffect, useRef } from "react";
 import "@i258/ui/styles.css";
 
 /**
@@ -70,6 +70,7 @@ function ThemeHost({
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `theme` is a deliberate trigger; the effect reads computed styles that change with data-theme.
   useEffect(() => {
     if (!hostRef.current) return;
 

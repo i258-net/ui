@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Alert, Badge, Button, Input, Surface } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { ReactNode } from "react";
 
 /**
  * Raised / inverted context lives in composition stories — never as global
@@ -41,8 +41,8 @@ export const RaisedOnPage: Story = {
   render: () => (
     <PageFrame>
       <div style={{ fontSize: 13, color: "var(--i258-muted)" }}>
-        Page = <code>--i258-background</code>. Card ={" "}
-        <code>Surface raised</code> — not a decorator island.
+        Page = <code>--i258-background</code>. Card = <code>Surface raised</code> — not a decorator
+        island.
       </div>
       <Surface variant="raised" padding="lg">
         <div style={{ display: "grid", gap: 12 }}>
@@ -80,8 +80,8 @@ export const InvertedChrome: Story = {
     return (
       <PageFrame>
         <div style={{ fontSize: 13, color: "var(--i258-muted)" }}>
-          Nested <code>data-theme=&quot;{inverted}&quot;</code> strip — inverted
-          chrome is composition, not global decorator paint.
+          Nested <code>data-theme=&quot;{inverted}&quot;</code> strip — inverted chrome is
+          composition, not global decorator paint.
         </div>
         <div
           data-theme={inverted}
@@ -134,10 +134,10 @@ export const AccentChrome: Story = {
   render: () => (
     <PageFrame>
       <div style={{ fontSize: 13, color: "var(--i258-muted)" }}>
-        Accent is for links, selection, focus and primary actions. Painting a
-        whole band with it makes the product name compete with the one control
-        the user is meant to press. Prefer the top row; the bottom row is the
-        escape hatch, for a band that genuinely is an interactive surface.
+        Accent is for links, selection, focus and primary actions. Painting a whole band with it
+        makes the product name compete with the one control the user is meant to press. Prefer the
+        top row; the bottom row is the escape hatch, for a band that genuinely is an interactive
+        surface.
       </div>
 
       <div
@@ -186,8 +186,8 @@ export const AccentChrome: Story = {
 
       <Surface variant="default" padding="md">
         <span style={{ fontSize: 14, color: "var(--i258-muted)" }}>
-          Both are composition surfaces, not decorator chrome — but only the
-          first is the house style.
+          Both are composition surfaces, not decorator chrome — but only the first is the house
+          style.
         </span>
       </Surface>
     </PageFrame>

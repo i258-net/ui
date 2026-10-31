@@ -1,18 +1,18 @@
-import * as React from "react";
-import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import type {
   MenuCheckboxItemProps as BaseCheckboxItemProps,
   MenuGroupLabelProps as BaseGroupLabelProps,
   MenuGroupProps as BaseGroupProps,
   MenuItemProps as BaseItemProps,
   MenuLinkItemProps as BaseLinkItemProps,
-  MenuPopupProps,
-  MenuPositionerProps,
   MenuRadioGroupProps as BaseRadioGroupProps,
   MenuRadioItemProps as BaseRadioItemProps,
-  MenuRootProps,
   MenuTriggerProps as BaseTriggerProps,
+  MenuPopupProps,
+  MenuPositionerProps,
+  MenuRootProps,
 } from "@base-ui/react/menu";
+import { Menu as MenuPrimitive } from "@base-ui/react/menu";
+import * as React from "react";
 
 import { useFrameLayer } from "../lib/frame-context.js";
 import { CheckIcon } from "../lib/icons.js";
@@ -56,31 +56,29 @@ export type MenuContentProps = Omit<MenuPopupProps, "className"> & {
 };
 
 /** Portal + positioner + popup. */
-export const MenuContent = React.forwardRef<HTMLDivElement, MenuContentProps>(
-  function MenuContent(
-    { className, side = "bottom", align = "start", sideOffset = 6, container, ...props },
-    ref,
-  ) {
-    const frameLayer = useFrameLayer();
-    return (
-      <MenuPrimitive.Portal container={container ?? frameLayer}>
-        <MenuPrimitive.Positioner
-          className="i258-menu__positioner"
-          side={side}
-          align={align}
-          sideOffset={sideOffset}
-        >
-          <MenuPrimitive.Popup
-            ref={ref}
-            data-slot="menu"
-            className={cn("i258-menu", className)}
-            {...props}
-          />
-        </MenuPrimitive.Positioner>
-      </MenuPrimitive.Portal>
-    );
-  },
-);
+export const MenuContent = React.forwardRef<HTMLDivElement, MenuContentProps>(function MenuContent(
+  { className, side = "bottom", align = "start", sideOffset = 6, container, ...props },
+  ref,
+) {
+  const frameLayer = useFrameLayer();
+  return (
+    <MenuPrimitive.Portal container={container ?? frameLayer}>
+      <MenuPrimitive.Positioner
+        className="i258-menu__positioner"
+        side={side}
+        align={align}
+        sideOffset={sideOffset}
+      >
+        <MenuPrimitive.Popup
+          ref={ref}
+          data-slot="menu"
+          className={cn("i258-menu", className)}
+          {...props}
+        />
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
+  );
+});
 
 type ItemExtras = {
   /** Leading glyph. Decorative: the label names the item. */
@@ -158,14 +156,20 @@ export const MenuLinkItem = React.forwardRef<HTMLAnchorElement, MenuLinkItemProp
 );
 
 export type MenuCheckboxItemProps = Omit<BaseCheckboxItemProps, "className" | "children"> &
-  Pick<ItemExtras, "trailing"> & { className?: string | undefined; children?: React.ReactNode };
+  Pick<ItemExtras, "trailing"> & {
+    className?: string | undefined;
+    children?: React.ReactNode;
+  };
 
 /**
  * An on/off option (`menuitemcheckbox`). Stays open when chosen, by
  * default, so several can be toggled in one visit (filter menus).
  */
 export const MenuCheckboxItem = React.forwardRef<HTMLDivElement, MenuCheckboxItemProps>(
-  function MenuCheckboxItem({ className, trailing, children, closeOnClick = false, ...props }, ref) {
+  function MenuCheckboxItem(
+    { className, trailing, children, closeOnClick = false, ...props },
+    ref,
+  ) {
     return (
       <MenuPrimitive.CheckboxItem
         ref={ref}
@@ -195,7 +199,10 @@ export const MenuRadioGroup = React.forwardRef<HTMLDivElement, MenuRadioGroupPro
 );
 
 export type MenuRadioItemProps = Omit<BaseRadioItemProps, "className" | "children"> &
-  Pick<ItemExtras, "trailing"> & { className?: string | undefined; children?: React.ReactNode };
+  Pick<ItemExtras, "trailing"> & {
+    className?: string | undefined;
+    children?: React.ReactNode;
+  };
 
 /** One option in a MenuRadioGroup (`menuitemradio`). Stays open when chosen. */
 export const MenuRadioItem = React.forwardRef<HTMLDivElement, MenuRadioItemProps>(
@@ -223,12 +230,11 @@ export function MenuSeparator({ className }: { className?: string | undefined })
 export type MenuGroupProps = BaseGroupProps;
 
 /** Groups items under a MenuGroupLabel. */
-export const MenuGroup = React.forwardRef<HTMLDivElement, MenuGroupProps>(function MenuGroup(
-  props,
-  ref,
-) {
-  return <MenuPrimitive.Group ref={ref} {...props} />;
-});
+export const MenuGroup = React.forwardRef<HTMLDivElement, MenuGroupProps>(
+  function MenuGroup(props, ref) {
+    return <MenuPrimitive.Group ref={ref} {...props} />;
+  },
+);
 
 export type MenuGroupLabelProps = Omit<BaseGroupLabelProps, "className"> & {
   className?: string | undefined;

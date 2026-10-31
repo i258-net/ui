@@ -1,6 +1,6 @@
+import { Tab, Tabs, TabsList, TabsPanel } from "@i258/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Tab, Tabs, TabsList, TabsPanel } from "@i258/ui";
 
 /**
  * Views of one thing, on Base UI Tabs. ←/→ and Home/End move focus

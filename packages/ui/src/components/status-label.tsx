@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -45,25 +45,26 @@ export type StatusLabelProps = React.ComponentProps<"span"> &
  * row around it. The kit owns the shape and the tones; the app owns which
  * of its values maps to which tone.
  */
-export const StatusLabel = React.forwardRef<HTMLSpanElement, StatusLabelProps>(
-  function StatusLabel({ className, tone, size, icon, tinted = false, children, ...props }, ref) {
-    return (
-      <span
-        ref={ref}
-        data-slot="status-label"
-        data-tinted={tinted ? "" : undefined}
-        className={cn(statusLabelVariants({ tone, size }), className)}
-        {...props}
-      >
-        {icon != null ? (
-          <span className="i258-status__icon" aria-hidden="true">
-            {icon}
-          </span>
-        ) : null}
-        <span className="i258-status__label">{children}</span>
-      </span>
-    );
-  },
-);
+export const StatusLabel = React.forwardRef<HTMLSpanElement, StatusLabelProps>(function StatusLabel(
+  { className, tone, size, icon, tinted = false, children, ...props },
+  ref,
+) {
+  return (
+    <span
+      ref={ref}
+      data-slot="status-label"
+      data-tinted={tinted ? "" : undefined}
+      className={cn(statusLabelVariants({ tone, size }), className)}
+      {...props}
+    >
+      {icon != null ? (
+        <span className="i258-status__icon" aria-hidden="true">
+          {icon}
+        </span>
+      ) : null}
+      <span className="i258-status__label">{children}</span>
+    </span>
+  );
+});
 
 export { statusLabelVariants };

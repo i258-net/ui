@@ -1,9 +1,9 @@
-import * as React from "react";
-import { ToggleGroup } from "@base-ui/react/toggle-group";
-import type { ToggleGroupProps } from "@base-ui/react/toggle-group";
-import { Toggle } from "@base-ui/react/toggle";
 import type { ToggleProps } from "@base-ui/react/toggle";
+import { Toggle } from "@base-ui/react/toggle";
+import type { ToggleGroupProps } from "@base-ui/react/toggle-group";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -19,9 +19,8 @@ const choiceGroupVariants = cva("i258-choice-group", {
   },
 });
 
-export type ChoiceGroupProps<Value extends string = string> =
-  ToggleGroupProps<Value> &
-    VariantProps<typeof choiceGroupVariants>;
+export type ChoiceGroupProps<Value extends string = string> = ToggleGroupProps<Value> &
+  VariantProps<typeof choiceGroupVariants>;
 
 export function ChoiceGroup<Value extends string = string>({
   className,
@@ -76,9 +75,7 @@ export function Choice<Value extends string = string>({
       {...props}
     >
       <span className="i258-choice__label">{children}</span>
-      {count != null ? (
-        <span className="i258-choice__count">{count}</span>
-      ) : null}
+      {count != null ? <span className="i258-choice__count">{count}</span> : null}
     </Toggle>
   );
 }

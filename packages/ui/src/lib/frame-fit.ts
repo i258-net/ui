@@ -6,6 +6,7 @@
 /** A minimum: finite and not negative, else 0. */
 const floorOf = (v: number) => (Number.isFinite(v) && v > 0 ? v : 0);
 /** A maximum: at least `min` (NaN, negatives and too-small values become `min`). */
+// biome-ignore lint/complexity/useMathMinMax: Math.max(NaN, min) is NaN; this ternary maps NaN to `min` on purpose.
 const ceilOf = (v: number, min: number) => (v >= min ? v : min);
 /** A measured width: positive, else unknown. */
 const measured = (v: number | null) => (v != null && Number.isFinite(v) && v > 0 ? v : null);

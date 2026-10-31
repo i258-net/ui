@@ -1,7 +1,7 @@
-import type { StorybookConfig } from "@storybook/react-vite";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { StorybookConfig } from "@storybook/react-vite";
 
 const monorepoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -47,7 +47,7 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
-    "@chromatic-com/storybook"
+    "@chromatic-com/storybook",
   ],
   docs: {
     defaultName: "Documentation",
@@ -63,10 +63,7 @@ const config: StorybookConfig = {
       optimizeDeps: { include: kitBareImports() },
       resolve: {
         alias: {
-          "@i258/ui/styles.css": join(
-            monorepoRoot,
-            "packages/ui/src/styles/entry.css",
-          ),
+          "@i258/ui/styles.css": join(monorepoRoot, "packages/ui/src/styles/entry.css"),
           "@i258/ui": join(monorepoRoot, "packages/ui/src/index.ts"),
         },
       },

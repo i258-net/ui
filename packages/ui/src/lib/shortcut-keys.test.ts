@@ -5,8 +5,8 @@ import {
   bindingFromEvent,
   formatShortcut,
   isCharacterBinding,
-  normaliseBinding,
   type KeyLike,
+  normaliseBinding,
 } from "./shortcut-keys.js";
 
 const ev = (key: string, mods: Partial<Omit<KeyLike, "key">> = {}): KeyLike => ({
@@ -79,9 +79,9 @@ describe("bindingFromEvent", () => {
   it("keeps Shift on a digit in a command chord, so shifted and plain digits differ", () => {
     // US: Ctrl+1 types "1", Ctrl+Shift+1 types "!".
     expect(bindingFromEvent(ev("1", { ctrlKey: true, code: "Digit1" }), false)).toBe("ctrl+1");
-    expect(bindingFromEvent(ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false)).toBe(
-      "ctrl+shift+1",
-    );
+    expect(
+      bindingFromEvent(ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false),
+    ).toBe("ctrl+shift+1");
     // Mac: ⌥1 types "¡", ⌥⇧1 types "⁄"; ⌘⇧1 may report "!" or "1".
     expect(bindingFromEvent(ev("⁄", { altKey: true, shiftKey: true, code: "Digit1" }), true)).toBe(
       "alt+shift+1",
@@ -94,13 +94,16 @@ describe("bindingFromEvent", () => {
     );
     // AZERTY: the 1 key types "&", and "1" with Shift. Same chords as US.
     expect(bindingFromEvent(ev("&", { ctrlKey: true, code: "Digit1" }), false)).toBe("ctrl+1");
-    expect(bindingFromEvent(ev("1", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false)).toBe(
-      "ctrl+shift+1",
-    );
+    expect(
+      bindingFromEvent(ev("1", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false),
+    ).toBe("ctrl+shift+1");
   });
 
   it("matches ctrl+! and ctrl+shift+1 to the same US keypress", () => {
-    const step = bindingFromEvent(ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }), false);
+    const step = bindingFromEvent(
+      ev("!", { ctrlKey: true, shiftKey: true, code: "Digit1" }),
+      false,
+    );
     expect(step).toBe(normaliseBinding("ctrl+!", false));
     expect(step).toBe(normaliseBinding("ctrl+shift+1", false));
     const mac = bindingFromEvent(ev("!", { metaKey: true, shiftKey: true, code: "Digit1" }), true);
@@ -129,20 +132,30 @@ describe("bindingFromEvent", () => {
     const altGr = (key: string) => key === "AltGraph";
     expect(
       bindingFromEvent(
-        ev("@", { ctrlKey: true, altKey: true, code: "KeyQ", getModifierState: altGr }),
+        ev("@", {
+          ctrlKey: true,
+          altKey: true,
+          code: "KeyQ",
+          getModifierState: altGr,
+        }),
         false,
       ),
     ).toBe("@");
     expect(
       bindingFromEvent(
-        ev("€", { ctrlKey: true, altKey: true, code: "KeyE", getModifierState: altGr }),
+        ev("€", {
+          ctrlKey: true,
+          altKey: true,
+          code: "KeyE",
+          getModifierState: altGr,
+        }),
         false,
       ),
     ).toBe("€");
     // Deliberate Ctrl+Alt chord (no AltGraph): bind the physical key.
-    expect(
-      bindingFromEvent(ev("л", { ctrlKey: true, altKey: true, code: "KeyK" }), false),
-    ).toBe("ctrl+alt+k");
+    expect(bindingFromEvent(ev("л", { ctrlKey: true, altKey: true, code: "KeyK" }), false)).toBe(
+      "ctrl+alt+k",
+    );
     // No modifier: never remapped.
     expect(bindingFromEvent(ev("л", { code: "KeyK" }), false)).toBe("л");
   });
@@ -156,7 +169,16 @@ describe("isCharacterBinding (WCAG 2.1.4)", () => {
   });
 
   it("excludes named keys and command chords", () => {
-    for (const b of ["Enter", "Escape", "Space", "ArrowDown", "meta+k", "ctrl+k", "alt+1", "ctrl++"]) {
+    for (const b of [
+      "Enter",
+      "Escape",
+      "Space",
+      "ArrowDown",
+      "meta+k",
+      "ctrl+k",
+      "alt+1",
+      "ctrl++",
+    ]) {
       expect(isCharacterBinding(normaliseBinding(b))).toBe(false);
     }
   });

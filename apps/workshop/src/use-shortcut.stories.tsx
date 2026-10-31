@@ -1,10 +1,9 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
+  ariaKeyShortcuts,
   Button,
   Checkbox,
   FormField,
+  formatShortcut,
   Input,
   Kbd,
   Menu,
@@ -12,11 +11,12 @@ import {
   MenuItem,
   MenuTrigger,
   ShortcutsProvider,
-  ariaKeyShortcuts,
-  formatShortcut,
   useShortcut,
   useSingleKeyShortcuts,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { modKey, withDocumentTheme } from "./document-theme";
 
@@ -314,15 +314,24 @@ export const EnterConfirms: Story = {
     blur();
 
     await press("1");
-    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute("aria-pressed", "true");
+    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     await press("1");
     await press("1");
     await expect(confirmed).toHaveTextContent("none");
-    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute("aria-pressed", "true");
+    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
     // Held down: auto-repeat never fires a binding.
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "2", repeat: true, bubbles: true }));
-    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute("aria-pressed", "true");
+    await expect(c.getByRole("button", { name: "Approve" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
     await press("2");
     await expect(c.getByRole("button", { name: "Reject" })).toHaveAttribute("aria-pressed", "true");
@@ -357,6 +366,9 @@ function QueueList({ role = "listbox" }: { role?: "listbox" | "treegrid" }) {
   useShortcut("ArrowDown", () => log("Next view"));
   return (
     <div style={{ display: "grid", gap: 12, maxWidth: 320 }}>
+      {/* A composite (listbox or treegrid) the story switches by role. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: role is dynamic; both values are interactive composites */}
+      {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is dynamic; both values take aria-label */}
       <div
         role={role}
         aria-label="Queue"
@@ -366,9 +378,14 @@ function QueueList({ role = "listbox" }: { role?: "listbox" | "treegrid" }) {
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") setActive((i) => Math.min(rows.length - 1, i + 1));
         }}
-        style={{ border: "1px solid var(--i258-border-strong)", borderRadius: 8, padding: 4 }}
+        style={{
+          border: "1px solid var(--i258-border-strong)",
+          borderRadius: 8,
+          padding: 4,
+        }}
       >
         {rows.map((r, i) => (
+          // biome-ignore lint/a11y/useAriaPropsSupportedByRole: both row and option take aria-selected
           <div
             key={r}
             id={`q-${i}`}
@@ -376,7 +393,12 @@ function QueueList({ role = "listbox" }: { role?: "listbox" | "treegrid" }) {
             aria-selected={i === active}
             style={{ padding: 4 }}
           >
-            {role === "treegrid" ? <span role="gridcell">{r}</span> : r}
+            {role === "treegrid" ? (
+              // biome-ignore lint/a11y/useFocusableInteractive: focus stays on the grid via aria-activedescendant
+              <span role="gridcell">{r}</span>
+            ) : (
+              r
+            )}
           </div>
         ))}
       </div>
@@ -408,10 +430,21 @@ function TagList() {
           if (e.key === " ")
             setPicked((p) => (p.includes(active) ? p.filter((i) => i !== active) : [...p, active]));
         }}
-        style={{ border: "1px solid var(--i258-border-strong)", borderRadius: 8, padding: 4 }}
+        style={{
+          border: "1px solid var(--i258-border-strong)",
+          borderRadius: 8,
+          padding: 4,
+        }}
       >
         {tags.map((t, i) => (
-          <div key={t} id={`t-${i}`} role="option" aria-selected={picked.includes(i)} style={{ padding: 4 }}>
+          // biome-ignore lint/a11y/useFocusableInteractive: focus stays on the listbox via aria-activedescendant
+          <div
+            key={t}
+            id={`t-${i}`}
+            role="option"
+            aria-selected={picked.includes(i)}
+            style={{ padding: 4 }}
+          >
             {t}
           </div>
         ))}
@@ -444,7 +477,10 @@ export const ListboxKeepsSpace: Story = {
     } finally {
       document.removeEventListener("keydown", spy);
     }
-    await expect(c.getByRole("option", { name: "Ledger" })).toHaveAttribute("aria-selected", "true");
+    await expect(c.getByRole("option", { name: "Ledger" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(c.getByTestId("last")).toHaveTextContent("Nothing yet");
     await expect(spaceKept).toBe(true);
     // Off the list, the page's Space runs.

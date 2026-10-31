@@ -1,6 +1,6 @@
+import { ariaKeyShortcuts, Button, formatShortcut, Kbd } from "@i258/ui";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Button, Kbd, ariaKeyShortcuts, formatShortcut } from "@i258/ui";
 
 /**
  * A key cap. `formatShortcut(binding)` spells a binding for the current

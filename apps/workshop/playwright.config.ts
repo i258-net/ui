@@ -83,8 +83,7 @@ export default defineConfig({
     },
   },
   // Same filenames locally and in CI (no -darwin/-linux suffix).
-  snapshotPathTemplate:
-    "{testDir}/{testFileName}-snapshots/{arg}{ext}",
+  snapshotPathTemplate: "{testDir}/{testFileName}-snapshots/{arg}{ext}",
   use: {
     ...devices["Desktop Chrome"],
     baseURL: "http://127.0.0.1:6006",
@@ -92,8 +91,7 @@ export default defineConfig({
   },
   webServer: {
     // `serve` 301s /iframe.html?... → /iframe and drops the query string.
-    command:
-      "python3 -m http.server 6006 --bind 127.0.0.1 --directory storybook-static",
+    command: "python3 -m http.server 6006 --bind 127.0.0.1 --directory storybook-static",
     url: "http://127.0.0.1:6006/iframe.html",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

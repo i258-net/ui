@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "../lib/utils.js";
 
@@ -18,20 +18,20 @@ const badgeVariants = cva("i258-badge", {
   },
 });
 
-export type BadgeProps = React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants>;
+export type BadgeProps = React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>;
 
-export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  function Badge({ className, variant, ...props }, ref) {
-    return (
-      <span
-        ref={ref}
-        data-slot="badge"
-        className={cn(badgeVariants({ variant }), className)}
-        {...props}
-      />
-    );
-  },
-);
+export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
+  { className, variant, ...props },
+  ref,
+) {
+  return (
+    <span
+      ref={ref}
+      data-slot="badge"
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    />
+  );
+});
 
 export { badgeVariants };

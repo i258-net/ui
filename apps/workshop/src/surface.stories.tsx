@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge, Button, Surface } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { chromaticPilotParameters } from "../.storybook/modes";
 
 const meta = {
@@ -58,8 +58,8 @@ export const Composition: Story = {
           <Badge variant="accent">demo</Badge>
         </div>
         <p style={{ margin: 0, color: "var(--i258-muted)", fontSize: 14 }}>
-          Surface is the composition shell — padding and elevation only; content
-          stays with the consumer.
+          Surface is the composition shell — padding and elevation only; content stays with the
+          consumer.
         </p>
         <Button size="sm">Action</Button>
       </div>

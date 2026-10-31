@@ -1,14 +1,14 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
-  Button,
-  CommandPalette,
-  Kbd,
   ariaKeyShortcuts,
-  formatShortcut,
+  Button,
   type CommandItem,
+  CommandPalette,
+  formatShortcut,
+  Kbd,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { modKey, withDocumentTheme } from "./document-theme";
 
@@ -33,7 +33,14 @@ type Story = StoryObj<typeof meta>;
 const body = () => within(document.body);
 
 const Glyph = ({ d }: { d: string }) => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+  >
     <path d={d} />
   </svg>
 );
@@ -41,21 +48,64 @@ const Glyph = ({ d }: { d: string }) => (
 function useItems(log: (what: string) => void, go: (view: string) => void): CommandItem[] {
   return React.useMemo(
     () => [
-      { id: "inbox", label: "Inbox", group: "Go to", navigates: true, icon: <Glyph d="M2.5 9h3l1 2h3l1-2h3M2.5 9 4 3.5h8L13.5 9v3.5h-11Z" />, onSelect: () => go("Inbox") },
-      { id: "reports", label: "Reports", group: "Go to", navigates: true, detail: "2 failing", icon: <Glyph d="M3 13V8m5 5V3m5 10V6" />, onSelect: () => go("Reports") },
-      { id: "ledger", label: "Ledger", group: "Go to", keywords: ["abacus", "accounts"], navigates: true, icon: <Glyph d="M3 3h10v10H3zM3 7h10M7 3v10" />, onSelect: () => go("Ledger") },
-      { id: "new", label: "New issue", group: "Actions", detail: <Kbd>C</Kbd>, onSelect: () => log("New issue") },
-      { id: "sidebar", label: "Toggle sidebar", group: "Actions", detail: <Kbd>{formatShortcut("mod+b")}</Kbd>, onSelect: () => log("Toggle sidebar") },
-      { id: "theme", label: "Switch theme", group: "Actions", keywords: ["dark", "light"], onSelect: () => log("Switch theme") },
-      ...["X-19 Parser drops trailing fields", "X-41 Duplicate ledger rows", "X-66 Stale freshness line"].map(
-        (label) => ({
-          id: label.slice(0, 4),
-          label,
-          group: "Issues",
-          navigates: true,
-          onSelect: () => go(label.slice(0, 4)),
-        }),
-      ),
+      {
+        id: "inbox",
+        label: "Inbox",
+        group: "Go to",
+        navigates: true,
+        icon: <Glyph d="M2.5 9h3l1 2h3l1-2h3M2.5 9 4 3.5h8L13.5 9v3.5h-11Z" />,
+        onSelect: () => go("Inbox"),
+      },
+      {
+        id: "reports",
+        label: "Reports",
+        group: "Go to",
+        navigates: true,
+        detail: "2 failing",
+        icon: <Glyph d="M3 13V8m5 5V3m5 10V6" />,
+        onSelect: () => go("Reports"),
+      },
+      {
+        id: "ledger",
+        label: "Ledger",
+        group: "Go to",
+        keywords: ["abacus", "accounts"],
+        navigates: true,
+        icon: <Glyph d="M3 3h10v10H3zM3 7h10M7 3v10" />,
+        onSelect: () => go("Ledger"),
+      },
+      {
+        id: "new",
+        label: "New issue",
+        group: "Actions",
+        detail: <Kbd>C</Kbd>,
+        onSelect: () => log("New issue"),
+      },
+      {
+        id: "sidebar",
+        label: "Toggle sidebar",
+        group: "Actions",
+        detail: <Kbd>{formatShortcut("mod+b")}</Kbd>,
+        onSelect: () => log("Toggle sidebar"),
+      },
+      {
+        id: "theme",
+        label: "Switch theme",
+        group: "Actions",
+        keywords: ["dark", "light"],
+        onSelect: () => log("Switch theme"),
+      },
+      ...[
+        "X-19 Parser drops trailing fields",
+        "X-41 Duplicate ledger rows",
+        "X-66 Stale freshness line",
+      ].map((label) => ({
+        id: label.slice(0, 4),
+        label,
+        group: "Issues",
+        navigates: true,
+        onSelect: () => go(label.slice(0, 4)),
+      })),
     ],
     [log, go],
   );
@@ -80,7 +130,7 @@ function PaletteDemo({ initialOpen = false }: { initialOpen?: boolean }) {
     if (!focusHeading || open) return;
     heading.current?.focus();
     setFocusHeading(false);
-  }, [focusHeading, open, view]);
+  }, [focusHeading, open]);
   const items = useItems(log, go);
   return (
     <div style={{ display: "grid", gap: 12, justifyItems: "start" }}>
@@ -121,7 +171,9 @@ export const Default: Story = {
     await userEvent.click(note);
     await userEvent.keyboard(`{${mod}>}k{/${mod}}`);
 
-    const dialog = await body().findByRole("dialog", { name: "Command palette" });
+    const dialog = await body().findByRole("dialog", {
+      name: "Command palette",
+    });
     const input = body().getByRole("combobox", { name: "Search commands" });
     await waitFor(() => expect(input).toHaveFocus());
     const listbox = body().getByRole("listbox");
@@ -158,7 +210,9 @@ export const Default: Story = {
 
     // It reopens empty.
     await userEvent.keyboard(`{${mod}>}k{/${mod}}`);
-    const again = await body().findByRole("combobox", { name: "Search commands" });
+    const again = await body().findByRole("combobox", {
+      name: "Search commands",
+    });
     await expect(again).toHaveValue("");
     // ⌘K again (from inside) closes it; so does Escape.
     await userEvent.keyboard(`{${mod}>}k{/${mod}}`);
@@ -181,10 +235,16 @@ export const Navigates: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await userEvent.click(c.getByRole("button", { name: "Search" }));
-    const input = await body().findByRole("combobox", { name: "Search commands" });
+    const input = await body().findByRole("combobox", {
+      name: "Search commands",
+    });
     await waitFor(() => expect(input).toHaveFocus());
     await userEvent.type(input, "abacus");
-    await expect(body().getAllByRole("option").map((o) => o.textContent)).toEqual(["Ledger"]);
+    await expect(
+      body()
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Ledger"]);
     await userEvent.click(body().getByRole("option", { name: "Ledger" }));
     await waitFor(() => expect(body().queryByRole("dialog")).toBeNull());
     const heading = c.getByRole("heading", { level: 1 });
@@ -208,11 +268,15 @@ export const NoResults: Story = {
   args: { open: false, onOpenChange: () => {}, items: [] },
   render: () => <PaletteDemo initialOpen />,
   play: async () => {
-    const input = await body().findByRole("combobox", { name: "Search commands" });
+    const input = await body().findByRole("combobox", {
+      name: "Search commands",
+    });
     await userEvent.type(input, "zzz");
     await expect(body().queryAllByRole("option")).toHaveLength(0);
     await expect(input).not.toHaveAttribute("aria-activedescendant");
-    await expect(within(body().getByRole("dialog")).getByRole("status")).toHaveTextContent("No matches");
+    await expect(within(body().getByRole("dialog")).getByRole("status")).toHaveTextContent(
+      "No matches",
+    );
     await userEvent.keyboard("{Enter}");
     await expect(body().getByRole("dialog")).toBeInTheDocument();
   },
@@ -230,7 +294,12 @@ function InterleavedDemo() {
           ["c", "Charlie", "Files"],
           ["d", "Delta", "Views"],
         ] as const
-      ).map(([id, label, group]) => ({ id, label, group, onSelect: () => setLast(label) })),
+      ).map(([id, label, group]) => ({
+        id,
+        label,
+        group,
+        onSelect: () => setLast(label),
+      })),
     [],
   );
   return (
@@ -252,7 +321,9 @@ export const InterleavedGroups: Story = {
   args: { open: false, onOpenChange: () => {}, items: [] },
   render: () => <InterleavedDemo />,
   play: async ({ canvasElement }) => {
-    const input = await body().findByRole("combobox", { name: "Search commands" });
+    const input = await body().findByRole("combobox", {
+      name: "Search commands",
+    });
     await waitFor(() => expect(input).toHaveFocus());
     const shown = body().getAllByRole("option");
     await expect(shown.map((o) => o.textContent)).toEqual(["Alpha", "Charlie", "Bravo", "Delta"]);
@@ -285,7 +356,9 @@ export const Open: Story = {
   args: { open: false, onOpenChange: () => {}, items: [] },
   render: () => <PaletteDemo initialOpen />,
   play: async () => {
-    const input = await body().findByRole("combobox", { name: "Search commands" });
+    const input = await body().findByRole("combobox", {
+      name: "Search commands",
+    });
     await waitFor(() => expect(input).toHaveFocus());
   },
 };

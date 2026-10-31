@@ -1,6 +1,3 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
   Button,
   Dialog,
@@ -11,6 +8,9 @@ import {
   TooltipProvider,
   useShortcut,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { withDocumentTheme } from "./document-theme";
 
@@ -35,14 +35,30 @@ const body = () => within(document.body);
 const tip = () => document.querySelector<HTMLElement>("[data-slot='tooltip']");
 
 const ArchiveIcon = () => (
-  <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+  <svg
+    viewBox="0 0 16 16"
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
     <rect x="2" y="3" width="12" height="3" rx="1" />
     <path d="M3 6v6.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6M6.5 9h3" strokeLinecap="round" />
   </svg>
 );
 
 const StaleIcon = () => (
-  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+  <svg
+    viewBox="0 0 16 16"
+    width="14"
+    height="14"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
     <circle cx="8" cy="8" r="5.5" />
     <path d="M8 5v3l2 1.5" strokeLinecap="round" />
   </svg>
@@ -128,7 +144,13 @@ export const Open: Story = {
     <div style={{ padding: 48 }}>
       <TooltipProvider delay={0}>
         <Tooltip content="Archive (⌫)">
-          <Button variant="secondary" size="sm" shape="icon" aria-label="Archive" data-testid="trigger">
+          <Button
+            variant="secondary"
+            size="sm"
+            shape="icon"
+            aria-label="Archive"
+            data-testid="trigger"
+          >
             <ArchiveIcon />
           </Button>
         </Tooltip>
@@ -300,7 +322,9 @@ export const Disabled: Story = {
     </TooltipProvider>
   ),
   play: async ({ canvasElement }) => {
-    const button = within(canvasElement).getByRole("button", { name: "Archive" });
+    const button = within(canvasElement).getByRole("button", {
+      name: "Archive",
+    });
     await userEvent.hover(button);
     await new Promise((r) => setTimeout(r, 200));
     await expect(tip()).toBeNull();

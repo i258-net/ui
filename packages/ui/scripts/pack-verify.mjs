@@ -7,12 +7,7 @@
  * Usage: run after `pnpm build` from packages/ui (or via `pnpm pack:verify`).
  */
 import { spawnSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -57,7 +52,7 @@ const tarball = (pack.stdout || "")
   .map((l) => l.trim())
   .filter(Boolean)
   .at(-1);
-if (!tarball || !tarball.endsWith(".tgz")) {
+if (!tarball?.endsWith(".tgz")) {
   console.error("pack-verify: could not find tarball path in pnpm pack output:");
   console.error(pack.stdout);
   process.exit(1);
@@ -78,9 +73,7 @@ const packedFiles = new Set(
 
 const missing = exportPaths.filter((rel) => !packedFiles.has(rel));
 if (missing.length) {
-  console.error(
-    "pack-verify: package.json exports point at files missing from the tarball:",
-  );
+  console.error("pack-verify: package.json exports point at files missing from the tarball:");
   for (const m of missing) console.error(`  - ${m}`);
   process.exit(1);
 }
@@ -138,9 +131,7 @@ console.log("pack-verify: import ok (" + keys.length + " exports)");
     process.exit(run.status ?? 1);
   }
   process.stdout.write(run.stdout || "");
-  console.log(
-    `pack-verify: ok — ${exportPaths.length} export paths present in ${tarball}`,
-  );
+  console.log(`pack-verify: ok — ${exportPaths.length} export paths present in ${tarball}`);
 } finally {
   rmSync(work, { recursive: true, force: true });
   rmSync(tarball, { force: true });

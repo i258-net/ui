@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button, Checkbox, Input, Label, Link } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
   title: "Foundation/FocusAndMotion",
@@ -21,9 +21,8 @@ export const VisibleFocus: Story = {
       }}
     >
       <p style={{ margin: 0, color: "var(--i258-muted)", fontSize: 14 }}>
-        Tab through these controls. Focus uses{" "}
-        <code>--i258-focus-ring</code> with offset; interactive primitives share
-        the same ring tokens.
+        Tab through these controls. Focus uses <code>--i258-focus-ring</code> with offset;
+        interactive primitives share the same ring tokens.
       </p>
       <Button>Focusable button</Button>
       <div style={{ display: "grid", gap: 6 }}>
@@ -54,15 +53,13 @@ export const ReducedMotion: Story = {
       }}
     >
       <p style={{ margin: 0 }}>
-        Transitions use <code>--i258-duration-fast</code> /{" "}
-        <code>--i258-ease-standard</code>. Under{" "}
-        <code>prefers-reduced-motion: reduce</code>, button / input / link /
-        checkbox transitions are disabled in the shipped CSS.
+        Transitions use <code>--i258-duration-fast</code> / <code>--i258-ease-standard</code>. Under{" "}
+        <code>prefers-reduced-motion: reduce</code>, button / input / link / checkbox transitions
+        are disabled in the shipped CSS.
       </p>
       <p style={{ margin: 0 }}>
-        Verify in DevTools → Rendering → emulate CSS{" "}
-        <code>prefers-reduced-motion: reduce</code>, then hover a primary
-        button.
+        Verify in DevTools → Rendering → emulate CSS <code>prefers-reduced-motion: reduce</code>,
+        then hover a primary button.
       </p>
       <Button>Hover me</Button>
     </div>

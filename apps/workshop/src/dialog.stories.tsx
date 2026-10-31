@@ -1,6 +1,3 @@
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, waitFor, within } from "storybook/test";
 import {
   AppFrame,
   Button,
@@ -20,6 +17,9 @@ import {
   MenuItem,
   MenuTrigger,
 } from "@i258/ui";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { withDocumentTheme } from "./document-theme";
 
@@ -66,7 +66,9 @@ function ConfirmDialog(props: React.ComponentProps<typeof Dialog>) {
 export const Confirm: Story = {
   render: () => <ConfirmDialog />,
   play: async ({ canvasElement }) => {
-    const trigger = within(canvasElement).getByRole("button", { name: "Resolve decision" });
+    const trigger = within(canvasElement).getByRole("button", {
+      name: "Resolve decision",
+    });
     await userEvent.click(trigger);
     const dialog = await body().findByRole("dialog", { name: "Resolve X-19?" });
     await expect(dialog).toHaveAccessibleDescription(/needs a confirm/);
@@ -166,10 +168,10 @@ export const PageIsInert: Story = {
     await expect(c.queryByRole("button", { name: "Behind" })).toBeNull();
     for (let i = 0; i < 4; i++) {
       await userEvent.tab();
-      await waitFor(() =>
-        expect(document.activeElement?.matches("button")).toBe(true),
+      await waitFor(() => expect(document.activeElement?.matches("button")).toBe(true));
+      await expect(body().getByRole("dialog")).toContainElement(
+        document.activeElement as HTMLElement,
       );
-      await expect(body().getByRole("dialog")).toContainElement(document.activeElement as HTMLElement);
     }
     await userEvent.click(body().getByRole("button", { name: "Close" }));
     await waitFor(() => expect(body().queryByRole("dialog")).toBeNull());

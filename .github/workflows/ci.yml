@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Biome: lint + format check (`biome ci` never writes). Config: biome.json.
+      - run: pnpm lint
+
       - run: pnpm typecheck
 
       - run: pnpm build
