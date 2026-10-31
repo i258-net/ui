@@ -5,7 +5,7 @@
  * `onlyStoryNames`. Keep modes off global preview so a shared decorator
  * change does not expand the accept matrix to every story × mode.
  */
-export const allModes = {
+const allModes = {
   light: {
     theme: "light",
   },

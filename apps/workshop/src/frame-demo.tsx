@@ -38,7 +38,7 @@ export type FrameDemoProps = {
   escapeClosesInspector?: boolean;
 };
 
-export type FrameDemoHooks = {
+type FrameDemoHooks = {
   setNavOpen: (open: boolean) => void;
   setSelected: (id: string | null) => void;
   /** Drop the `sidebar` prop entirely (as an app with no nav on a route). */

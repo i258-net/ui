@@ -47,7 +47,7 @@ export const icons = {
   close: <Icon d="M4 4l8 8M12 4l-8 8" />,
 };
 
-export const NAV = [
+const NAV = [
   {
     title: "Workspace",
     items: [
